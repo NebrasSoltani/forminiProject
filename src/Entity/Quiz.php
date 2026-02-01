@@ -6,6 +6,7 @@ use App\Repository\QuizRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: QuizRepository::class)]
 class Quiz
@@ -13,33 +14,42 @@ class Quiz
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['quiz'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['quiz'])]
     private ?string $titre = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Groups(['quiz'])]
     private ?string $description = null;
 
     #[ORM\Column(nullable: false)]
+    #[Groups(['quiz'])]
     private \DateTimeImmutable $dateCreation;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['quiz'])]
     private ?\DateTimeImmutable $dateModification = null;
 
     #[ORM\Column(nullable: false)]
+    #[Groups(['quiz'])]
     private bool $estActif = true;
 
     #[ORM\Column(nullable: true)]
+    #[Groups(['quiz'])]
     private ?int $dureeMinutes = null;
 
     #[ORM\Column(type: 'float', precision: 5, scale: 2, nullable: true)]
+    #[Groups(['quiz'])]
     private ?float $noteSur = 20.00;
 
     /**
      * @var Collection<int, ResultatQuiz>
      */
     #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: ResultatQuiz::class, orphanRemoval: true)]
+    #[Groups(['quiz'])]
     private Collection $resultats;
 
     public function __construct()
@@ -145,7 +155,6 @@ class Quiz
     public function removeResultat(ResultatQuiz $resultat): self
     {
         if ($this->resultats->removeElement($resultat)) {
-            // set the owning side to null (unless already changed)
             if ($resultat->getQuiz() === $this) {
                 $resultat->setQuiz(null);
             }
