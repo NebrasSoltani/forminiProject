@@ -2,292 +2,216 @@
 
 namespace App\Controller;
 
-use App\Entity\Quiz;
 use App\Entity\ResultatQuiz;
 use App\Repository\ResultatQuizRepository;
+use App\Repository\QuizRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-#[Route('/api/resultats-quiz', name: 'api_resultat_quiz_')]
+#[Route('/api/resultats', name: 'resultat_')]
 class ResultatQuizController extends AbstractController
 {
+    private ResultatQuizRepository $repository;
+    private SerializerInterface $serializer;
+    private EntityManagerInterface $em;
+    private QuizRepository $quizRepository;
+    private ValidatorInterface $validator;
+
     public function __construct(
-        private readonly ResultatQuizRepository $resultatRepository,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly SerializerInterface $serializer,
-        private readonly ValidatorInterface $validator
+        ResultatQuizRepository $repository,
+        SerializerInterface $serializer,
+        EntityManagerInterface $em,
+        QuizRepository $quizRepository,
+        ValidatorInterface $validator
     ) {
-    }
-
-  
-    /**
-     * Liste tous les résultats (admin / global)
-     * GET /api/resultats-quiz
-     */
-    #[Route('', name: 'list', methods: ['GET'])]
-    public function list(Request $request): JsonResponse
-    {
-        $qb = $this->resultatRepository->createQueryBuilder('r')
-            ->orderBy('r.dateRealisation', 'DESC');
-
-        // Pagination manuelle simple
-        $page  = max(1, $request->query->getInt('page', 1));
-        $limit = min(50, max(5, $request->query->getInt('limit', 20)));
-        $offset = ($page - 1) * $limit;
-
-        $total = (clone $qb)->select('COUNT(r.id)')->getQuery()->getSingleScalarResult();
-        $items = $qb->setFirstResult($offset)->setMaxResults($limit)->getQuery()->getResult();
-
-        return $this->json([
-            'items' => $items,
-            'meta'  => [
-                'total' => $total,
-                'page'  => $page,
-                'limit' => $limit,
-                'pages' => ceil($total / $limit),
-            ]
-        ], Response::HTTP_OK, [], ['groups' => ['resultat:read', 'resultat:quiz']]);
+        $this->repository = $repository;
+        $this->serializer = $serializer;
+        $this->em = $em;
+        $this->quizRepository = $quizRepository;
+        $this->validator = $validator;
     }
 
     /**
-     * Résultats d'un quiz spécifique
-     * GET /api/resultats-quiz/quiz/{quizId}
+     * Lister tous les résultats
      */
-    #[Route('/quiz/{quizId}', name: 'by_quiz', methods: ['GET'])]
-    public function byQuiz(int $quizId, Request $request): JsonResponse
-    {
-        $quiz = $this->entityManager->getRepository(Quiz::class)->find($quizId);
-        if (!$quiz) {
-            throw new NotFoundHttpException('Quiz non trouvé');
-        }
+  #[Route('', name: 'list', methods: ['GET'])]
+public function list(): JsonResponse
+{
+    $resultats = $this->repository->findBy([], ['dateRealisation' => 'DESC']);
 
-        $qb = $this->resultatRepository->createQueryBuilder('r')
-            ->where('r.quiz = :quiz')
-            ->setParameter('quiz', $quiz)
-            ->orderBy('r.dateRealisation', 'DESC');
-
-        // Pagination
-        $page  = max(1, $request->query->getInt('page', 1));
-        $limit = min(50, max(5, $request->query->getInt('limit', 20)));
-        $offset = ($page - 1) * $limit;
-
-        $total = (clone $qb)->select('COUNT(r.id)')->getQuery()->getSingleScalarResult();
-        $items = $qb->setFirstResult($offset)->setMaxResults($limit)->getQuery()->getResult();
-
-        return $this->json([
-            'quiz_id' => $quizId,
-            'items'   => $items,
-            'meta'    => [
-                'total' => $total,
-                'page'  => $page,
-                'limit' => $limit,
-                'pages' => ceil($total / $limit),
-            ]
-        ], Response::HTTP_OK, [], ['groups' => ['resultat:read', 'resultat:quiz']]);
+    if (!$resultats) {
+        return new JsonResponse(['message' => 'Aucun résultat trouvé.'], JsonResponse::HTTP_NOT_FOUND);
     }
 
-    /**
-     * Détail d'un résultat
-     * GET /api/resultats-quiz/{id}
-     */
-    #[Route('/{id}', name: 'show', methods: ['GET'])]
-    public function show(?ResultatQuiz $resultatQuiz): JsonResponse
-    {
-        if (!$resultatQuiz) {
-            throw new NotFoundHttpException('Résultat non trouvé');
-        }
-
-        return $this->json($resultatQuiz, Response::HTTP_OK, [], [
-            'groups' => ['resultat:read', 'resultat:quiz', 'resultat:details']
-        ]);
-    }
+    $data = $this->serializer->serialize($resultats, 'json', ['groups' => 'resultat:read']);
+    return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
+}
 
     /**
      * Créer un nouveau résultat
-     * POST /api/resultats-quiz
      */
-    #[Route('', name: 'create', methods: ['POST'])]
-    public function create(Request $request): JsonResponse
-    {
-        $resultat = $this->serializer->deserialize(
-            $request->getContent(),
-            ResultatQuiz::class,
-            'json'
-        );
+#[Route('', name: 'create', methods: ['POST'])]
+public function create(Request $request): JsonResponse
+{
+    $data = json_decode($request->getContent(), true);
 
-        if (!$resultat->getQuiz()) {
-            return $this->json(['error' => 'Quiz requis'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $quiz = $this->entityManager->getRepository(Quiz::class)->find($resultat->getQuiz()->getId());
-        if (!$quiz) {
-            return $this->json(['error' => 'Quiz invalide'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $errors = $this->validator->validate($resultat);
-        if (count($errors) > 0) {
-            return $this->json($errors, Response::HTTP_BAD_REQUEST);
-        }
-
-        $this->entityManager->persist($resultat);
-        $this->entityManager->flush();
-
-        return $this->json($resultat, Response::HTTP_CREATED, [], ['groups' => 'resultat:read']);
+    if (!$data) {
+        return new JsonResponse(['message' => 'Données invalides'], JsonResponse::HTTP_BAD_REQUEST);
     }
 
-    /**
-     * Mise à jour (PUT/PATCH)
-     * PUT/PATCH /api/resultats-quiz/{id}
-     */
-    #[Route('/{id}', name: 'update', methods: ['PUT', 'PATCH'])]
-    public function update(Request $request, ?ResultatQuiz $resultatQuiz): JsonResponse
-    {
-        if (!$resultatQuiz) {
-            throw new NotFoundHttpException('Résultat non trouvé');
-        }
-
-        $this->serializer->deserialize(
-            $request->getContent(),
-            ResultatQuiz::class,
-            'json',
-            ['object_to_populate' => $resultatQuiz]
-        );
-
-        $errors = $this->validator->validate($resultatQuiz);
-        if (count($errors) > 0) {
-            return $this->json($errors, Response::HTTP_BAD_REQUEST);
-        }
-
-        $this->entityManager->flush();
-
-        return $this->json($resultatQuiz, Response::HTTP_OK, [], ['groups' => 'resultat:read']);
+    // Vérifier l'existence du quiz
+    $quiz = $this->quizRepository->find($data['quiz_id'] ?? null);
+    if (!$quiz) {
+        return new JsonResponse(['message' => 'Quiz introuvable'], JsonResponse::HTTP_BAD_REQUEST);
     }
 
-    /**
-     * Suppression
-     * DELETE /api/resultats-quiz/{id}
-     */
-    #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
-    public function delete(?ResultatQuiz $resultatQuiz): JsonResponse
-    {
-        if (!$resultatQuiz) {
-            throw new NotFoundHttpException('Résultat non trouvé');
-        }
+    // Créer le résultat
+    $resultat = new ResultatQuiz();
+    $resultat->setQuiz($quiz);
+    $resultat->setScoreObtenu((float)($data['scoreObtenu'] ?? 0));
+    $resultat->setNbQuestionsRepondues((int)($data['nbQuestionsRepondues'] ?? 0));
+    $resultat->setTempsPrisSecondes(isset($data['tempsPrisSecondes']) ? (int)$data['tempsPrisSecondes'] : null);
+    $resultat->setStatut($data['statut'] ?? 'termine');
+    $resultat->setReponsesDetaillees($data['reponsesDetaillees'] ?? null);
 
-        $this->entityManager->remove($resultatQuiz);
-        $this->entityManager->flush();
-
-        return $this->json(null, Response::HTTP_NO_CONTENT);
+    // Validation
+    $errors = $this->validator->validate($resultat);
+    if (count($errors) > 0) {
+        return new JsonResponse(['message' => (string)$errors], JsonResponse::HTTP_BAD_REQUEST);
     }
 
- 
-    /**
-     * Les 10 derniers résultats (tous quizzes)
-     * GET /api/resultats-quiz/recent
-     */
-    #[Route('/recent', name: 'recent', methods: ['GET'])]
-    public function recent(): JsonResponse
-    {
-        $resultats = $this->resultatRepository->findBy(
-            [],
-            ['dateRealisation' => 'DESC'],
-            10
-        );
+    // Sauvegarder en base
+    $this->em->persist($resultat);
+    $this->em->flush();
 
-        return $this->json($resultats, Response::HTTP_OK, [], ['groups' => ['resultat:read', 'resultat:quiz']]);
+    // Retourner un message de succès + l'ID du résultat ajouté
+    return new JsonResponse([
+        'message' => 'Résultat ajouté avec succès',
+        'id' => $resultat->getId()
+    ], JsonResponse::HTTP_CREATED);
+}
+#[Route('/{id}', name: 'update', methods: ['PUT', 'PATCH'])]
+public function update(int $id, Request $request): JsonResponse
+{
+    // Chercher le résultat existant
+    $resultat = $this->repository->find($id);
+    if (!$resultat) {
+        return new JsonResponse(['message' => 'Résultat introuvable'], JsonResponse::HTTP_NOT_FOUND);
     }
 
-    /**
-     * Meilleurs scores pour un quiz
- 
-     */
-    #[Route('/quiz/{quizId}/top', name: 'top_scores', methods: ['GET'])]
-    public function topScores(int $quizId, Request $request): JsonResponse
-    {
-        $limit = min(50, max(3, $request->query->getInt('limit', 10)));
-
-        $resultats = $this->resultatRepository->createQueryBuilder('r')
-            ->where('r.quiz = :quiz')
-            ->setParameter('quiz', $quizId)
-            ->orderBy('r.scoreObtenu', 'DESC')
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
-
-        return $this->json([
-            'quiz_id' => $quizId,
-            'top_scores' => $resultats
-        ], Response::HTTP_OK, [], ['groups' => ['resultat:read', 'resultat:quiz']]);
+    $data = json_decode($request->getContent(), true);
+    if (!$data) {
+        return new JsonResponse(['message' => 'Données invalides'], JsonResponse::HTTP_BAD_REQUEST);
     }
 
-    /**
-     * Statistiques rapides d'un quiz
-
-     */
-    #[Route('/quiz/{quizId}/stats', name: 'quiz_stats', methods: ['GET'])]
-    public function quizStats(int $quizId): JsonResponse
-    {
-        $quiz = $this->entityManager->getRepository(Quiz::class)->find($quizId);
-        if (!$quiz) {
-            throw new NotFoundHttpException('Quiz non trouvé');
-        }
-
-        $resultats = $this->resultatRepository->findBy(['quiz' => $quizId]);
-
-        $count = count($resultats);
-        if ($count === 0) {
-            return $this->json([
-                'quiz_id' => $quizId,
-                'participations' => 0,
-                'score_moyen' => null,
-                'meilleur_score' => null,
-                'note_sur' => $quiz->getNoteSur(),
-            ]);
-        }
-
-        $scores = array_map(fn($r) => $r->getScoreObtenu(), $resultats);
-
-        $stats = [
-            'quiz_id'           => $quizId,
-            'participations'    => $count,
-            'score_moyen'       => round(array_sum($scores) / $count, 2),
-            'meilleur_score'    => max($scores),
-            'pire_score'        => min($scores),
-            'note_sur'          => $quiz->getNoteSur(),
-            'pourcentage_moyen' => $quiz->getNoteSur() ? round((array_sum($scores) / $count / $quiz->getNoteSur()) * 100, 1) : null,
-        ];
-
-        return $this->json($stats);
+    // Mettre à jour les champs si fournis
+    if (isset($data['scoreObtenu'])) {
+        $resultat->setScoreObtenu((float)$data['scoreObtenu']);
+    }
+    if (isset($data['nbQuestionsRepondues'])) {
+        $resultat->setNbQuestionsRepondues((int)$data['nbQuestionsRepondues']);
+    }
+    if (isset($data['tempsPrisSecondes'])) {
+        $resultat->setTempsPrisSecondes((int)$data['tempsPrisSecondes']);
+    }
+    if (isset($data['statut'])) {
+        $resultat->setStatut($data['statut']);
+    }
+    if (isset($data['reponsesDetaillees'])) {
+        $resultat->setReponsesDetaillees($data['reponsesDetaillees']);
     }
 
-
-    /**
-     * Résultats terminés vs abandonnés (si tu utilises le champ statut)
-     * GET /api/resultats-quiz/stats/global
-     */
-    #[Route('/stats/global', name: 'global_stats', methods: ['GET'])]
-    public function globalStats(): JsonResponse
-    {
-        $counts = $this->resultatRepository->createQueryBuilder('r')
-            ->select('r.statut, COUNT(r.id) as count')
-            ->groupBy('r.statut')
-            ->getQuery()
-            ->getResult();
-
-        $stats = [];
-        foreach ($counts as $row) {
-            $stats[$row['statut']] = (int)$row['count'];
-        }
-
-        $stats['total'] = array_sum($stats);
-
-        return $this->json($stats);
+    // Validation
+    $errors = $this->validator->validate($resultat);
+    if (count($errors) > 0) {
+        return new JsonResponse(['message' => (string)$errors], JsonResponse::HTTP_BAD_REQUEST);
     }
+
+    // Sauvegarder les modifications
+    $this->em->flush();
+
+    // Réponse de succès
+    return new JsonResponse([
+        'message' => 'Résultat mis à jour avec succès',
+        'id' => $resultat->getId()
+    ], JsonResponse::HTTP_OK);
+}
+#[Route('/{id}', name: 'delete', methods: ['DELETE'])]
+public function delete(int $id): JsonResponse
+{
+    // Chercher le résultat existant
+    $resultat = $this->repository->find($id);
+    if (!$resultat) {
+        return new JsonResponse(['message' => 'Résultat introuvable'], JsonResponse::HTTP_NOT_FOUND);
+    }
+
+    // Supprimer le résultat
+    $this->em->remove($resultat);
+    $this->em->flush();
+
+    // Réponse de succès
+    return new JsonResponse(['message' => 'Résultat supprimé avec succès'], JsonResponse::HTTP_OK);
+}
+#[Route('/recent', name: 'recent', methods: ['GET'])]
+public function recent(): JsonResponse
+{
+    // Récupérer les 10 derniers résultats triés par dateRealisation décroissante
+    $resultats = $this->repository->findBy([], ['dateRealisation' => 'DESC'], 10);
+
+    if (!$resultats) {
+        return new JsonResponse(['message' => 'Aucun résultat trouvé'], JsonResponse::HTTP_NOT_FOUND);
+    }
+
+    // Sérialisation avec le groupe resultat:read
+    $data = $this->serializer->serialize($resultats, 'json', ['groups' => 'resultat:read']);
+
+    return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
+}
+#[Route('/top-scores/{quizId}', name: 'top_scores', methods: ['GET'])]
+public function topScores(int $quizId): JsonResponse
+{
+    // Vérifier si le quiz existe
+    $quiz = $this->quizRepository->find($quizId);
+    if (!$quiz) {
+        return new JsonResponse(['message' => 'Quiz introuvable'], JsonResponse::HTTP_NOT_FOUND);
+    }
+
+    // Récupérer les 10 meilleurs scores pour ce quiz
+    $resultats = $this->repository->findBy(
+        ['quiz' => $quiz],
+        ['scoreObtenu' => 'DESC'],
+        10
+    );
+
+    if (!$resultats) {
+        return new JsonResponse(['message' => 'Aucun résultat trouvé pour ce quiz'], JsonResponse::HTTP_NOT_FOUND);
+    }
+
+    // Sérialisation avec le groupe resultat:read
+    $data = $this->serializer->serialize($resultats, 'json', ['groups' => 'resultat:read']);
+
+    return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
+}
+#[Route('/stats/global', name: 'global_stats', methods: ['GET'])]
+public function globalStats(): JsonResponse
+{
+    // Compter les résultats terminés
+    $termines = $this->repository->count(['statut' => 'termine']);
+
+    // Compter les résultats abandonnés
+    $abandons = $this->repository->count(['statut' => 'abandon']);
+
+    // Retourner les statistiques
+    return new JsonResponse([
+        'termines' => $termines,
+        'abandons' => $abandons,
+        'total' => $termines + $abandons
+    ], JsonResponse::HTTP_OK);
+}
+
 }
