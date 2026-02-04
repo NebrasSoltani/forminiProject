@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ResultatQuizRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ResultatQuizRepository::class)]
@@ -13,31 +14,35 @@ class ResultatQuiz
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'resultats')]
-    #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $apprenant = null;
+
+    #[ORM\ManyToOne(targetEntity: Quiz::class)]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Quiz $quiz = null;
 
-    #[ORM\Column(nullable: false)]
-    private \DateTimeImmutable $dateRealisation;
+    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    private ?string $note = null; // note en %
 
-    #[ORM\Column(type: 'float', precision: 6, scale: 2)]
-    private float $scoreObtenu = 0.00;
+    #[ORM\Column]
+    private ?int $nombreBonnesReponses = null;
 
-    #[ORM\Column(nullable: false)]
-    private int $nbQuestionsRepondues = 0;
+    #[ORM\Column]
+    private ?int $nombreTotalQuestions = null;
 
-    #[ORM\Column(nullable: true)]
-    private ?int $tempsPrisSecondes = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $dateTentative = null;
 
-    #[ORM\Column(length: 50)]
-    private string $statut = 'termine';
+    #[ORM\Column]
+    private ?bool $reussi = false;
 
-    #[ORM\Column(type: 'json', nullable: true)]
-    private ?array $reponsesDetaillees = null;
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $detailsReponses = null; // JSON des réponses
 
     public function __construct()
     {
-        $this->dateRealisation = new \DateTimeImmutable();
+        $this->dateTentative = new \DateTime();
     }
 
     public function getId(): ?int
@@ -45,74 +50,91 @@ class ResultatQuiz
         return $this->id;
     }
 
+    public function getApprenant(): ?User
+    {
+        return $this->apprenant;
+    }
+
+    public function setApprenant(?User $apprenant): static
+    {
+        $this->apprenant = $apprenant;
+        return $this;
+    }
+
     public function getQuiz(): ?Quiz
     {
         return $this->quiz;
     }
 
-    public function setQuiz(?Quiz $quiz): self
+    public function setQuiz(?Quiz $quiz): static
     {
         $this->quiz = $quiz;
         return $this;
     }
 
-    public function getDateRealisation(): \DateTimeImmutable
+    public function getNote(): ?string
     {
-        return $this->dateRealisation;
+        return $this->note;
     }
 
-    public function getScoreObtenu(): float
+    public function setNote(string $note): static
     {
-        return $this->scoreObtenu;
-    }
-
-    public function setScoreObtenu(float $scoreObtenu): self
-    {
-        $this->scoreObtenu = max(0.0, $scoreObtenu); // protection basique
+        $this->note = $note;
         return $this;
     }
 
-    public function getNbQuestionsRepondues(): int
+    public function getNombreBonnesReponses(): ?int
     {
-        return $this->nbQuestionsRepondues;
+        return $this->nombreBonnesReponses;
     }
 
-    public function setNbQuestionsRepondues(int $nbQuestionsRepondues): self
+    public function setNombreBonnesReponses(int $nombreBonnesReponses): static
     {
-        $this->nbQuestionsRepondues = max(0, $nbQuestionsRepondues);
+        $this->nombreBonnesReponses = $nombreBonnesReponses;
         return $this;
     }
 
-    public function getTempsPrisSecondes(): ?int
+    public function getNombreTotalQuestions(): ?int
     {
-        return $this->tempsPrisSecondes;
+        return $this->nombreTotalQuestions;
     }
 
-    public function setTempsPrisSecondes(?int $tempsPrisSecondes): self
+    public function setNombreTotalQuestions(int $nombreTotalQuestions): static
     {
-        $this->tempsPrisSecondes = $tempsPrisSecondes;
+        $this->nombreTotalQuestions = $nombreTotalQuestions;
         return $this;
     }
 
-    public function getStatut(): string
+    public function getDateTentative(): ?\DateTimeInterface
     {
-        return $this->statut;
+        return $this->dateTentative;
     }
 
-    public function setStatut(string $statut): self
+    public function setDateTentative(\DateTimeInterface $dateTentative): static
     {
-        $this->statut = $statut;
+        $this->dateTentative = $dateTentative;
         return $this;
     }
 
-    public function getReponsesDetaillees(): ?array
+    public function isReussi(): ?bool
     {
-        return $this->reponsesDetaillees;
+        return $this->reussi;
     }
 
-    public function setReponsesDetaillees(?array $reponsesDetaillees): self
+    public function setReussi(bool $reussi): static
     {
-        $this->reponsesDetaillees = $reponsesDetaillees;
+        $this->reussi = $reussi;
+        return $this;
+    }
+
+    public function getDetailsReponses(): ?string
+    {
+        return $this->detailsReponses;
+    }
+
+    public function setDetailsReponses(?string $detailsReponses): static
+    {
+        $this->detailsReponses = $detailsReponses;
         return $this;
     }
 }

@@ -6,7 +6,7 @@ use App\Repository\QuizRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: QuizRepository::class)]
 class Quiz
@@ -14,48 +14,39 @@ class Quiz
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['quiz'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    #[Groups(['quiz'])]
+    #[Assert\NotBlank(message: 'Le titre est obligatoire')]
     private ?string $titre = null;
 
-    #[ORM\Column(type: 'text', nullable: true)]
-    #[Groups(['quiz'])]
+    #[ORM\Column(length: 500, nullable: true)]
     private ?string $description = null;
 
-    #[ORM\Column(nullable: false)]
-    #[Groups(['quiz'])]
-    private \DateTimeImmutable $dateCreation;
+    #[ORM\Column]
+    #[Assert\Positive]
+    private ?int $duree = 30; // durée en minutes
 
-    #[ORM\Column(nullable: true)]
-    #[Groups(['quiz'])]
-    private ?\DateTimeImmutable $dateModification = null;
+    #[ORM\Column]
+    #[Assert\Range(min: 0, max: 100)]
+    private ?int $noteMinimale = 50; // note minimale pour réussir (en %)
 
-    #[ORM\Column(nullable: false)]
-    #[Groups(['quiz'])]
-    private bool $estActif = true;
+    #[ORM\ManyToOne(targetEntity: Formation::class, inversedBy: 'quizzes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Formation $formation = null;
 
-    #[ORM\Column(nullable: true)]
-    #[Groups(['quiz'])]
-    private ?int $dureeMinutes = null;
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['persist', 'remove'])]
+    private Collection $questions;
 
-    #[ORM\Column(type: 'float', precision: 5, scale: 2, nullable: true)]
-    #[Groups(['quiz'])]
-    private ?float $noteSur = 20.00;
+    #[ORM\Column]
+    private ?bool $afficherCorrection = true;
 
-    /**
-     * @var Collection<int, ResultatQuiz>
-     */
-    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: ResultatQuiz::class, orphanRemoval: true)]
-    #[Groups(['quiz'])]
-    private Collection $resultats;
+    #[ORM\Column]
+    private ?bool $melanger = true; // mélanger les questions
 
     public function __construct()
     {
-        $this->resultats = new ArrayCollection();
-        $this->dateCreation = new \DateTimeImmutable();
+        $this->questions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -68,7 +59,7 @@ class Quiz
         return $this->titre;
     }
 
-    public function setTitre(string $titre): self
+    public function setTitre(string $titre): static
     {
         $this->titre = $titre;
         return $this;
@@ -79,87 +70,88 @@ class Quiz
         return $this->description;
     }
 
-    public function setDescription(?string $description): self
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
         return $this;
     }
 
-    public function getDateCreation(): \DateTimeImmutable
+    public function getDuree(): ?int
     {
-        return $this->dateCreation;
+        return $this->duree;
     }
 
-    public function getDateModification(): ?\DateTimeImmutable
+    public function setDuree(int $duree): static
     {
-        return $this->dateModification;
-    }
-
-    public function setDateModification(?\DateTimeImmutable $dateModification): self
-    {
-        $this->dateModification = $dateModification;
+        $this->duree = $duree;
         return $this;
     }
 
-    public function isEstActif(): bool
+    public function getNoteMinimale(): ?int
     {
-        return $this->estActif;
+        return $this->noteMinimale;
     }
 
-    public function setEstActif(bool $estActif): self
+    public function setNoteMinimale(int $noteMinimale): static
     {
-        $this->estActif = $estActif;
+        $this->noteMinimale = $noteMinimale;
         return $this;
     }
 
-    public function getDureeMinutes(): ?int
+    public function getFormation(): ?Formation
     {
-        return $this->dureeMinutes;
+        return $this->formation;
     }
 
-    public function setDureeMinutes(?int $dureeMinutes): self
+    public function setFormation(?Formation $formation): static
     {
-        $this->dureeMinutes = $dureeMinutes;
+        $this->formation = $formation;
         return $this;
     }
 
-    public function getNoteSur(): ?float
+    public function getQuestions(): Collection
     {
-        return $this->noteSur;
+        return $this->questions;
     }
 
-    public function setNoteSur(?float $noteSur): self
+    public function addQuestion(Question $question): static
     {
-        $this->noteSur = $noteSur;
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, ResultatQuiz>
-     */
-    public function getResultats(): Collection
-    {
-        return $this->resultats;
-    }
-
-    public function addResultat(ResultatQuiz $resultat): self
-    {
-        if (!$this->resultats->contains($resultat)) {
-            $this->resultats->add($resultat);
-            $resultat->setQuiz($this);
+        if (!$this->questions->contains($question)) {
+            $this->questions->add($question);
+            $question->setQuiz($this);
         }
-
         return $this;
     }
 
-    public function removeResultat(ResultatQuiz $resultat): self
+    public function removeQuestion(Question $question): static
     {
-        if ($this->resultats->removeElement($resultat)) {
-            if ($resultat->getQuiz() === $this) {
-                $resultat->setQuiz(null);
+        if ($this->questions->removeElement($question)) {
+            if ($question->getQuiz() === $this) {
+                $question->setQuiz(null);
             }
         }
+        return $this;
+    }
 
+    public function isAfficherCorrection(): ?bool
+    {
+        return $this->afficherCorrection;
+    }
+
+    public function setAfficherCorrection(bool $afficherCorrection): static
+    {
+        $this->afficherCorrection = $afficherCorrection;
+        return $this;
+    }
+
+    public function isMelanger(): ?bool
+    {
+        return $this->melanger;
+    }
+
+    public function setMelanger(bool $melanger): static
+    {
+        $this->melanger = $melanger;
         return $this;
     }
 }
