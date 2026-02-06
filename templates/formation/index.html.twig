@@ -1,0 +1,269 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Formations{% endblock %}
+
+{% block body %}
+
+{# Font Awesome (si pas déjà inclus dans base.html.twig)
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+#}
+
+{# Flash messages #}
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+{% endfor %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="d-flex align-items-center mb-4">
+                    <h4 class="card-title mb-0">Mes Formations</h4>
+
+                    <div class="ml-auto d-flex align-items-center">
+                        <a href="{{ path('formation_new') }}" class="btn btn-primary mr-2">
+                            <i class="fa fa-plus-circle mr-1"></i> Nouvelle Formation
+                        </a>
+
+                        <div class="dropdown sub-dropdown">
+                            <button class="btn btn-link text-muted dropdown-toggle" type="button"
+                                    id="dd1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i data-feather="more-vertical"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dd1">
+                                <a class="dropdown-item" href="{{ path('apprenant_mes_formations') }}">
+                                    <i class="fa fa-list mr-2"></i> Voir tout
+                                </a>
+                                <a class="dropdown-item" href="{{ path('formation_new') }}">
+                                    <i class="fa fa-plus mr-2"></i> Créer
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table no-wrap v-middle mb-0">
+                        <thead>
+                        <tr class="border-0">
+                            <th class="border-0 font-14 font-weight-medium text-muted">
+                                <i class="fa fa-book mr-1"></i> Formation
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted px-2">
+                                <i class="fa fa-tags mr-1"></i> Catégorie
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted">
+                                <i class="fa fa-money-bill mr-1"></i> Prix
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted text-center">
+                                <i class="fa fa-clock mr-1"></i> Durée
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted text-center">
+                                <i class="fa fa-list-ol mr-1"></i> Leçons
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted text-center">
+                                <i class="fa fa-flag mr-1"></i> Statut
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted">
+                                <i class="fa fa-calendar-alt mr-1"></i> Créée le
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted text-right">
+                                <i class="fa fa-cogs mr-1"></i> Actions
+                            </th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for formation in formations %}
+                            <tr>
+                                <td class="border-top-0 px-2 py-4">
+                                    <div class="d-flex no-block align-items-center">
+                                        <div class="mr-3">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center formation-avatar">
+                                                <i class="fa fa-book text-primary"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h5 class="text-dark mb-0 font-16 font-weight-medium">
+                                            
+                                              <a href="{{ path('formation_show', {'id': formation.id}) }}" style="color:#1c2d41">
+                                                {{ formation.titre }}
+                                            </h5></a>
+                                            <span class="text-muted font-14">
+                                                <i class="fa fa-users mr-1"></i>
+                                                {{ formation.inscriptions|length }} inscrit(s)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="border-top-0 text-muted px-2 py-4 font-14">
+                                    {{ formation.categorie }}
+                                </td>
+
+                                <td class="border-top-0 px-2 py-4">
+                                    {% if formation.typeAcces == 'gratuit' %}
+                                        <span class="badge badge-light text-success border badge-soft">
+                                            <i class="fa fa-gift mr-1"></i> Gratuit
+                                        </span>
+                                    {% else %}
+                                        <span class="font-weight-medium text-dark">{{ formation.prix }} TND</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="border-top-0 text-center text-muted font-weight-medium px-2 py-4">
+                                    {{ formation.duree }} h
+                                </td>
+
+                                <td class="border-top-0 text-center text-muted font-weight-medium px-2 py-4">
+                                    {{ formation.nombreLecons }}
+                                </td>
+
+                                <td class="border-top-0 text-center px-2 py-4">
+                                    {% if formation.statut == 'publiee' %}
+                                        <span class="badge badge-light text-success border badge-soft">
+                                            <i class="fa fa-check-circle mr-1"></i> Publiée
+                                        </span>
+                                    {% elseif formation.statut == 'brouillon' %}
+                                        <span class="badge badge-light text-secondary border badge-soft">
+                                            <i class="fa fa-pencil-alt mr-1"></i> Brouillon
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-light text-warning border badge-soft">
+                                            <i class="fa fa-exclamation-triangle mr-1"></i> {{ formation.statut }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="border-top-0 text-dark px-2 py-4">
+                                    {{ formation.dateCreation|date('d/m/Y') }}
+                                </td>
+
+                                <td class="border-top-0 px-2 py-4 text-right">
+                                    <div class="btn-group action-buttons" role="group" aria-label="Actions">
+                                  
+
+                                        <a href="{{ path('formation_edit', {'id': formation.id}) }}"
+                                           class="btn btn-sm btn-light action-btn" title="Modifier">
+                                            <i class="fa fa-edit text-warning"></i>
+                                        </a>
+
+                                        <a href="{{ path('lecon_index', {'formationId': formation.id}) }}"
+                                           class="btn btn-sm btn-light action-btn" title="Gérer les leçons">
+                                            <i class="fa fa-book text-primary"></i>
+
+                                        </a>
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-light action-btn"
+                                                onclick="deleteFormation({{ formation.id }}, '{{ formation.titre|e('js') }}', {{ formation.inscriptions|length }})"
+                                                title="Supprimer">
+                                            <i class="fa fa-trash text-danger"></i>
+                                        </button>
+                                    </div>
+
+                                    {# Formulaire suppression caché #}
+                                    <form id="delete-form-{{ formation.id }}"
+                                          method="post"
+                                          action="{{ path('formation_delete', {'id': formation.id}) }}"
+                                          style="display:none;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-5">
+                                    <h4 class="text-muted mb-2">
+                                        <i class="fa fa-info-circle mr-1"></i> Aucune formation trouvée
+                                    </h4>
+                                    <p class="mb-3">Créez votre première formation pour commencer !</p>
+                                    <a href="{{ path('formation_new') }}" class="btn btn-primary">
+                                        <i class="fa fa-plus-circle mr-1"></i> Créer une formation
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteFormation(id, titre, nbInscriptions) {
+    let message = 'Êtes-vous sûr de vouloir supprimer la formation "' + titre + '" ?\n\n';
+
+    if (nbInscriptions > 0) {
+        message += 'ATTENTION : ' + nbInscriptions + ' apprenant(s) sont inscrits à cette formation.\n';
+        message += 'La suppression sera impossible.\n\n';
+        message += 'Voulez-vous continuer ?';
+    } else {
+        message += 'Aucun apprenant inscrit.\n';
+        message += 'Cette action supprimera également :\n';
+        message += '- Toutes les leçons\n';
+        message += '- Tous les quiz\n';
+        message += '- Tous les favoris\n\n';
+        message += 'Cette action est irréversible !';
+    }
+
+    if (confirm(message)) {
+        document.getElementById('delete-form-' + id).submit();
+    }
+}
+</script>
+
+<style>
+/* Avatar */
+.formation-avatar{
+    width:45px;
+    height:45px;
+    background:#f3f4f6;
+}
+
+/* Badges soft (remplace le vert agressif) */
+.badge-soft{
+    padding: .4rem .6rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+/* Boutons actions modernes */
+.action-buttons .action-btn{
+    border-radius: 10px;
+    padding: 6px 10px;
+    margin: 0 3px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    transition: all .2s ease;
+}
+.action-buttons .action-btn i{
+    font-size: 14px;
+}
+.action-buttons .action-btn:hover{
+    background: #eef1f4;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+</style>
+
+{% endblock %}
