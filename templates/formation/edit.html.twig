@@ -1,0 +1,425 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Formation{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white border-0 d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 class="mb-0">
+                            <i class="fa fa-edit text-primary mr-2"></i>
+                            Modifier la formation
+                        </h3>
+                        <small class="text-muted">
+                            {{ formation.titre }}
+                        </small>
+                    </div>
+                    <a href="{{ path('formation_index') }}" class="btn btn-soft-dark">
+                        <i class="fa fa-arrow-left mr-1"></i> Retour
+                    </a>
+                </div>
+
+                <div class="card-body">
+                    {{ form_start(form) }}
+
+                    {# ===== SECTION 1 : Infos ===== #}
+                    <div class="section-card mb-4">
+                        <div class="section-title">
+                            <i class="fa fa-info-circle mr-2"></i> Informations générales
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form_row(form.titre) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.categorie) }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                {{ form_row(form.niveau) }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                {{ form_row(form.langue) }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form_row(form.descriptionCourte) }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form_row(form.descriptionDetaillee) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ===== SECTION 2 : Contenu ===== #}
+                    <div class="section-card mb-4">
+                        <div class="section-title">
+                            <i class="fa fa-graduation-cap mr-2"></i> Contenu pédagogique
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                {{ form_row(form.objectifsPedagogiques) }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form_row(form.prerequis) }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form_row(form.programme) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.duree) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.nombreLecons) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ===== SECTION 3 : Format ===== #}
+                    <div class="section-card mb-4">
+                        <div class="section-title">
+                            <i class="fa fa-video mr-2"></i> Format de la formation
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.format) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.dateDebut) }}
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                {{ form_row(form.planning) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.lienLive) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.nombreSeances) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ===== SECTION 4 : Prix ===== #}
+                    <div class="section-card mb-4">
+                        <div class="section-title d-flex align-items-center justify-content-between flex-wrap">
+                            <div>
+                                <i class="fa fa-coins mr-2"></i> Prix & Accès
+                            </div>
+                            <span class="badge badge-light border text-muted mt-2 mt-md-0">
+                                Les champs prix apparaissent seulement si "payant"
+                            </span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {{ form_row(form.typeAcces) }}
+                            </div>
+                            <div class="col-md-4 mb-3 payant-field">
+                                {{ form_row(form.prix) }}
+                            </div>
+                            <div class="col-md-4 mb-3 payant-field">
+                                {{ form_row(form.typeAchat) }}
+                            </div>
+                            <div class="col-md-6 mb-3 payant-field">
+                                {{ form_row(form.prixPromo) }}
+                            </div>
+                            <div class="col-md-6 mb-3 payant-field">
+                                {{ form_row(form.dateFinPromo) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ===== SECTION 5 : Médias ===== #}
+                    <div class="section-card mb-4">
+                        <div class="section-title">
+                            <i class="fa fa-photo-video mr-2"></i> Médias
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.imageCouverture) }}
+                                {% if formation.imageCouverture %}
+                                    <div class="mt-3 p-3 bg-light border rounded">
+                                        <img src="{{ asset('uploads/images/' ~ formation.imageCouverture) }}" 
+                                             alt="Image actuelle" 
+                                             class="img-thumbnail mb-2" 
+                                             style="max-width: 200px;">
+                                        <p class="text-muted small mb-0">
+                                            <i class="fa fa-check-circle text-success mr-1"></i>
+                                            Image actuelle
+                                        </p>
+                                    </div>
+                                {% endif %}
+                                <small class="text-muted d-block mt-2">Image JPG/PNG recommandée.</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_row(form.videoPromo) }}
+                                <small class="text-muted d-block mt-2">Lien YouTube/Vimeo ou mp4.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ===== SECTION 6 : Bonus ===== #}
+                    <div class="section-card mb-4">
+                        <div class="section-title">
+                            <i class="fa fa-gift mr-2"></i> Options bonus
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-6 mb-3">
+                                <label class="option-tile">
+                                    {{ form_widget(form.certificat) }}
+                                    <span><i class="fa fa-certificate mr-1"></i> Certificat</span>
+                                </label>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <label class="option-tile">
+                                    {{ form_widget(form.hasQuiz) }}
+                                    <span><i class="fa fa-tasks mr-1"></i> Quiz</span>
+                                </label>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <label class="option-tile">
+                                    {{ form_widget(form.fichiersTelechargeables) }}
+                                    <span><i class="fa fa-file mr-1"></i> Fichiers</span>
+                                </label>
+                            </div>
+                            <div class="col-md-3 col-6 mb-3">
+                                <label class="option-tile">
+                                    {{ form_widget(form.forum) }}
+                                    <span><i class="fa fa-comments mr-1"></i> Forum</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# ===== ACTIONS ===== #}
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <a href="{{ path('formation_index') }}" class="btn btn-soft-dark mb-2 mb-md-0">
+                            <i class="fa fa-arrow-left mr-1"></i> Retour
+                        </a>
+
+                        <button type="submit" class="btn btn-action btn-primary mb-2 mb-md-0">
+                            <i class="fa fa-save mr-1"></i> Enregistrer les modifications
+                        </button>
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeAcces = document.querySelector('#formation_typeAcces');
+    const payantBlocks = document.querySelectorAll('.payant-field');
+
+    function togglePayantFields() {
+        const isPayant = typeAcces && typeAcces.value === 'payant';
+        payantBlocks.forEach(el => el.style.display = isPayant ? 'block' : 'none');
+    }
+
+    togglePayantFields();
+    if (typeAcces) typeAcces.addEventListener('change', togglePayantFields);
+});
+</script>
+
+<style>
+/* ===== Boutons soft dark ===== */
+.btn-soft-dark{
+    background:#343a40;
+    border:1px solid #495057;
+    color:#f8f9fa;
+}
+.btn-soft-dark:hover{
+    background:#3e444a;
+    color:#fff;
+}
+
+/* ===== Sections ===== */
+.section-card{
+    border:1px solid #e9ecef;
+    border-radius:14px;
+    padding:22px;
+    background:#fff;
+}
+.section-title{
+    font-weight:700;
+    color:#2f343a;
+    margin-bottom:18px;
+    display:flex;
+    align-items:center;
+}
+
+/* ===== Form groups spacing ===== */
+.form-group{
+    margin-bottom:0 !important;
+}
+
+/* ===== Option tiles - FLEX pour aligner checkbox et texte ===== */
+.option-tile{
+    width:100%;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:12px;
+    border:1px solid #e9ecef;
+    background:#f8f9fa;
+    padding:14px 16px;
+    border-radius:12px;
+    cursor:pointer;
+    transition:all .2s ease;
+    margin-bottom:0;
+}
+.option-tile:hover{
+    background:#eef1f4;
+    transform:translateY(-1px);
+    box-shadow:0 4px 10px rgba(0,0,0,.06);
+}
+.option-tile input[type="checkbox"]{ 
+    margin:0;
+    width:20px;
+    height:20px;
+    cursor:pointer;
+    flex-shrink:0;
+}
+.option-tile span{
+    font-weight:600;
+    color:#495057;
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+/* ===== Buttons ===== */
+.btn-action{
+    border-radius:12px;
+    padding:10px 18px;
+    font-weight:600;
+    min-width:180px;
+}
+
+/* ===== SELECT : force FLEX display + style uniforme ===== */
+select,
+.form-select,
+select.form-control{
+    display:flex !important;
+    align-items:center !important;
+    border-radius:12px !important;
+    border:1px solid #e0e0e0 !important;
+    padding:10px 14px !important;
+    background-color:#f8f9fa !important;
+    height:auto !important;
+    min-height:45px !important;
+
+    appearance:none;
+    -webkit-appearance:none;
+    -moz-appearance:none;
+
+    background-image:url("data:image/svg+xml,%3Csvg fill='none' stroke='%236c757d' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    background-size:16px 16px;
+
+    padding-right:42px !important;
+}
+select:focus,
+.form-select:focus,
+select.form-control:focus{
+    border-color:#6c757d !important;
+    box-shadow:0 0 0 .15rem rgba(108,117,125,.25) !important;
+    background-color:#fff !important;
+    outline:none !important;
+}
+
+/* ===== INPUT & TEXTAREA ===== */
+input[type="text"].form-control,
+input[type="number"].form-control,
+input[type="date"].form-control,
+input[type="datetime-local"].form-control,
+input[type="url"].form-control,
+textarea.form-control{
+    border-radius:12px !important;
+    border:1px solid #e0e0e0 !important;
+    padding:10px 14px !important;
+    background-color:#f8f9fa !important;
+    min-height:45px !important;
+}
+input[type="text"].form-control:focus,
+input[type="number"].form-control:focus,
+input[type="date"].form-control:focus,
+input[type="datetime-local"].form-control:focus,
+input[type="url"].form-control:focus,
+textarea.form-control:focus{
+    border-color:#6c757d !important;
+    box-shadow:0 0 0 .15rem rgba(108,117,125,.25) !important;
+    background-color:#fff !important;
+    outline:none !important;
+}
+
+/* ===== FILE : dashed + button dark ===== */
+input[type="file"],
+input[type="file"].form-control{
+    border-radius:12px !important;
+    border:2px dashed #ced4da !important;
+    background:#f8f9fa !important;
+    padding:10px !important;
+    cursor:pointer;
+    min-height:60px !important;
+}
+input[type="file"]:hover,
+input[type="file"].form-control:hover{
+    background:#eef1f4 !important;
+    border-color:#adb5bd !important;
+}
+input[type="file"]::file-selector-button{
+    border:none !important;
+    background:#343a40 !important;
+    color:#fff !important;
+    padding:8px 14px !important;
+    border-radius:8px !important;
+    margin-right:10px !important;
+    cursor:pointer;
+}
+input[type="file"]::file-selector-button:hover{
+    background:#3e444a !important;
+}
+
+/* ===== Labels uniformes ===== */
+label{
+    font-weight:600;
+    color:#495057;
+    margin-bottom:8px;
+    display:block;
+}
+
+/* ===== Gap util BS4 ===== */
+.gap-2 > *:not(:last-child){ 
+    margin-right:10px; 
+}
+
+/* ===== Responsive adjustments ===== */
+@media (max-width: 768px) {
+    .section-card{
+        padding:16px;
+    }
+    .btn-action{
+        min-width:auto;
+        width:100%;
+    }
+    .option-tile{
+        padding:12px;
+    }
+}
+</style>
+
+{% endblock %}
