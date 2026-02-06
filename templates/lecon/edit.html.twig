@@ -1,0 +1,479 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Leçon - {{ formation.titre }}{% endblock %}
+
+{% block body %}
+
+{# Flash messages #}
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+{% endfor %}
+
+<div class="row">
+    <div class="col-12">
+        {# Header #}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h3 class="mb-1">
+                            <i class="fa fa-edit text-warning mr-2"></i>
+                            Modifier la leçon
+                        </h3>
+                        <p class="text-muted mb-0">
+                            <i class="fa fa-book mr-1"></i>
+                            Formation : <strong>{{ formation.titre }}</strong>
+                        </p>
+                    </div>
+                    <div>
+                        <a href="{{ path('lecon_show', {'formationId': formation.id, 'id': lecon.id}) }}" class="btn btn-secondary mr-2">
+                            <i class="fa fa-eye mr-1"></i> Voir
+                        </a>
+                        <a href="{{ path('lecon_index', {'formationId': formation.id}) }}" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left mr-1"></i> Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            {# Formulaire principal #}
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-4">
+                            <i class="fa fa-info-circle text-primary mr-2"></i>
+                            Informations de la leçon
+                        </h5>
+
+                        {{ form_start(form) }}
+                            {# Titre #}
+                            <div class="form-group">
+                                <label for="{{ form.titre.vars.id }}" class="form-label">
+                                    <i class="fa fa-graduation-cap text-muted mr-1"></i>
+                                    Titre de la leçon *
+                                </label>
+                                {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Ex: Introduction aux bases'}}) }}
+                                {{ form_errors(form.titre) }}
+                                <small class="form-text text-muted">
+                                    Un titre clair et descriptif pour votre leçon
+                                </small>
+                            </div>
+
+                            {# Description #}
+                            <div class="form-group">
+                                <label for="{{ form.description.vars.id }}" class="form-label">
+                                    <i class="fa fa-align-left text-muted mr-1"></i>
+                                    Description
+                                </label>
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5, 'placeholder': 'Décrivez le contenu de cette leçon...'}}) }}
+                                {{ form_errors(form.description) }}
+                                <small class="form-text text-muted">
+                                    Expliquez ce que les apprenants vont découvrir dans cette leçon
+                                </small>
+                            </div>
+
+                            {# Contenu #}
+                            <div class="form-group">
+                                <label for="{{ form.contenu.vars.id }}" class="form-label">
+                                    <i class="fa fa-file-alt text-muted mr-1"></i>
+                                    Contenu
+                                </label>
+                                {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': 10, 'placeholder': 'Contenu détaillé de la leçon...'}}) }}
+                                {{ form_errors(form.contenu) }}
+                                <small class="form-text text-muted">
+                                    <i class="fa fa-info-circle mr-1"></i>
+                                    Vous pouvez utiliser du HTML pour formater votre contenu
+                                </small>
+                            </div>
+
+                            {# URL Vidéo #}
+                            <div class="form-group">
+                                <label for="{{ form.videoUrl.vars.id }}" class="form-label">
+                                    <i class="fa fa-play-circle text-muted mr-1"></i>
+                                    URL de la vidéo
+                                </label>
+                                {{ form_widget(form.videoUrl, {'attr': {'class': 'form-control', 'placeholder': 'https://www.youtube.com/watch?v=...'}}) }}
+                                {{ form_errors(form.videoUrl) }}
+                                <small class="form-text text-muted">
+                                    <i class="fa fa-info-circle mr-1"></i>
+                                    Lien YouTube, Vimeo ou autre plateforme vidéo
+                                </small>
+                            </div>
+
+                            {# Durée, Ordre et Gratuit #}
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="{{ form.duree.vars.id }}" class="form-label">
+                                            <i class="fa fa-clock text-muted mr-1"></i>
+                                            Durée (minutes)
+                                        </label>
+                                        {{ form_widget(form.duree, {'attr': {'class': 'form-control', 'placeholder': '30'}}) }}
+                                        {{ form_errors(form.duree) }}
+                                        <small class="form-text text-muted">
+                                            Durée estimée de la leçon
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="{{ form.ordre.vars.id }}" class="form-label">
+                                            <i class="fa fa-sort text-muted mr-1"></i>
+                                            Ordre d'affichage
+                                        </label>
+                                        {{ form_widget(form.ordre, {'attr': {'class': 'form-control', 'placeholder': '1'}}) }}
+                                        {{ form_errors(form.ordre) }}
+                                        <small class="form-text text-muted">
+                                            Position dans la formation
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="form-label d-block">
+                                            <i class="fa fa-unlock text-muted mr-1"></i>
+                                            Accès
+                                        </label>
+                                        <div class="custom-control custom-switch mt-2">
+                                            {{ form_widget(form.gratuit, {'attr': {'class': 'custom-control-input'}}) }}
+                                            <label class="custom-control-label" for="{{ form.gratuit.vars.id }}">
+                                                Leçon gratuite
+                                            </label>
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            Accessible sans inscription
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Boutons d'action #}
+                            <div class="form-actions mt-4 pt-3 border-top">
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ path('lecon_index', {'formationId': formation.id}) }}" class="btn btn-secondary btn-lg">
+                                        <i class="fa fa-times mr-1"></i> Annuler
+                                    </a>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fa fa-save mr-1"></i> Enregistrer les modifications
+                                    </button>
+                                </div>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+
+            {# Sidebar - Aide et conseils #}
+            <div class="col-lg-4">
+                {# Guide de modification #}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fa fa-lightbulb text-warning mr-2"></i>
+                            Astuces HTML
+                        </h5>
+                        
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-code text-primary"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Paragraphes</strong>
+                                <p class="mb-0"><code>&lt;p&gt;...&lt;/p&gt;</code></p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-list text-primary"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Listes</strong>
+                                <p class="mb-0"><code>&lt;ul&gt;&lt;li&gt;...&lt;/li&gt;&lt;/ul&gt;</code></p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-bold text-primary"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Gras</strong>
+                                <p class="mb-0"><code>&lt;strong&gt;...&lt;/strong&gt;</code></p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item mb-0">
+                            <div class="tip-icon">
+                                <i class="fa fa-video text-danger"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>YouTube</strong>
+                                <p class="mb-0"><code>youtube.com/embed/VIDEO_ID</code></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Informations leçon #}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fa fa-info-circle text-primary mr-2"></i>
+                            Informations
+                        </h5>
+                        
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fa fa-sort text-muted"></i> Ordre actuel
+                            </div>
+                            <div class="info-value">
+                                <span class="badge badge-light text-primary border">{{ lecon.ordre }}</span>
+                            </div>
+                        </div>
+
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fa fa-clock text-muted"></i> Durée
+                            </div>
+                            <div class="info-value">
+                                {% if lecon.duree %}
+                                    {{ lecon.duree }} min
+                                {% else %}
+                                    <span class="text-muted">Non définie</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="info-item mb-0">
+                            <div class="info-label">
+                                <i class="fa fa-unlock text-muted"></i> Accès
+                            </div>
+                            <div class="info-value">
+                                {% if lecon.gratuit %}
+                                    <span class="badge badge-success">Gratuit</span>
+                                {% else %}
+                                    <span class="badge badge-warning">Payant</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Actions rapides #}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fa fa-bolt text-warning mr-2"></i>
+                            Actions rapides
+                        </h5>
+                        
+                        <div class="quick-actions">
+                            <a href="{{ path('lecon_show', {'formationId': formation.id, 'id': lecon.id}) }}" class="quick-action-item">
+                                <i class="fa fa-eye text-info"></i>
+                                <span>Voir la leçon</span>
+                            </a>
+                            <a href="{{ path('formation_show', {'id': formation.id}) }}" class="quick-action-item">
+                                <i class="fa fa-book text-primary"></i>
+                                <span>Voir la formation</span>
+                            </a>
+                            <a href="{{ path('lecon_index', {'formationId': formation.id}) }}" class="quick-action-item">
+                                <i class="fa fa-list text-success"></i>
+                                <span>Liste des leçons</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Form styling */
+.form-label {
+    font-weight: 600;
+    color: #1c2d41;
+    margin-bottom: 8px;
+}
+
+.form-control {
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    padding: 10px 15px;
+    transition: all .2s ease;
+}
+
+.form-control:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.15);
+}
+
+.form-control-lg {
+    padding: 12px 18px;
+    font-size: 1.1rem;
+}
+
+/* Custom switch */
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+/* Buttons */
+.btn-lg {
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all .2s ease;
+}
+
+.btn-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.card-title {
+    font-weight: 600;
+    color: #1c2d41;
+}
+
+/* Tips */
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tip-item:last-child {
+    border-bottom: none;
+}
+
+.tip-icon {
+    width: 30px;
+    flex-shrink: 0;
+}
+
+.tip-icon i {
+    font-size: 18px;
+}
+
+.tip-content {
+    flex: 1;
+}
+
+.tip-content strong {
+    display: block;
+    color: #1c2d41;
+    margin-bottom: 4px;
+}
+
+.tip-content code {
+    font-size: 12px;
+    color: #e83e8c;
+    background: #f8f9fa;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Info items */
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.info-label i {
+    width: 20px;
+    margin-right: 8px;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #1c2d41;
+}
+
+/* Quick actions */
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.quick-action-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all .2s ease;
+    text-decoration: none;
+    color: #495057;
+}
+
+.quick-action-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+    text-decoration: none;
+    color: #495057;
+}
+
+.quick-action-item i {
+    width: 30px;
+    font-size: 18px;
+    margin-right: 12px;
+}
+
+/* Form actions */
+.form-actions {
+    background: #f8f9fa;
+    margin: 0 -1.25rem -1.25rem;
+    padding: 1.25rem;
+    border-radius: 0 0 12px 12px;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+    .col-lg-4 {
+        margin-top: 1rem;
+    }
+}
+</style>
+
+{% endblock %}
