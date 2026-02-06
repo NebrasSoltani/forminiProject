@@ -1,0 +1,152 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commande {{ commande.reference }}{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-10 col-12 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <a href="{{ path('boutique_mes_commandes') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour à mes commandes
+                            </a>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <h4 class="card-title mb-1">Commande {{ commande.reference }}</h4>
+                                <p class="text-muted mb-0">
+                                    Passée le {{ commande.dateCommande|date('d/m/Y à H:i') }}
+                                </p>
+                            </div>
+                            <div>
+                                {% if commande.statut == 'en_attente' %}
+                                    <span class="badge bg-warning fs-6">En attente</span>
+                                {% elseif commande.statut == 'confirmee' %}
+                                    <span class="badge bg-info fs-6">Confirmée</span>
+                                {% elseif commande.statut == 'en_cours' %}
+                                    <span class="badge bg-primary fs-6">En cours</span>
+                                {% elseif commande.statut == 'livree' %}
+                                    <span class="badge bg-success fs-6">Livrée</span>
+                                {% elseif commande.statut == 'annulee' %}
+                                    <span class="badge bg-danger fs-6">Annulée</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-3">Détails de la commande</h5>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Produit</th>
+                                        <th>Prix unitaire</th>
+                                        <th>Quantité</th>
+                                        <th>Sous-total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in commande.items %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.produit.image %}
+                                                    <img src="{{ asset('uploads/produits/' ~ item.produit.image) }}" 
+                                                         alt="{{ item.produit.nom }}" 
+                                                         class="img-thumbnail me-3" 
+                                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="bg-light d-flex align-items-center justify-content-center me-3" 
+                                                         style="width: 60px; height: 60px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ item.nomProduit }}</strong><br>
+                                                    <small class="text-muted">{{ item.produit.categorie }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ item.prixUnitaire|number_format(2, ',', ' ') }} €</td>
+                                        <td>{{ item.quantite }}</td>
+                                        <td><strong>{{ item.getSousTotal()|number_format(2, ',', ' ') }} €</strong></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-active">
+                                        <td colspan="3" class="text-end"><strong>Total :</strong></td>
+                                        <td><strong class="text-primary fs-5">{{ commande.calculerTotal()|number_format(2, ',', ' ') }} €</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <hr>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Informations de livraison</h6>
+                                <address>
+                                    <strong>{{ app.user.nom }} {{ app.user.prenom }}</strong><br>
+                                    {{ app.user.email }}<br>
+                                    {% if app.user.telephone %}
+                                        Tel: {{ app.user.telephone }}<br>
+                                    {% endif %}
+                                </address>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Suivi de commande</h6>
+                                <div class="timeline">
+                                    <p class="mb-1">
+                                        <i class="fas fa-check-circle text-success"></i>
+                                        <strong>Commande passée</strong><br>
+                                        <small class="text-muted">{{ commande.dateCommande|date('d/m/Y à H:i') }}</small>
+                                    </p>
+                                    {% if commande.statut in ['confirmee', 'en_cours', 'livree'] %}
+                                        <p class="mb-1">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                            <strong>Commande confirmée</strong>
+                                        </p>
+                                    {% endif %}
+                                    {% if commande.statut in ['en_cours', 'livree'] %}
+                                        <p class="mb-1">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                            <strong>En cours de préparation</strong>
+                                        </p>
+                                    {% endif %}
+                                    {% if commande.statut == 'livree' %}
+                                        <p class="mb-1">
+                                            <i class="fas fa-check-circle text-success"></i>
+                                            <strong>Livrée</strong>
+                                        </p>
+                                    {% endif %}
+                                    {% if commande.statut == 'annulee' %}
+                                        <p class="mb-1">
+                                            <i class="fas fa-times-circle text-danger"></i>
+                                            <strong>Commande annulée</strong>
+                                        </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if commande.statut == 'en_attente' %}
+                            <div class="alert alert-info mt-4">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Information :</strong> Votre commande sera traitée sous 24-48h. Vous recevrez un email de confirmation.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
