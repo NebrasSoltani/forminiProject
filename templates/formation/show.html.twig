@@ -1,0 +1,197 @@
+{% extends 'base.html.twig' %}
+{% block title %}{{ formation.titre }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">
+                <i class="fa fa-book text-primary mr-2"></i>{{ formation.titre }}
+            </h3>
+            <span class="badge badge-light border 
+                {% if formation.statut == 'publiee' %}text-success
+                {% elseif formation.statut == 'brouillon' %}text-secondary
+                {% else %}text-warning{% endif %}">
+                <i class="fa fa-flag mr-1"></i>{{ formation.statut }}
+            </span>
+        </div>
+
+        <div class="card-body">
+
+            {% if formation.imageCouverture %}
+                <div class="mb-4 text-center">
+                    <img src="{{ asset('uploads/images/' ~ formation.imageCouverture) }}"
+                         class="img-fluid rounded shadow-sm"
+                         style="max-height:380px;">
+                </div>
+            {% endif %}
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-3">
+                                <i class="fa fa-info-circle mr-1"></i> Informations générales
+                            </h6>
+                            <ul class="list-unstyled mb-0">
+                                <li><strong>Catégorie :</strong> <span class="badge badge-light border">{{ formation.categorie }}</span></li>
+                                <li><strong>Niveau :</strong> <span class="badge badge-light border">{{ formation.niveau }}</span></li>
+                                <li><strong>Langue :</strong> {{ formation.langue }}</li>
+                                <li><strong>Format :</strong> {{ formation.format }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted mb-3">
+                                <i class="fa fa-coins mr-1"></i> Prix & Durée
+                            </h6>
+                            <ul class="list-unstyled mb-0">
+                                <li>
+                                    <strong>Accès :</strong>
+                                    {% if formation.typeAcces == 'gratuit' %}
+                                        <span class="badge badge-light text-success border">
+                                            <i class="fa fa-gift mr-1"></i> Gratuit
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-light text-primary border">
+                                            <i class="fa fa-credit-card mr-1"></i> Payant
+                                        </span>
+                                    {% endif %}
+                                </li>
+
+                                {% if formation.typeAcces == 'payant' %}
+                                    <li>
+                                        <strong>Prix :</strong>
+                                        {% if formation.prixPromo %}
+                                            <span class="text-muted text-decoration-line-through">{{ formation.prix }} TND</span>
+                                            <span class="text-danger font-weight-bold">{{ formation.prixPromo }} TND</span>
+                                        {% else %}
+                                            <span class="font-weight-bold">{{ formation.prix }} TND</span>
+                                        {% endif %}
+                                    </li>
+                                    <li><strong>Type achat :</strong> {{ formation.typeAchat }}</li>
+                                {% endif %}
+
+                                <li><strong>Durée :</strong> {{ formation.duree }} h</li>
+                                <li><strong>Leçons :</strong> {{ formation.nombreLecons }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="text-muted"><i class="fa fa-align-left mr-1"></i> Description courte</h6>
+                <p class="text-muted">{{ formation.descriptionCourte }}</p>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="text-muted"><i class="fa fa-file-alt mr-1"></i> Description détaillée</h6>
+                <p>{{ formation.descriptionDetaillee|nl2br }}</p>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="text-muted"><i class="fa fa-bullseye mr-1"></i> Objectifs pédagogiques</h6>
+                <p>{{ formation.objectifsPedagogiques|nl2br }}</p>
+            </div>
+
+            {% if formation.prerequis %}
+                <div class="mb-4">
+                    <h6 class="text-muted"><i class="fa fa-check mr-1"></i> Pré-requis</h6>
+                    <p>{{ formation.prerequis|nl2br }}</p>
+                </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <h6 class="text-muted"><i class="fa fa-list mr-1"></i> Programme</h6>
+                <pre class="bg-light p-3 rounded">{{ formation.programme }}</pre>
+            </div>
+
+            {% if formation.format in ['live','presentiel'] %}
+                <div class="mb-4">
+                    <h6 class="text-muted"><i class="fa fa-calendar mr-1"></i> Planning</h6>
+                    {% if formation.dateDebut %}
+                        <p><strong>Date début :</strong> {{ formation.dateDebut|date('d/m/Y H:i') }}</p>
+                    {% endif %}
+                    {% if formation.nombreSeances %}
+                        <p><strong>Séances :</strong> {{ formation.nombreSeances }}</p>
+                    {% endif %}
+                    {% if formation.planning %}
+                        <pre class="bg-light p-3 rounded">{{ formation.planning }}</pre>
+                    {% endif %}
+                    {% if formation.lienLive %}
+                        <p><strong>Lien :</strong>
+                            <a href="{{ formation.lienLive }}" target="_blank">{{ formation.lienLive }}</a>
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <h6 class="text-muted"><i class="fa fa-gift mr-1"></i> Bonus</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    {% set options = {
+                        'Certificat': formation.certificat,
+                        'Quiz': formation.quiz,
+                        'Fichiers': formation.fichiersTelechargeables,
+                        'Forum': formation.forum
+                    } %}
+                    {% for label,val in options %}
+                        <span class="badge badge-light border {{ val ? 'text-success' : 'text-secondary' }}">
+                            <i class="fa {{ val ? 'fa-check' : 'fa-times' }} mr-1"></i>{{ label }}
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="text-muted"><i class="fa fa-user mr-1"></i> Formateur</h6>
+                <strong>{{ formation.formateur.nom }} {{ formation.formateur.prenom }}</strong><br>
+                <span class="text-muted">{{ formation.formateur.email }}</span>
+            </div>
+
+            <div class="mb-4 text-muted">
+                <small>Créée le : {{ formation.dateCreation|date('d/m/Y H:i') }}</small><br>
+                {% if formation.datePublication %}
+                    <small>Publiée le : {{ formation.datePublication|date('d/m/Y H:i') }}</small>
+                {% endif %}
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ path('formation_index') }}" class="btn btn-light border">
+                    <i class="fa fa-arrow-left mr-1"></i> Retour
+                </a>
+
+                <a href="{{ path('lecon_index', {'formationId': formation.id}) }}"
+                   class="btn btn-light border">
+                    <i class="fa fa-book mr-1 text-primary"></i> Leçons
+                </a>
+
+                <a href="{{ path('quiz_index', {'formationId': formation.id}) }}"
+                   class="btn btn-light border">
+                    <i class="fa fa-tasks mr-1 text-success"></i> Quiz
+                </a>
+
+                <a href="{{ path('formation_edit', {'id': formation.id}) }}"
+                   class="btn btn-light border">
+                    <i class="fa fa-edit mr-1 text-warning"></i> Modifier
+                </a>
+
+                <form method="post" action="{{ path('formation_delete', {'id': formation.id}) }}"
+                      onsubmit="return confirm('Supprimer cette formation ?')" class="d-inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ formation.id) }}">
+                    <button class="btn btn-light border text-danger">
+                        <i class="fa fa-trash mr-1"></i> Supprimer
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

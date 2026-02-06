@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ quiz.titre }} - {{ formation.titre }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <h2>{{ quiz.titre }}</h2>
+                <p class="text-muted mb-0">Formation : {{ formation.titre }}</p>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if quiz.description %}
+                <div class="mb-4">
+                    <h5>📝 Description</h5>
+                    <p>{{ quiz.description }}</p>
+                </div>
+            {% endif %}
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>ℹ️ Informations</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Durée :</th>
+                            <td>⏱️ {{ quiz.duree }} minutes</td>
+                        </tr>
+                        <tr>
+                            <th>Note minimale :</th>
+                            <td>{{ quiz.noteMinimale }}%</td>
+                        </tr>
+                        <tr>
+                            <th>Nombre de questions :</th>
+                            <td>{{ quiz.questions|length }}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h5>⚙️ Paramètres</h5>
+                    <table class="table">
+                        <tr>
+                            <th>Mélanger les questions :</th>
+                            <td>{{ quiz.melanger ? '✅ Oui' : '❌ Non' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Afficher la correction :</th>
+                            <td>{{ quiz.afficherCorrection ? '✅ Oui' : '❌ Non' }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h5>📝 Questions ({{ quiz.questions|length }})</h5>
+                {% if quiz.questions is empty %}
+                    <div class="alert alert-warning">
+                        Aucune question dans ce quiz. 
+                        <a href="{{ path('question_index', {'formationId': formation.id, 'quizId': quiz.id}) }}">Ajouter des questions</a>
+                    </div>
+                {% else %}
+                    <div class="list-group">
+                        {% for question in quiz.questions %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">{{ question.ordre }}. {{ question.enonce }}</h6>
+                                    <small class="text-muted">
+                                        Type: {{ question.type }} | Points: {{ question.points }}
+                                    </small>
+                                    <div class="mt-2">
+                                        {% for reponse in question.reponses %}
+                                            <span class="badge {{ reponse.estCorrecte ? 'bg-success' : 'bg-secondary' }} me-1">
+                                                {{ reponse.estCorrecte ? '✓' : '✗' }} {{ reponse.texte }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="{{ path('quiz_index', {'formationId': formation.id}) }}" class="btn btn-secondary">← Retour aux quiz</a>
+                <a href="{{ path('question_index', {'formationId': formation.id, 'quizId': quiz.id}) }}" class="btn btn-success">📝 Gérer les questions</a>
+                <a href="{{ path('quiz_edit', {'formationId': formation.id, 'id': quiz.id}) }}" class="btn btn-warning">✏️ Modifier</a>
+                <form method="post" action="{{ path('quiz_delete', {'formationId': formation.id, 'id': quiz.id}) }}" style="display:inline">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ quiz.id) }}">
+                    <button class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce quiz ?')">
+                        🗑️ Supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
