@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formini | Formations certifiantes & Produits pédagogiques</title>
+
+  <style>
+    :root{
+      --navy:#153969;
+      --green:#00bf63;
+      --bg:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --card:#f6f8fb;
+      --border:#e6edf5;
+      --shadow: 0 10px 30px rgba(21, 57, 105, .10);
+      --radius: 18px;
+      --max: 1120px;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ margin:0; padding:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; color:var(--text); background:var(--bg); }
+    a{ color:inherit; text-decoration:none; }
+    img{ max-width:100%; display:block; }
+
+    .container{ width: min(var(--max), 92vw); margin: 0 auto; }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:.55rem;
+      padding:.9rem 1.1rem; border-radius:999px; border:1px solid transparent;
+      font-weight:700; cursor:pointer; transition:.2s ease;
+      user-select:none;
+    }
+    .btn-primary{ background:var(--green); color:#0b1b12; }
+    .btn-primary:hover{ filter: brightness(.95); transform: translateY(-1px); }
+    .btn-outline{ background:transparent; border-color: rgba(21,57,105,.25); color:var(--navy); }
+    .btn-outline:hover{ border-color: rgba(21,57,105,.45); transform: translateY(-1px); }
+
+    /* Top bar */
+    header{
+      position: sticky; top:0; z-index:50;
+      backdrop-filter: blur(10px);
+      background: rgba(255,255,255,.86);
+      border-bottom:1px solid var(--border);
+    }
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 14px 0;
+      gap: 18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:.7rem; font-weight:900; letter-spacing:.3px;
+      color:var(--navy);
+    }
+    .logo{
+      width:38px; height:38px; border-radius:14px;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(0,191,99,.35), transparent 55%),
+        linear-gradient(135deg, var(--navy), #0f2f57);
+      box-shadow: 0 10px 24px rgba(21,57,105,.18);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo:after{
+      content:"";
+      position:absolute; inset:-40%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+      transform: rotate(25deg);
+      animation: shine 4.2s ease-in-out infinite;
+    }
+    @keyframes shine{
+      0%, 75%{ transform: translateX(-40%) rotate(25deg); opacity:.0; }
+      85%{ opacity:.55; }
+      100%{ transform: translateX(40%) rotate(25deg); opacity:0; }
+    }
+    .menu{ display:flex; gap: 16px; align-items:center; }
+    .menu a{
+      font-weight:650; color: rgba(15,23,42,.78);
+      padding:10px 10px; border-radius: 12px;
+      transition:.2s;
+    }
+    .menu a:hover{ background: rgba(21,57,105,.06); color: var(--navy); }
+    .nav-actions{ display:flex; gap:10px; align-items:center; }
+
+    /* Hero */
+    .hero{
+      padding: 56px 0 22px;
+      background:
+        radial-gradient(1000px 420px at 20% 0%, rgba(0,191,99,.16), transparent 60%),
+        radial-gradient(900px 460px at 95% 10%, rgba(21,57,105,.16), transparent 55%);
+    }
+    .hero-grid{
+      display:grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 26px;
+      align-items: center;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:.55rem;
+      padding:.45rem .8rem; border-radius:999px;
+      background: rgba(21,57,105,.06);
+      border:1px solid rgba(21,57,105,.14);
+      color: var(--navy);
+      font-weight:700;
+      width:fit-content;
+    }
+    .pill .dot{ width:10px; height:10px; border-radius:50%; background:var(--green); box-shadow:0 0 0 5px rgba(0,191,99,.18); }
+    h1{
+      margin: 14px 0 10px;
+      font-size: clamp(2rem, 2.6vw + 1rem, 3.2rem);
+      line-height: 1.06;
+      letter-spacing: -.8px;
+      color: #0b1a2a;
+    }
+    .hero p{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height:1.65;
+    }
+    .hero-cta{ display:flex; gap:12px; flex-wrap:wrap; }
+    .stats{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 22px;
+    }
+    .stat{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius: var(--radius);
+      padding: 14px;
+      box-shadow: 0 8px 22px rgba(21,57,105,.06);
+    }
+    .stat b{ display:block; font-size:1.25rem; color: var(--navy); }
+    .stat span{ color: var(--muted); font-weight:650; font-size:.9rem; }
+
+    /* Hero card right */
+    .hero-card{
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, #ffffff, #f9fbff);
+      border-radius: calc(var(--radius) + 6px);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .hero-card:before{
+      content:"";
+      position:absolute;
+      width:260px; height:260px;
+      background: radial-gradient(circle, rgba(0,191,99,.20), transparent 60%);
+      top:-130px; right:-130px;
+    }
+    .mini-grid{
+      display:grid; grid-template-columns: 1fr 1fr; gap: 12px;
+      margin-top: 12px;
+    }
+    .mini{
+      border: 1px solid var(--border);
+      background:#fff;
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .mini .tag{
+      display:inline-block;
+      font-size:.78rem; font-weight:800;
+      padding:.3rem .55rem;
+      border-radius:999px;
+      background: rgba(0,191,99,.12);
+      color:#0b3a23;
+      border:1px solid rgba(0,191,99,.22);
+    }
+    .mini h4{ margin:10px 0 6px; color: var(--navy); }
+    .mini p{ margin:0; color: var(--muted); font-size:.92rem; line-height:1.4; }
+    .badge-row{
+      display:flex; gap:10px; flex-wrap:wrap; margin-top: 14px;
+    }
+    .badge{
+      display:inline-flex; align-items:center; gap:.5rem;
+      padding:.55rem .75rem;
+      border-radius: 999px;
+      border: 1px dashed rgba(21,57,105,.28);
+      background: rgba(21,57,105,.04);
+      color: rgba(15,23,42,.82);
+      font-weight:700;
+      font-size:.9rem;
+    }
+    .icon{
+      width:26px; height:26px;
+      border-radius:10px;
+      background: rgba(0,191,99,.14);
+      border: 1px solid rgba(0,191,99,.28);
+      display:inline-flex; align-items:center; justify-content:center;
+      color:#0b3a23;
+      font-weight:900;
+    }
+
+    /* Sections */
+    section{ padding: 46px 0; }
+    .section-head{
+      display:flex; align-items:flex-end; justify-content:space-between; gap: 16px;
+      margin-bottom: 18px;
+    }
+    .section-head h2{
+      margin:0;
+      font-size: clamp(1.5rem, 1.2vw + 1.1rem, 2.1rem);
+      color: #0b1a2a;
+      letter-spacing: -.4px;
+    }
+    .section-head p{ margin:0; color: var(--muted); max-width: 64ch; line-height:1.55; }
+
+    .grid-3{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card{
+      border:1px solid var(--border);
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 10px 22px rgba(21,57,105,.06);
+      transition:.2s;
+    }
+    .card:hover{ transform: translateY(-3px); box-shadow: 0 14px 34px rgba(21,57,105,.10); }
+    .card .top{
+      display:flex; align-items:center; justify-content:space-between; gap: 10px;
+      margin-bottom: 10px;
+    }
+    .chip{
+      display:inline-flex; align-items:center; gap:.45rem;
+      font-size:.82rem; font-weight:850;
+      padding:.35rem .6rem;
+      border-radius:999px;
+      border:1px solid rgba(21,57,105,.18);
+      background: rgba(21,57,105,.05);
+      color: var(--navy);
+    }
+    .price{
+      font-weight:900; color: var(--navy);
+    }
+    .card h3{ margin: 6px 0 8px; color:#0b1a2a; }
+    .card p{ margin:0 0 12px; color: var(--muted); line-height:1.5; }
+    .meta{
+      display:flex; flex-wrap:wrap; gap: 8px;
+      margin-bottom: 12px;
+    }
+    .meta span{
+      font-size:.86rem; font-weight:750;
+      padding:.35rem .55rem;
+      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: rgba(15,23,42,.78);
+    }
+    .card .actions{ display:flex; gap:10px; flex-wrap:wrap; }
+
+    /* Products */
+    .product{
+      background: linear-gradient(180deg, rgba(21,57,105,.04), transparent 60%);
+      border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);
+    }
+    .product-card{
+      display:flex; gap: 14px; align-items:stretch;
+    }
+    .thumb{
+      width: 92px; min-width: 92px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(0,191,99,.25), transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(21,57,105,.20), transparent 55%),
+        #fff;
+      box-shadow: 0 12px 22px rgba(21,57,105,.08);
+    }
+    .product-info{ flex:1; }
+    .product-info h3{ margin: 2px 0 6px; color:#0b1a2a; }
+    .product-info p{ margin: 0 0 10px; color: var(--muted); }
+
+    /* CTA */
+    .cta{
+      padding: 52px 0;
+    }
+    .cta-box{
+      border-radius: calc(var(--radius) + 10px);
+      padding: 28px;
+      border: 1px solid rgba(21,57,105,.18);
+      background:
+        radial-gradient(900px 300px at 10% 0%, rgba(0,191,99,.20), transparent 60%),
+        radial-gradient(900px 320px at 95% 60%, rgba(21,57,105,.16), transparent 55%),
+        #ffffff;
+      box-shadow: var(--shadow);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .cta-box h2{ margin:0; color:#0b1a2a; }
+    .cta-box p{ margin:8px 0 0; color: var(--muted); max-width: 62ch; }
+
+    /* Footer */
+    footer{
+      padding: 28px 0;
+      border-top: 1px solid var(--border);
+      background: #ffffff;
+    }
+    .foot{
+      display:grid; grid-template-columns: 1.2fr .8fr .8fr; gap: 18px;
+    }
+    .foot h4{ margin:0 0 10px; color: var(--navy); }
+    .foot a{ color: rgba(15,23,42,.72); font-weight:650; display:block; padding: 7px 0; }
+    .foot a:hover{ color: var(--navy); }
+    .copyright{
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: .92rem;
+      display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;
+    }
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .hero-grid{ grid-template-columns: 1fr; }
+      .grid-3{ grid-template-columns: 1fr; }
+      .stats{ grid-template-columns: 1fr; }
+      .foot{ grid-template-columns: 1fr; }
+      .menu{ display:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="#">
+        <span class="logo" aria-hidden="true"></span>
+        <span>Formini</span>
+      </a>
+
+      <nav class="menu" aria-label="Navigation">
+        <a href="#formations">Formations</a>
+        <a href="#certification">Certification</a>
+        <a href="#produits">Produits</a>
+        <a href="#avis">Avis</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="btn btn-outline" href="#">Se connecter</a>
+        <a class="btn btn-primary" href="#">Créer un compte</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="pill"><span class="dot"></span> Formations certifiantes • 100% en ligne</div>
+          <h1>Apprends vite, progresse mieux, et gagne un certificat avec <span style="color:var(--navy)">Formini</span>.</h1>
+          <p>
+            Des parcours clairs, des projets pratiques, des quiz, et une attestation/certificat à la fin.
+            En plus, on vend des <b>produits pédagogiques</b> (packs, templates, supports) pour t’aider à réussir.
+          </p>
+
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#formations">Découvrir les formations</a>
+            <a class="btn btn-outline" href="#produits">Voir les produits</a>
+          </div>
+
+          <div class="stats" aria-label="Statistiques">
+            <div class="stat"><b>+120</b><span>Modules & leçons</span></div>
+            <div class="stat"><b>Certifié</b><span>Attestation à la fin</span></div>
+            <div class="stat"><b>Support</b><span>Communauté & Q/R</span></div>
+          </div>
+        </div>
+
+        <aside class="hero-card" aria-label="Aperçu">
+          <div class="badge-row">
+            <span class="badge"><span class="icon">✓</span> Certificat vérifiable</span>
+            <span class="badge"><span class="icon">⚡</span> Apprentissage rapide</span>
+            <span class="badge"><span class="icon">🎯</span> Projets pratiques</span>
+          </div>
+
+          <div class="mini-grid">
+            <div class="mini">
+              <span class="tag">Nouveau</span>
+              <h4>Web Dev Starter</h4>
+              <p>HTML • CSS • JS + mini-projet + certificat.</p>
+            </div>
+            <div class="mini">
+              <span class="tag">Top</span>
+              <h4>Marketing Digital</h4>
+              <p>Ads • contenu • analytics + étude de cas.</p>
+            </div>
+            <div class="mini">
+              <span class="tag">Pro</span>
+              <h4>Symfony Essentials</h4>
+              <p>Routing • Twig • CRUD • Auth + projet.</p>
+            </div>
+            <div class="mini">
+              <span class="tag">Pack</span>
+              <h4>Templates & PDF</h4>
+              <p>Supports, fiches, checklists & modèles.</p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- FORMATIONS -->
+    <section id="formations">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Formations certifiantes</h2>
+            <p>Choisis un parcours, avance à ton rythme, valide tes acquis, puis télécharge ton certificat.</p>
+          </div>
+          <a class="btn btn-outline" href="#">Voir tout</a>
+        </div>
+
+        <div class="grid-3">
+          <article class="card">
+            <div class="top">
+              <span class="chip">Débutant</span>
+              <span class="price">149 DT</span>
+            </div>
+            <h3>Web Development Starter</h3>
+            <p>Les bases solides pour créer des sites modernes + mini-projet final.</p>
+            <div class="meta">
+              <span>⏱ 18h</span><span>📚 42 leçons</span><span>🧪 6 quiz</span><span>🎓 Certificat</span>
+            </div>
+            <div class="actions">
+              <a class="btn btn-primary" href="#">S’inscrire</a>
+              <a class="btn btn-outline" href="#">Détails</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="top">
+              <span class="chip">Intermédiaire</span>
+              <span class="price">199 DT</span>
+            </div>
+            <h3>Marketing Digital & Ads</h3>
+            <p>Stratégie, ciblage, créatives, pixel/analytics, optimisation & reporting.</p>
+            <div class="meta">
+              <span>⏱ 14h</span><span>📚 30 leçons</span><span>🧪 5 quiz</span><span>📈 Projet</span>
+            </div>
+            <div class="actions">
+              <a class="btn btn-primary" href="#">S’inscrire</a>
+              <a class="btn btn-outline" href="#">Détails</a>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="top">
+              <span class="chip">Avancé</span>
+              <span class="price">249 DT</span>
+            </div>
+            <h3>Symfony Full CRUD</h3>
+            <p>CRUD propre, relations, upload, auth/roles, pagination, dashboards.</p>
+            <div class="meta">
+              <span>⏱ 22h</span><span>📚 55 leçons</span><span>🧪 8 quiz</span><span>🎓 Certificat</span>
+            </div>
+            <div class="actions">
+              <a class="btn btn-primary" href="#">S’inscrire</a>
+              <a class="btn btn-outline" href="#">Détails</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- CERTIFICATION -->
+    <section id="certification">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Certification simple et claire</h2>
+            <p>Ton certificat devient disponible après la validation du quiz final + le projet (si موجود).</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="top">
+              <span class="chip">Étape 1</span>
+              <span class="icon" aria-hidden="true">1</span>
+            </div>
+            <h3>Suivre le parcours</h3>
+            <p>Leçons courtes, exercices, et ressources téléchargeables.</p>
+          </div>
+
+          <div class="card">
+            <div class="top">
+              <span class="chip">Étape 2</span>
+              <span class="icon" aria-hidden="true">2</span>
+            </div>
+            <h3>Valider les quiz</h3>
+            <p>QCM + corrections pour comprendre tes erreurs.</p>
+          </div>
+
+          <div class="card">
+            <div class="top">
+              <span class="chip">Étape 3</span>
+              <span class="icon" aria-hidden="true">3</span>
+            </div>
+            <h3>Télécharger le certificat</h3>
+            <p>PDF propre + ID vérifiable (ex: FORM-2026-XXXX).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section id="produits" class="product">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Produits pédagogiques</h2>
+            <p>Packs de supports, templates, fiches, exercices… pour avancer plus vite.</p>
+          </div>
+          <a class="btn btn-outline" href="#">Boutique</a>
+        </div>
+
+        <div class="grid-3">
+          <article class="card product-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="product-info">
+              <div class="top">
+                <span class="chip">Pack</span>
+                <span class="price">39 DT</span>
+              </div>
+              <h3>Pack “CV + Portfolio”</h3>
+              <p>Templates + checklist + exemples prêts à modifier.</p>
+              <div class="actions">
+                <a class="btn btn-primary" href="#">Acheter</a>
+                <a class="btn btn-outline" href="#">Détails</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card product-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="product-info">
+              <div class="top">
+                <span class="chip">PDF</span>
+                <span class="price">25 DT</span>
+              </div>
+              <h3>Guide “Ads Meta”</h3>
+              <p>Structure campagne, ciblage, créatives, optimisation.</p>
+              <div class="actions">
+                <a class="btn btn-primary" href="#">Acheter</a>
+                <a class="btn btn-outline" href="#">Détails</a>
+              </div>
+            </div>
+          </article>
+
+          <article class="card product-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="product-info">
+              <div class="top">
+                <span class="chip">Templates</span>
+                <span class="price">49 DT</span>
+              </div>
+              <h3>Dashboard UI Kit</h3>
+              <p>Composants UI (cards, tables, stats) pour tes projets.</p>
+              <div class="actions">
+                <a class="btn btn-primary" href="#">Acheter</a>
+                <a class="btn btn-outline" href="#">Détails</a>
+              </div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONIALS -->
+    <section id="avis">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <h2>Avis des apprenants</h2>
+            <p>Des retours simples sur l’expérience, le contenu, et la certification.</p>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="top">
+              <span class="chip">★★★★★</span>
+              <span class="icon" aria-hidden="true">💬</span>
+            </div>
+            <h3>“Très clair et pratique”</h3>
+            <p>Les leçons sont courtes, et le projet final m’a vraiment aidé.</p>
+            <p style="margin-top:10px; font-weight:800; color:var(--navy)">— Yassine</p>
+          </div>
+
+          <div class="card">
+            <div class="top">
+              <span class="chip">★★★★★</span>
+              <span class="icon" aria-hidden="true">💬</span>
+            </div>
+            <h3>“Le pack PDF est top”</h3>
+            <p>Checklists جاهزة، وخدمت بيهم في أول campagne.</p>
+            <p style="margin-top:10px; font-weight:800; color:var(--navy)">— Mariem</p>
+          </div>
+
+          <div class="card">
+            <div class="top">
+              <span class="chip">★★★★☆</span>
+              <span class="icon" aria-hidden="true">💬</span>
+            </div>
+            <h3>“Certification محترمة”</h3>
+            <p>النظام واضح: quiz + projet → certificate، وخلاص.</p>
+            <p style="margin-top:10px; font-weight:800; color:var(--navy)">— Ahmed</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="contact">
+      <div class="container">
+        <div class="cta-box">
+          <div>
+            <h2>جاهز تبدأ مع Formini؟</h2>
+            <p>اصنع حساب، اختار formation، وابدأ اليوم. إذا تحب نزيدولك design متاع صفحة “Catalogue” و “Page Formation”.</p>
+          </div>
+          <div style="display:flex; gap:12px; flex-wrap:wrap;">
+            <a class="btn btn-primary" href="#">Créer un compte</a>
+            <a class="btn btn-outline" href="#">Nous contacter</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container foot">
+      <div>
+        <div class="brand" style="margin-bottom:10px;">
+          <span class="logo" aria-hidden="true"></span>
+          <span>Formini</span>
+        </div>
+        <p style="margin:0; color:var(--muted); line-height:1.6;">
+          Formations certifiantes + produits pédagogiques pour apprendre plus vite et construire un vrai projet.
+        </p>
+      </div>
+
+      <div>
+        <h4>Liens</h4>
+        <a href="#formations">Formations</a>
+        <a href="#certification">Certification</a>
+        <a href="#produits">Produits</a>
+        <a href="#avis">Avis</a>
+      </div>
+
+      <div>
+        <h4>Support</h4>
+        <a href="#">FAQ</a>
+        <a href="#">Politique de confidentialité</a>
+        <a href="#">Conditions</a>
+        <a href="#">Email: support@formini.tn</a>
+      </div>
+    </div>
+
+    <div class="container copyright">
+      <span>© <span id="year"></span> Formini. Tous droits réservés.</span>
+      <span style="color:rgba(15,23,42,.65)">Couleurs: #153969 • #00bf63</span>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
