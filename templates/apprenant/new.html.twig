@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un Apprenant{% endblock %}
+
+{% block body %}
+<h1>Ajouter un Apprenant</h1>
+
+{{ form_start(form) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.password) }}
+    {{ form_row(form.nom) }}
+    {{ form_row(form.niveau) }}
+    
+    <h5>Centres d'intérêt</h5>
+    {{ form_row(form.centresInteret) }}
+
+    <button class="btn btn-success mt-3">Créer</button>
+{{ form_end(form) }}
+
+<a href="{{ path('apprenant_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
+{% endblock %}
