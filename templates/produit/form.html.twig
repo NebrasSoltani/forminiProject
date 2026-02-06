@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ produit.id ? 'Modifier' : 'Nouveau' }} Produit{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8 col-12 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            {{ produit.id ? 'Modifier le produit' : 'Nouveau produit' }}
+                        </h4>
+                        
+                        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.nom, 'Nom du produit') }}
+                                    {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.nom) }}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.categorie, 'Catégorie') }}
+                                    {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                                    {{ form_errors(form.categorie) }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.description, 'Description') }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form_label(form.prix, 'Prix (€)') }}
+                                    {{ form_widget(form.prix, {'attr': {'class': 'form-control', 'step': '0.01'}}) }}
+                                    {{ form_errors(form.prix) }}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form_label(form.stock, 'Stock disponible') }}
+                                    {{ form_widget(form.stock, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.stock) }}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form_label(form.statut, 'Statut') }}
+                                    {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
+                                    {{ form_errors(form.statut) }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.imageFile, 'Image du produit') }}
+                            {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.imageFile) }}
+                            
+                            {% if produit.image %}
+                                <div class="mt-2">
+                                    <p class="text-muted mb-1">Image actuelle :</p>
+                                    <img src="{{ asset('uploads/produits/' ~ produit.image) }}" 
+                                         alt="{{ produit.nom }}" 
+                                         class="img-thumbnail" 
+                                         style="max-width: 200px;">
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('produit_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ produit.id ? 'Mettre à jour' : 'Créer' }}
+                            </button>
+                        </div>
+                        
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
