@@ -1,0 +1,262 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}register{% endblock %}
+
+{% block body %}
+
+<br><br><br>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center">Inscription</h2>
+                </div>
+                <div class="card-body">
+                    {{ form_start(registrationForm) }}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.nom, 'Nom') }}
+                                {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.nom) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.prenom, 'Prénom') }}
+                                {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.prenom) }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.email, 'Email') }}
+                                {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.email) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.telephone, 'Numéro de téléphone') }}
+                                {{ form_widget(registrationForm.telephone, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.telephone) }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.governorat, 'Gouvernorat') }}
+                                {{ form_widget(registrationForm.governorat, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.governorat) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.dateNaissance, 'Date de naissance') }}
+                                {{ form_widget(registrationForm.dateNaissance, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.dateNaissance) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.profession, 'Profession') }}
+                            {{ form_widget(registrationForm.profession, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.profession) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.photo, 'Photo de profil') }}
+                            {{ form_widget(registrationForm.photo, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.photo) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.roleUtilisateur, 'Rôle dans la plateforme') }}
+                            {{ form_widget(registrationForm.roleUtilisateur, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(registrationForm.roleUtilisateur) }}
+                        </div>
+
+                        {# Champs spécifiques pour Formateur #}
+                        <div id="formateur-fields" style="display:none;">
+                            <h5 class="mt-4 mb-3 text-primary">Informations Formateur</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.specialite) }}
+                                    {{ form_widget(registrationForm.specialite) }}
+                                    {{ form_errors(registrationForm.specialite) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.experienceAnnees) }}
+                                    {{ form_widget(registrationForm.experienceAnnees) }}
+                                    {{ form_errors(registrationForm.experienceAnnees) }}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(registrationForm.bio) }}
+                                {{ form_widget(registrationForm.bio) }}
+                                {{ form_errors(registrationForm.bio) }}
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.linkedin) }}
+                                    {{ form_widget(registrationForm.linkedin) }}
+                                    {{ form_errors(registrationForm.linkedin) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.portfolio) }}
+                                    {{ form_widget(registrationForm.portfolio) }}
+                                    {{ form_errors(registrationForm.portfolio) }}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(registrationForm.cv) }}
+                                {{ form_widget(registrationForm.cv) }}
+                                {{ form_errors(registrationForm.cv) }}
+                            </div>
+                        </div>
+
+                        {# Champs spécifiques pour Apprenant #}
+                        <div id="apprenant-fields" style="display:none;">
+                            <h5 class="mt-4 mb-3 text-success">Informations Apprenant</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.genre) }}
+                                    {{ form_widget(registrationForm.genre) }}
+                                    {{ form_errors(registrationForm.genre) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.etatCivil) }}
+                                    {{ form_widget(registrationForm.etatCivil) }}
+                                    {{ form_errors(registrationForm.etatCivil) }}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(registrationForm.objectif) }}
+                                {{ form_widget(registrationForm.objectif) }}
+                                {{ form_errors(registrationForm.objectif) }}
+                            </div>
+                        </div>
+
+                        {# Champs spécifiques pour Société #}
+                        <div id="societe-fields" style="display:none;">
+                            <h5 class="mt-4 mb-3 text-info">Informations Société</h5>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.nomSociete) }}
+                                    {{ form_widget(registrationForm.nomSociete) }}
+                                    {{ form_errors(registrationForm.nomSociete) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.secteur) }}
+                                    {{ form_widget(registrationForm.secteur) }}
+                                    {{ form_errors(registrationForm.secteur) }}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(registrationForm.descriptionSociete) }}
+                                {{ form_widget(registrationForm.descriptionSociete) }}
+                                {{ form_errors(registrationForm.descriptionSociete) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(registrationForm.adresse) }}
+                                {{ form_widget(registrationForm.adresse) }}
+                                {{ form_errors(registrationForm.adresse) }}
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.siteWeb) }}
+                                    {{ form_widget(registrationForm.siteWeb) }}
+                                    {{ form_errors(registrationForm.siteWeb) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(registrationForm.logo) }}
+                                    {{ form_widget(registrationForm.logo) }}
+                                    {{ form_errors(registrationForm.logo) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.plainPassword.first, 'Mot de passe') }}
+                                {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.plainPassword.first) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.plainPassword.second, 'Confirmer mot de passe') }}
+                                {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.plainPassword.second) }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">S'inscrire</button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <p>Vous avez déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></p>
+                        </div>
+                    {{ form_end(registrationForm) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Trouver le select par son attribut name (Symfony génère automatiquement l'ID)
+    const roleSelect = document.querySelector('select[name*="roleUtilisateur"]');
+    const formateurFields = document.getElementById('formateur-fields');
+    const apprenantFields = document.getElementById('apprenant-fields');
+    const societeFields = document.getElementById('societe-fields');
+    
+    if (!roleSelect) {
+        console.error('Le select roleUtilisateur n\'a pas été trouvé');
+        console.log('Tous les selects:', document.querySelectorAll('select'));
+        return;
+    }
+    
+    console.log('Select trouvé:', roleSelect);
+    
+    function showRoleFields() {
+        const selectedRole = roleSelect.value;
+        console.log('Rôle sélectionné:', selectedRole);
+        
+        // Cacher tous les champs spécifiques
+        if (formateurFields) {
+            formateurFields.style.display = 'none';
+            console.log('Formateur fields caché');
+        }
+        if (apprenantFields) {
+            apprenantFields.style.display = 'none';
+            console.log('Apprenant fields caché');
+        }
+        if (societeFields) {
+            societeFields.style.display = 'none';
+            console.log('Societe fields caché');
+        }
+        
+        // Afficher les champs correspondants au rôle sélectionné
+        if (selectedRole === 'formateur' && formateurFields) {
+            formateurFields.style.display = 'block';
+            console.log('Affichage des champs formateur');
+        } else if (selectedRole === 'apprenant' && apprenantFields) {
+            apprenantFields.style.display = 'block';
+            console.log('Affichage des champs apprenant');
+        } else if (selectedRole === 'societe' && societeFields) {
+            societeFields.style.display = 'block';
+            console.log('Affichage des champs société');
+        }
+    }
+    
+    // Écouter le changement de rôle
+    roleSelect.addEventListener('change', function() {
+        console.log('Changement détecté');
+        showRoleFields();
+    });
+    
+    // Afficher les champs si un rôle est déjà sélectionné (en cas d'erreurs de validation)
+    if (roleSelect.value) {
+        console.log('Rôle déjà sélectionné au chargement:', roleSelect.value);
+        showRoleFields();
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <title>Formini.tn - Plateforme de Formation Certifiante en Ligne</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <!-- Additional CSS Files -->
+    <link rel="stylesheet" href="asset/css/fontawesome.css">
+    <link rel="stylesheet" href="asset/css/templatemo-onix-digital.css">
+    <link rel="stylesheet" href="asset/css/animated.css">
+    <link rel="stylesheet" href="asset/css/owl.css">
+    <link rel="icon" href="asset/images/favicon.png" type="image/png">
+<!--
+
+TemplateMo 565 Onix Digital
+
+https://templatemo.com/tm-565-onix-digital
+
+-->
+  </head>
+
+<body>
+
+  <!-- ***** Preloader Start ***** -->
+  <div id="js-preloader" class="js-preloader">
+    <div class="preloader-inner">
+      <span class="dot"></span>
+      <div class="dots">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </div>
+  <!-- ***** Preloader End ***** -->
+
+  <!-- ***** Header Area Start ***** -->
+  <header class="header-area header-sticky wow slideInDown" data-wow-duration="0.75s" data-wow-delay="0s">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <nav class="main-nav">
+            <!-- ***** Logo Start ***** -->
+            <a href="{{ path('accueil') }}" class="logo">
+              <img src="asset/images/logo.png" style="width: 200px;height: 75px;">
+            </a>
+            <!-- ***** Logo End ***** -->
+            <!-- ***** Menu Start ***** -->
+            <ul class="nav">
+              <li class="scroll-to-section"><a href="#top" class="active">Accueil</a></li>
+              <li class="scroll-to-section"><a href="#services">Formations</a></li>
+              <li class="scroll-to-section"><a href="#about">À Propos</a></li>
+              <li class="scroll-to-section"><a href="#portfolio">Réussites</a></li>
+              <li class="scroll-to-section"><a href="#video">Nos Programmes</a></li> 
+              <li class="scroll-to-section"><a href="#contact">Contact</a></li> 
+              {% if app.user %}
+                <li class="scroll-to-section dropdown">
+                  <a href="#" class="dropdown-toggle d-flex align-items-center gap-2 text-decoration-none text-dark" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if app.user.photo %}
+                      <img src="{{ asset('uploads/photos/' ~ app.user.photo) }}" alt="{{ app.user.nom }}" class="rounded-circle border border-2 border-primary" style="width: 40px; height: 40px; object-fit: cover;">
+                    {% else %}
+                      <img src="{{ asset('assets/images/users/profile-pic.jpg') }}" alt="{{ app.user.nom }}" class="rounded-circle border border-2 border-primary" style="width: 40px; height: 40px; object-fit: cover;">
+                    {% endif %}
+                    <span class="fw-semibold text-dark">{{ app.user.prenom }} {{ app.user.nom }}</span>
+                    <i class="fa fa-chevron-down text-dark" style="font-size: 12px;"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 py-2" aria-labelledby="userDropdown" style="min-width: 220px; border-radius: 10px;">
+                    <li>
+                      <a class="dropdown-item d-flex align-items-center py-2 px-3 text-dark" href="{% if app.user.roleUtilisateur == 'apprenant' %}{{ path('apprenant_dashboard') }}{% elseif app.user.roleUtilisateur == 'formateur' %}{{ path('formateur_dashboard') }}{% elseif app.user.roleUtilisateur == 'admin' %}{{ path('admin_dashboard') }}{% else %}{{ path('societe_dashboard') }}{% endif %}">
+                        <i class="fa fa-tachometer me-2 text-primary"></i>
+                        <span class="text-dark">Mon Dashboard</span>
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider my-1"></li>
+                    <li>
+                      <a class="dropdown-item d-flex align-items-center py-2 px-3 text-dark" href="{{ path('app_profile_edit') }}">
+                       <i class="fa fa-pencil me-2 text-primary"></i> 
+                        <span class="text-dark">Modifier le profil</span>
+                      </a>
+                    </li>
+                    <li><hr class="dropdown-divider my-1"></li>
+                    <li>
+                      <a class="dropdown-item d-flex align-items-center py-2 px-3 text-dark" href="{{ path('app_logout') }}">
+                        <i class="fa fa-sign-out me-2 text-danger"></i>
+                        <span class="text-dark">Se déconnecter</span>
+                      </a>
+                    </li>
+                  </ul>
+                </li>
+              {% else %}
+                <li class="scroll-to-section">
+                  <div class="main-red-button-hover">
+                    <a href="{{ path('app_register') }}">Rejoindre Formini</a>
+                  </div>
+                </li>
+              {% endif %}
+            </ul>        
+            <a class='menu-trigger'>
+                <span>Menu</span>
+            </a>
+            <!-- ***** Menu End ***** -->
+          </nav>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- ***** Header Area End ***** -->
+
+  <div class="main-banner" id="top">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="row">
+            <div class="col-lg-6 align-self-center">
+              <div class="owl-carousel owl-banner">
+                <div class="item header-text">
+                  <h6>Bienvenue sur Formini.tn</h6>
+                  <h2>Formations <em>certifiantes</em> avec des <span>experts</span></h2>
+                  <p>Développez vos compétences avec des formateurs expérimentés et obtenez des certifications reconnues sur le marché tunisien.</p>
+                  <div class="down-buttons">
+                    <div class="main-blue-button-hover">
+                      <a href="#contact">Contactez-nous</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="item header-text">
+                  <h6>Formateurs Experts</h6>
+                  <h2>Apprenez avec les <em>meilleurs</em> dans leurs <span>domaines</span></h2>
+                  <p>Nos formateurs sont des professionnels certifiés avec plusieurs années d'expérience dans l'industrie.</p>
+                  <div class="down-buttons">
+                    <div class="main-blue-button-hover">
+                      <a href="#services">Nos Formations</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="item header-text">
+                  <h6>Accompagnement Post-Formation</h6>
+                  <h2>Trouvez un <em>stage</em> ou un <span>emploi</span> facilement</h2>
+                  <p>Après votre formation, nous vous aidons à postuler aux offres d'emploi et de stage publiées par nos partenaires.</p>
+                  <div class="down-buttons">
+                    <div class="main-blue-button-hover">
+                      <a href="#video">En Savoir Plus</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="services" class="our-services section">
+    <div class="services-right-dec">
+      <img src="asset/images/services-right-dec.png" alt="">
+    </div>
+    <div class="container">
+      <div class="services-left-dec">
+        <img src="asset/images/services-left-dec.png" alt="">
+      </div>
+      <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+          <div class="section-heading">
+            <h2>Nos <em>Formations</em> Certifiantes pour <span>Votre Carrière</span></h2>
+            <span>Nos Formations</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="owl-carousel owl-services">
+            <div class="item">
+              <h4>Développement Web Full Stack</h4>
+              <div class="icon"><i class="fa fa-code" style="font-size: 60px; color: #6974e8;"></i></div>
+              <p>Formation complète en développement web avec certification</p>
+            </div>
+            <div class="item">
+              <h4>Data Science & Intelligence Artificielle</h4>
+              <div class="icon"><i class="fa fa-database" style="font-size: 60px; color: #8f94f6;"></i></div>
+              <p>Maîtrisez les outils d'analyse de données et l'IA</p>
+            </div>
+            <div class="item">
+              <h4>Design UI/UX & Motion Design</h4>
+              <div class="icon"><i class="fa fa-paint-brush" style="font-size: 60px; color: #b3b2fb;"></i></div>
+              <p>Créez des expériences utilisateur exceptionnelles</p>
+            </div>
+            <div class="item">
+              <h4>Marketing Digital & SEO</h4>
+              <div class="icon"><i class="fa fa-bullhorn" style="font-size: 60px; color: #cdc7ff;"></i></div>
+              <p>Devenez expert en marketing numérique</p>
+            </div>
+            <div class="item">
+              <h4>Gestion de Projet Agile & Scrum</h4>
+              <div class="icon"><i class="fa fa-tasks" style="font-size: 60px; color: #6974e8;"></i></div>
+              <p>Obtenez vos certifications Scrum Master</p>
+            </div>
+            <div class="item">
+              <h4>Cybersécurité & Ethical Hacking</h4>
+              <div class="icon"><i class="fa fa-shield" style="font-size: 60px; color: #8f94f6;"></i></div>
+              <p>Protégez les systèmes et les données</p>
+            </div>
+            <div class="item">
+              <h4>Cloud Computing (AWS, Azure)</h4>
+              <div class="icon"><i class="fa fa-cloud" style="font-size: 60px; color: #b3b2fb;"></i></div>
+              <p>Certifications cloud reconnues mondialement</p>
+            </div>
+            <div class="item">
+              <h4>Développement Mobile (iOS & Android)</h4>
+              <div class="icon"><i class="fa fa-mobile" style="font-size: 60px; color: #cdc7ff;"></i></div>
+              <p>Créez des applications mobiles performantes</p>
+            </div>
+            <div class="item">
+              <h4>DevOps & Automatisation</h4>
+              <div class="icon"><i class="fa fa-cogs" style="font-size: 60px; color: #6974e8;"></i></div>
+              <p>Intégration et déploiement continus</p>
+            </div>
+            <div class="item">
+              <h4>Business Intelligence & Analytics</h4>
+              <div class="icon"><i class="fa fa-line-chart" style="font-size: 60px; color: #8f94f6;"></i></div>
+              <p>Transformez les données en décisions</p>
+            </div>
+            <div class="item">
+              <h4>Blockchain & Cryptomonnaies</h4>
+              <div class="icon"><i class="fa fa-bitcoin" style="font-size: 60px; color: #b3b2fb;"></i></div>
+              <p>Maîtrisez la technologie blockchain</p>
+            </div>
+            <div class="item">
+              <h4>E-Commerce & Dropshipping</h4>
+              <div class="icon"><i class="fa fa-shopping-cart" style="font-size: 60px; color: #cdc7ff;"></i></div>
+              <p>Lancez votre business en ligne</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="about" class="about-us section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 align-self-center">
+          <div class="left-image">
+            <img src="asset/images/about-left-image.png" alt="Two Girls working together">
+          </div>
+        </div>
+        <div class="col-lg-6">
+          <div class="section-heading">
+            <h2>Développez vos <em>compétences</em> avec des <span>formateurs experts</span></h2>
+            <p>Chez Formini.tn, nous collaborons avec les meilleurs formateurs tunisiens et internationaux pour vous offrir des formations de qualité supérieure. Nos programmes sont conçus pour répondre aux besoins du marché de l'emploi actuel.</p>
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="fact-item">
+                  <div class="count-area-content">
+                    <div class="icon">
+                      <i class="fa fa-graduation-cap" style="font-size: 50px; color: #6974e8;"></i>
+                    </div>
+                    <div class="count-digit">150+</div>
+                    <div class="count-title">Formations Disponibles</div>
+                    <p>Formations certifiantes dans tous les domaines</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="fact-item">
+                  <div class="count-area-content">
+                    <div class="icon">
+                      <i class="fa fa-users" style="font-size: 50px; color: #8f94f6;"></i>
+                    </div>
+                    <div class="count-digit">5000+</div>
+                    <div class="count-title">Apprenants Formés</div>
+                    <p>Professionnels formés et certifiés</p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="fact-item">
+                  <div class="count-area-content">
+                    <div class="icon">
+                      <i class="fa fa-briefcase" style="font-size: 50px; color: #b3b2fb;"></i>
+                    </div>
+                    <div class="count-digit">85%</div>
+                    <div class="count-title">Taux d'Insertion</div>
+                    <p>Nos diplômés trouvent rapidement un emploi</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="portfolio" class="our-portfolio section">
+    <div class="portfolio-left-dec">
+      <img src="asset/images/portfolio-left-dec.png" alt="">
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+          <div class="section-heading">
+            <h2>Nos <em>Formateurs</em> <span>Experts</span></h2>
+            <span style="color: black;">Une équipe qualifiée et expérimentée</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="owl-carousel owl-portfolio">
+            {% if formateurs is defined and formateurs|length > 0 %}
+              {% for formateur in formateurs %}
+                <div class="item">
+                  <div class="thumb">
+                    {% if formateur.photo %}
+                      <img src="{{ asset('uploads/photos/' ~ formateur.photo) }}" alt="{{ formateur.prenom ~ ' ' ~ formateur.nom }}" style="width: 100%; height: 500px; object-fit: cover;">
+                    {% else %}
+                      <img src="{{ asset('assets/images/users/profile-pic.jpg') }}" alt="{{ formateur.prenom ~ ' ' ~ formateur.nom }}" style="width: 100%; height: 500px; object-fit: cover;">
+                    {% endif %}
+                    <div class="hover-effect">
+                      <div class="inner-content">
+                        <a href="#"><h4>{{ formateur.prenom }} {{ formateur.nom }}</h4></a>
+                        <span>
+                          {% if formateur.formateur and formateur.formateur.specialite %}
+                            {{ formateur.formateur.specialite }}
+                          {% else %}
+                            {{ formateur.profession }}
+                          {% endif %}
+                        </span>
+                        {% if formateur.formateur and formateur.formateur.experienceAnnees %}
+                          <p style="margin-top: 10px; font-size: 14px;">
+                            <i class="fa fa-briefcase"></i> {{ formateur.formateur.experienceAnnees }} ans d'expérience
+                          </p>
+                        {% endif %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <div class="item">
+                <div class="thumb">
+                  <img src="asset/images/portfolio-01.jpg" alt="">
+                  <div class="hover-effect">
+                    <div class="inner-content">
+                      <a href="#"><h4>Aucun formateur</h4></a>
+                      <span>Inscrivez-vous comme formateur</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+            
+
+
+  <div id="pricing" class="pricing-tables">
+    <div class="tables-left-dec">
+      <img src="asset/images/tables-left-dec.png" alt="">
+    </div>
+    <div class="tables-right-dec">
+      <img src="asset/images/tables-right-dec.png" alt="">
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+          <div class="section-heading">
+            <h2>Choisissez votre <em>pack</em> de formation <span>certifiante</span></h2>
+            <span>Nos Packs</span>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-lg-4">
+          <div class="item first-item">
+            <h4>Pack Débutant</h4>
+            <em>1200 TND</em>
+            <span>999 TND</span>
+            <ul>
+              <li>1 Formation au choix</li>
+              <li>Certification officielle</li>
+              <li>Accès à vie aux ressources</li>
+              <li>Support formateur 3 mois</li>
+              <li>Aide à la recherche de stage</li>
+            </ul>
+            <div class="main-blue-button-hover">
+              <a href="#">Commencer</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="item second-item">
+            <h4>Pack Professionnel</h4>
+            <em>3000 TND</em>
+            <span>2500 TND</span>
+            <ul>
+              <li>3 Formations au choix</li>
+              <li>Certifications officielles</li>
+              <li>Accès à vie + mises à jour</li>
+              <li>Support formateur 6 mois</li>
+              <li>Accompagnement emploi garanti</li>
+            </ul>
+            <div class="main-blue-button-hover">
+              <a href="#">S'inscrire</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="item third-item">
+            <h4>Pack Expert</h4>
+            <em>5500 TND</em>
+            <span>4500 TND</span>
+            <ul>
+              <li>5 Formations + bonus</li>
+              <li>Certifications internationales</li>
+              <li>Mentorat personnalisé 1 an</li>
+              <li>Réseau entreprises partenaires</li>
+              <li>Placement en CDI garanti</li>
+            </ul>
+            <div class="main-blue-button-hover">
+              <a href="#">Réserver</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="subscribe" class="subscribe">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="inner-content">
+            <div class="row">
+              <div class="col-lg-10 offset-lg-1">
+                <h2>Recevez nos offres de formations et opportunités d'emploi</h2>
+                <form id="subscribe" action="" method="get">
+                  <input type="text" name="name" id="name" placeholder="Votre Nom Complet" required="">
+                  <input type="text" name="email" id="email" pattern="[^ @]*@[^ @]*" placeholder="Votre Email" required="">
+                  <button type="submit" id="form-submit" class="main-button ">S'abonner</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="video" class="our-videos section">
+    <div class="videos-left-dec">
+      <img src="asset/images/videos-left-dec.png" alt="">
+    </div>
+    <div class="videos-right-dec">
+      <img src="asset/images/videos-right-dec.png" alt="">
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="naccs">
+            <div class="grid">
+              <div class="row">
+                <div class="col-lg-8">
+                  <ul class="nacc">
+                    <li class="active">
+                      <div>
+                        <div class="thumb">
+                          <iframe width="100%" height="auto" src="https://www.youtube.com/embed/JynGuQx4a1Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                          <div class="overlay-effect">
+                            <a href="#"><h4>Présentation Formini.tn</h4></a>
+                            <span>Découvrez notre plateforme</span>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div>
+                        <div class="thumb">
+                          <iframe width="100%" height="auto" src="https://www.youtube.com/embed/RdJBSFpcO4M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                          <div class="overlay-effect">
+                            <a href="#"><h4>Nos Formateurs Experts</h4></a>
+                            <span>Rencontrez l'équipe pédagogique</span>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div>
+                        <div class="thumb">
+                          <iframe width="100%" height="auto" src="https://www.youtube.com/embed/ZlfAjbQiL78" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                          <div class="overlay-effect">
+                            <a href="#"><h4>Processus de Certification</h4></a>
+                            <span>Comment obtenir votre certification</span>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                    <li>
+                      <div>
+                        <div class="thumb">
+                          <iframe width="100%" height="auto" src="https://www.youtube.com/embed/mx1WseE7-0Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                          <div class="overlay-effect">
+                            <a href="#"><h4>Aide à l'Emploi</h4></a>
+                            <span>Trouvez un stage ou un emploi</span>
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div class="col-lg-4">
+                  <div class="menu">
+                    <div class="active">
+                      <div class="thumb">
+                        <img src="asset/images/video-thumb-01.png" alt="">
+                        <div class="inner-content">
+                          <h4>Présentation Formini.tn</h4>
+                          <span>Découvrez notre plateforme</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="thumb">
+                        <img src="asset/images/video-thumb-02.png" alt="">
+                        <div class="inner-content">
+                          <h4>Nos Formateurs Experts</h4>
+                          <span>Rencontrez l'équipe pédagogique</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="thumb">
+                        <img src="asset/images/video-thumb-03.png" alt="Marketing">
+                        <div class="inner-content">
+                          <h4>Processus de Certification</h4>
+                          <span>Comment obtenir votre certification</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="thumb">
+                        <img src="asset/images/video-thumb-04.png" alt="SEO Work">
+                        <div class="inner-content">
+                          <h4>Aide à l'Emploi</h4>
+                          <span>Trouvez un stage ou un emploi</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>             
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="contact" class="contact-us section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-7">
+          <div class="section-heading">
+            <h2>N'hésitez pas à nous <em>contacter</em> via le <span>formulaire</span></h2>
+            <div id="map">
+              <iframe src="https://maps.google.com/maps?q=Tunis,+Tunisia&t=&z=13&ie=UTF8&iwloc=&output=embed" width="100%" height="360px" frameborder="0" style="border:0" allowfullscreen=""></iframe>
+            </div>
+            <div class="info">
+              <span><i class="fa fa-phone"></i> <a href="#">+216 70 123 456<br>+216 71 234 567</a></span>
+              <span><i class="fa fa-envelope"></i> <a href="#">contact@formini.tn<br>info@formini.tn</a></span>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5 align-self-center">
+          <form id="contact" action="" method="get">
+            <div class="row">
+              <div class="col-lg-12">
+                <fieldset>
+                  <input type="name" name="name" id="name" placeholder="Nom Complet" autocomplete="on" required>
+                </fieldset>
+              </div>
+              <div class="col-lg-12">
+                <fieldset>
+                  <input type="surname" name="surname" id="surname" placeholder="Numéro de Téléphone" autocomplete="on" required>
+                </fieldset>
+              </div>
+              <div class="col-lg-12">
+                <fieldset>
+                  <input type="text" name="email" id="email" pattern="[^ @]*@[^ @]*" placeholder="Votre Email" required="">
+                </fieldset>
+              </div>
+              <div class="col-lg-12">
+                <fieldset>
+                  <input type="text" name="website" id="website" placeholder="Formation souhaitée" required="">
+                </fieldset>
+              </div>
+              <div class="col-lg-12">
+                <fieldset>
+                  <button type="submit" id="form-submit" class="main-button">Envoyer</button>
+                </fieldset>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="contact-dec">
+      <img src="asset/images/contact-dec.png" alt="">
+    </div>
+    <div class="contact-left-dec">
+      <img src="asset/images/contact-left-dec.png" alt="">
+    </div>
+  </div>
+
+  <div class="footer-dec">
+    <img src="asset/images/footer-dec.png" alt="">
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-3">
+          <div class="about footer-item">
+            <div class="logo">
+              <a href="#"><img src="asset/images/logo.png" alt="Formini.tn"></a>
+            </div>
+            <a href="#">contact@formini.tn</a>
+            <ul>
+              <li><a href="#"><i class="fa fa-facebook"></i></a></li>
+              <li><a href="#"><i class="fa fa-twitter"></i></a></li>
+              <li><a href="#"><i class="fa fa-behance"></i></a></li>
+              <li><a href="#"><i class="fa fa-instagram"></i></a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <div class="services footer-item">
+            <h4>Formations</h4>
+            <ul>
+              <li><a href="#">Développement Web</a></li>
+              <li><a href="#">Data Science</a></li>
+              <li><a href="#">Design UI/UX</a></li>
+              <li><a href="#">Marketing Digital</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <div class="community footer-item">
+            <h4>Ressources</h4>
+            <ul>
+              <li><a href="#">Nos Certifications</a></li>
+              <li><a href="#">Trouver un Stage</a></li>
+              <li><a href="#">Offres d'Emploi</a></li>
+              <li><a href="#">Témoignages</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <div class="subscribe-newsletters footer-item">
+            <h4>Abonnez-vous</h4>
+            <p>Recevez nos dernières actualités et offres</p>
+            <form action="#" method="get">
+              <input type="text" name="email" id="email" pattern="[^ @]*@[^ @]*" placeholder="Votre Email" required="">
+              <button type="submit" id="form-submit" class="main-button "><i class="fa fa-paper-plane-o"></i></button>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-12">
+          <div class="copyright">
+            <p>Copyright © 2026 Formini.tn - Tous droits réservés. 
+            <br>
+            Plateforme de formation certifiante en ligne
+          </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- Scripts -->
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="asset/js/owl-carousel.js"></script>
+  <script src="asset/js/animation.js"></script>
+  <script src="asset/js/imagesloaded.js"></script>
+  <script src="asset/js/custom.js"></script>
+
+  <script>
+  // Acc
+    $(document).on("click", ".naccs .menu div", function() {
+      var numberIndex = $(this).index();
+
+      if (!$(this).is("active")) {
+          $(".naccs .menu div").removeClass("active");
+          $(".naccs ul li").removeClass("active");
+
+          $(this).addClass("active");
+          $(".naccs ul").find("li:eq(" + numberIndex + ")").addClass("active");
+
+          var listItemHeight = $(".naccs ul")
+            .find("li:eq(" + numberIndex + ")")
+            .innerHeight();
+          $(".naccs ul").height(listItemHeight + "px");
+        }
+    });
+
+    // User profile dropdown toggle
+    $(document).on("click", ".user-profile-dropdown", function(e) {
+      e.preventDefault();
+      $(this).siblings(".dropdown-menu-profile").slideToggle(200);
+    });
+
+    // Close dropdown when clicking outside
+    $(document).on("click", function(e) {
+      if (!$(e.target).closest(".user-profile-dropdown, .dropdown-menu-profile").length) {
+        $(".dropdown-menu-profile").slideUp(200);
+      }
+    });
+
+    // Hover effects for dropdown items
+    $(".dropdown-menu-profile a").hover(
+      function() { $(this).css("background-color", "#f8f9fa"); },
+      function() { $(this).css("background-color", "#fff"); }
+    );
+  </script>
+</body>
+</html>
