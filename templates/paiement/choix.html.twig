@@ -1,0 +1,190 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement - {{ inscription.formation.titre }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- En-tête -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">💳 Paiement de votre formation</h3>
+                </div>
+                <div class="card-body">
+                    <h5>{{ inscription.formation.titre }}</h5>
+                    <p class="text-muted mb-0">{{ inscription.formation.descriptionCourte }}</p>
+                </div>
+            </div>
+
+            <!-- Détails du paiement -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">📋 Récapitulatif</h5>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Formation :</strong></p>
+                        </div>
+                        <div class="col-6 text-end">
+                            <p>{{ inscription.formation.titre }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <p><strong>Prix :</strong></p>
+                        </div>
+                        <div class="col-6 text-end">
+                            {% if inscription.formation.prixPromo %}
+                                <p>
+                                    <span class="text-decoration-line-through text-muted">{{ inscription.formation.prix }} TND</span>
+                                    <span class="text-danger fw-bold">{{ inscription.formation.prixPromo }} TND</span>
+                                </p>
+                            {% else %}
+                                <p class="fw-bold">{{ inscription.formation.prix }} TND</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-6">
+                            <h5><strong>Total à payer :</strong></h5>
+                        </div>
+                        <div class="col-6 text-end">
+                            <h5 class="text-success fw-bold">{{ inscription.montantPaye }} TND</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Choix du mode de paiement -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">💰 Choisissez votre mode de paiement</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{{ path('paiement_traiter', {'id': inscription.id}) }}" id="payment-form">
+                        <!-- Mobile Money -->
+                        <div class="form-check mb-3 p-3 border rounded payment-option">
+                            <input class="form-check-input" type="radio" name="methode_paiement" id="mobile_money" value="mobile_money" required>
+                            <label class="form-check-label w-100" for="mobile_money">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">📱 Mobile Money</h6>
+                                        <small class="text-muted">Paiement via téléphone mobile</small>
+                                    </div>
+                                    <i class="bi bi-phone fs-3"></i>
+                                </div>
+                            </label>
+                            <div class="mt-3 mobile-money-fields" style="display: none;">
+                                <input type="tel" class="form-control" name="numero_telephone" placeholder="Numéro de téléphone">
+                            </div>
+                        </div>
+
+                        <!-- Virement bancaire -->
+                        <div class="form-check mb-3 p-3 border rounded payment-option">
+                            <input class="form-check-input" type="radio" name="methode_paiement" id="virement" value="virement">
+                            <label class="form-check-label w-100" for="virement">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">🏦 Virement bancaire</h6>
+                                        <small class="text-muted">Paiement par virement (délai 2-3 jours)</small>
+                                    </div>
+                                    <i class="bi bi-bank fs-3"></i>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Espèces -->
+                        <div class="form-check mb-3 p-3 border rounded payment-option">
+                            <input class="form-check-input" type="radio" name="methode_paiement" id="especes" value="especes">
+                            <label class="form-check-label w-100" for="especes">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">💵 Espèces</h6>
+                                        <small class="text-muted">Paiement en main propre au formateur</small>
+                                    </div>
+                                    <i class="bi bi-cash fs-3"></i>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Nom du titulaire -->
+                        <div class="mb-3">
+                            <label for="nom_titulaire" class="form-label">Nom complet</label>
+                            <input type="text" class="form-control" id="nom_titulaire" name="nom_titulaire" 
+                                   value="{{ app.user.nom }} {{ app.user.prenom }}" required>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <form method="post" action="{{ path('paiement_annuler', {'id': inscription.id}) }}">
+                                <button type="submit" class="btn btn-danger">
+                                    ❌ Annuler l'inscription
+                                </button>
+                            </form>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                ✓ Valider le paiement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <strong>ℹ️ Information :</strong> Votre formation sera accessible immédiatement après validation du paiement.
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-option {
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.payment-option:hover {
+    background-color: #f8f9fa;
+    border-color: #0d6efd !important;
+}
+.form-check-input:checked ~ .form-check-label {
+    font-weight: bold;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mobileMoney = document.getElementById('mobile_money');
+    const mobilemoneyFields = document.querySelector('.mobile-money-fields');
+
+    // Afficher/masquer les champs selon la méthode sélectionnée
+    document.querySelectorAll('input[name="methode_paiement"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            // Masquer tous les champs
+            if (mobilemoneyFields) {
+                mobilemoneyFields.style.display = 'none';
+                const telInput = mobilemoneyFields.querySelector('input');
+                if (telInput) telInput.required = false;
+            }
+
+            // Afficher les champs appropriés
+            if (this.value === 'mobile_money' && mobilemoneyFields) {
+                mobilemoneyFields.style.display = 'block';
+                const telInput = mobilemoneyFields.querySelector('input');
+                if (telInput) telInput.required = true;
+            }
+        });
+    });
+
+    // Style des options au clic
+    document.querySelectorAll('.payment-option').forEach(option => {
+        option.addEventListener('click', function() {
+            document.querySelectorAll('.payment-option').forEach(opt => {
+                opt.classList.remove('border-primary', 'bg-light');
+            });
+            this.classList.add('border-primary', 'bg-light');
+        });
+    });
+});
+</script>
+{% endblock %}
