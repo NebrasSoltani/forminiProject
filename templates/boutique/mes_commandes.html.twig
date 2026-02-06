@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Commandes{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h4 class="card-title">Mes Commandes</h4>
+                            <a href="{{ path('boutique_index') }}" class="btn btn-primary">
+                                <i class="fas fa-shopping-bag"></i> Continuer mes achats
+                            </a>
+                        </div>
+
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+
+                        {% if commandes|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Référence</th>
+                                            <th>Date</th>
+                                            <th>Produits</th>
+                                            <th>Total</th>
+                                            <th>Statut</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for commande in commandes %}
+                                        <tr>
+                                            <td><strong>{{ commande.reference }}</strong></td>
+                                            <td>{{ commande.dateCommande|date('d/m/Y H:i') }}</td>
+                                            <td>{{ commande.items|length }} article(s)</td>
+                                            <td><strong>{{ commande.calculerTotal()|number_format(2, ',', ' ') }} €</strong></td>
+                                            <td>
+                                                {% if commande.statut == 'en_attente' %}
+                                                    <span class="badge bg-warning">En attente</span>
+                                                {% elseif commande.statut == 'confirmee' %}
+                                                    <span class="badge bg-info">Confirmée</span>
+                                                {% elseif commande.statut == 'en_cours' %}
+                                                    <span class="badge bg-primary">En cours</span>
+                                                {% elseif commande.statut == 'livree' %}
+                                                    <span class="badge bg-success">Livrée</span>
+                                                {% elseif commande.statut == 'annulee' %}
+                                                    <span class="badge bg-danger">Annulée</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ path('boutique_commande_detail', {id: commande.id}) }}" 
+                                                   class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i> Détails
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-box-open fa-5x text-muted mb-3"></i>
+                                <h5 class="text-muted mb-4">Vous n'avez pas encore de commande</h5>
+                                <a href="{{ path('boutique_index') }}" class="btn btn-primary">
+                                    <i class="fas fa-shopping-bag"></i> Découvrir nos produits
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
