@@ -229,16 +229,40 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->photo = $photo;
         return $this;
     }
+    public function getApprenant(): ?Apprenant
+{
+    return $this->apprenant;
+}
 
-    /**
-     * @return Collection<int, Formation>
-     */
-    
+public function setApprenant(?Apprenant $apprenant): static
+{
+    $this->apprenant = $apprenant;
+    return $this;
+}
 
-    public function getFormateur(): ?Formateur
-    {
-        return $this->formateur;
-    }
+public function getSociete(): ?Societe
+{
+    return $this->societe;
+}
+
+public function setSociete(?Societe $societe): static
+{
+    $this->societe = $societe;
+    return $this;
+}
+
+
+   public function getFormateur(): ?Formateur
+{
+    return $this->formateur;
+}
+
+public function setFormateur(?Formateur $formateur): static
+{
+    $this->formateur = $formateur;
+    return $this;
+}
+
 
    
 }
