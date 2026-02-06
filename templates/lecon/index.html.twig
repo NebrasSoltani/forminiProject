@@ -1,0 +1,259 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Leçons - {{ formation.titre }}{% endblock %}
+
+{% block body %}
+
+{# Flash messages #}
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+{% endfor %}
+
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+{% endfor %}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+
+                <div class="d-flex align-items-center mb-4">
+                    <h4 class="card-title mb-0">Leçons de la formation</h4>
+                    <p class="text-muted mb-0 ml-3">{{ formation.titre }}</p>
+
+                    <div class="ml-auto d-flex align-items-center">
+                        <a href="{{ path('formation_show', {'id': formation.id}) }}" class="btn btn-secondary mr-2">
+                            <i class="fa fa-arrow-left mr-1"></i> Retour
+                        </a>
+                        <a href="{{ path('lecon_new', {'formationId': formation.id}) }}" class="btn btn-primary mr-2">
+                            <i class="fa fa-plus-circle mr-1"></i> Nouvelle Leçon
+                        </a>
+
+                        <div class="dropdown sub-dropdown">
+                            <button class="btn btn-link text-muted dropdown-toggle" type="button"
+                                    id="dd1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i data-feather="more-vertical"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dd1">
+                                <a class="dropdown-item" href="{{ path('formation_show', {'id': formation.id}) }}">
+                                    <i class="fa fa-eye mr-2"></i> Voir la formation
+                                </a>
+                                <a class="dropdown-item" href="{{ path('lecon_new', {'formationId': formation.id}) }}">
+                                    <i class="fa fa-plus mr-2"></i> Créer une leçon
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table no-wrap v-middle mb-0">
+                        <thead>
+                        <tr class="border-0">
+                            <th class="border-0 font-14 font-weight-medium text-muted">
+                                <i class="fa fa-sort mr-1"></i> Ordre
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted px-2">
+                                <i class="fa fa-book mr-1"></i> Leçon
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted">
+                                <i class="fa fa-align-left mr-1"></i> Description
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted text-center">
+                                <i class="fa fa-clock mr-1"></i> Durée
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted text-center">
+                                <i class="fa fa-arrows-alt-v mr-1"></i> Déplacer
+                            </th>
+                            <th class="border-0 font-14 font-weight-medium text-muted text-right">
+                                <i class="fa fa-cogs mr-1"></i> Actions
+                            </th>
+                        </tr>
+                        </thead>
+
+                        <tbody>
+                        {% for lecon in lecons %}
+                            <tr>
+                                <td class="border-top-0 px-2 py-4">
+                                    <span class="badge badge-light text-primary border badge-soft">
+                                        {{ lecon.ordre }}
+                                    </span>
+                                </td>
+
+                                <td class="border-top-0 px-2 py-4">
+                                    <div class="d-flex no-block align-items-center">
+                                        <div class="mr-3">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center lecon-avatar">
+                                                <i class="fa fa-graduation-cap text-primary"></i>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <h5 class="text-dark mb-0 font-16 font-weight-medium">
+                                                <a href="{{ path('lecon_show', {'formationId': formation.id, 'id': lecon.id}) }}" style="color:#1c2d41">
+                                                    {{ lecon.titre }}
+                                                </a>
+                                            </h5>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="border-top-0 text-muted px-2 py-4 font-14">
+                                    {% if lecon.description %}
+                                        {{ lecon.description|slice(0, 80) }}{% if lecon.description|length > 80 %}...{% endif %}
+                                    {% else %}
+                                        <span class="text-muted font-italic">Aucune description</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="border-top-0 text-center text-muted font-weight-medium px-2 py-4">
+                                    {% if lecon.duree %}
+                                        {{ lecon.duree }} min
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="border-top-0 text-center px-2 py-4">
+                                    <div class="btn-group" role="group">
+                                        <form method="post" action="{{ path('lecon_move_up', {'formationId': formation.id, 'id': lecon.id}) }}" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('move' ~ lecon.id) }}">
+                                            <button class="btn btn-sm btn-light move-btn" title="Monter">
+                                                <i class="fa fa-arrow-up text-primary"></i>
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{{ path('lecon_move_down', {'formationId': formation.id, 'id': lecon.id}) }}" class="d-inline">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('move' ~ lecon.id) }}">
+                                            <button class="btn btn-sm btn-light move-btn" title="Descendre">
+                                                <i class="fa fa-arrow-down text-primary"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+
+                                <td class="border-top-0 px-2 py-4 text-right">
+                                    <div class="btn-group action-buttons" role="group" aria-label="Actions">
+                                        <a href="{{ path('lecon_show', {'formationId': formation.id, 'id': lecon.id}) }}"
+                                           class="btn btn-sm btn-light action-btn" title="Voir">
+                                            <i class="fa fa-eye text-info"></i>
+                                        </a>
+
+                                        <a href="{{ path('lecon_edit', {'formationId': formation.id, 'id': lecon.id}) }}"
+                                           class="btn btn-sm btn-light action-btn" title="Modifier">
+                                            <i class="fa fa-edit text-warning"></i>
+                                        </a>
+
+                                        <button type="button"
+                                                class="btn btn-sm btn-light action-btn"
+                                                onclick="deleteLecon({{ lecon.id }}, '{{ lecon.titre|e('js') }}')"
+                                                title="Supprimer">
+                                            <i class="fa fa-trash text-danger"></i>
+                                        </button>
+                                    </div>
+
+                                    {# Formulaire suppression caché #}
+                                    <form id="delete-form-{{ lecon.id }}"
+                                          method="post"
+                                          action="{{ path('lecon_delete', {'formationId': formation.id, 'id': lecon.id}) }}"
+                                          style="display:none;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ lecon.id) }}">
+                                    </form>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <h4 class="text-muted mb-2">
+                                        <i class="fa fa-info-circle mr-1"></i> Aucune leçon trouvée
+                                    </h4>
+                                    <p class="mb-3">Créez votre première leçon pour commencer !</p>
+                                    <a href="{{ path('lecon_new', {'formationId': formation.id}) }}" class="btn btn-primary">
+                                        <i class="fa fa-plus-circle mr-1"></i> Créer une leçon
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteLecon(id, titre) {
+    let message = 'Êtes-vous sûr de vouloir supprimer la leçon "' + titre + '" ?\n\n';
+    message += 'Cette action supprimera également :\n';
+    message += '- Tous les contenus associés\n';
+    message += '- Les progressions des apprenants\n\n';
+    message += 'Cette action est irréversible !';
+
+    if (confirm(message)) {
+        document.getElementById('delete-form-' + id).submit();
+    }
+}
+</script>
+
+<style>
+/* Avatar */
+.lecon-avatar{
+    width:45px;
+    height:45px;
+    background:#f3f4f6;
+}
+
+/* Badges soft */
+.badge-soft{
+    padding: .4rem .6rem;
+    font-weight: 600;
+    border-radius: 999px;
+}
+
+/* Boutons actions modernes */
+.action-buttons .action-btn{
+    border-radius: 10px;
+    padding: 6px 10px;
+    margin: 0 3px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    transition: all .2s ease;
+}
+.action-buttons .action-btn i{
+    font-size: 14px;
+}
+.action-buttons .action-btn:hover{
+    background: #eef1f4;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+/* Boutons de déplacement */
+.move-btn{
+    border-radius: 8px;
+    padding: 4px 8px;
+    margin: 0 2px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    transition: all .2s ease;
+}
+.move-btn:hover{
+    background: #eef1f4;
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+</style>
+
+{% endblock %}
