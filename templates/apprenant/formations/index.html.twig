@@ -1,0 +1,414 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Catalogue de Formations{% endblock %}
+
+{% block body %}
+    <!-- En-tête moderne avec gradient -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="text-center py-4">
+                <h1 class="display-4 fw-bold text-dark mb-3">Découvrez nos formations</h1>
+                <p class="lead text-muted mb-4">Développez vos compétences avec nos programmes certifiants</p>
+                
+                <!-- Barre de recherche moderne -->
+                <form method="get" class="search-form mx-auto" style="max-width: 700px;">
+                    <div class="input-group input-group-lg shadow-sm border rounded-pill overflow-hidden">
+                        <span class="input-group-text border-0 rounded-start-pill">
+                            <i class="bi bi-search text-primary"></i>
+                        </span>
+                        <input type="text" name="search" class="form-control border-0 ps-0" 
+                               placeholder="Rechercher par titre, catégorie, formateur..." 
+                               value="{{ currentSearch }}">
+                        <button class="btn btn-primary px-4 rounded-end-pill" type="submit">
+                            <i class="bi bi-search me-2"></i>Rechercher
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Section Filtres avec bouton toggle -->
+        <div class="col-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-muted">
+                    <span class="badge rounded-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">{{ formations|length }}</span>
+                    formation(s) trouvée(s)
+                </h5>
+                
+                <button class="btn btn-outline-primary rounded-pill px-4" type="button" data-bs-toggle="collapse" data-bs-target="#filterSection" aria-expanded="false" aria-controls="filterSection">
+                    <i class="bi bi-funnel-fill me-2"></i>Filtrer
+                    <i class="bi bi-chevron-down ms-2"></i>
+                </button>
+            </div>
+
+            <!-- Filtres repliables -->
+            <div class="collapse mt-3" id="filterSection">
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-body p-4">
+                        <form method="get">
+                            {% if currentSearch %}
+                                <input type="hidden" name="search" value="{{ currentSearch }}">
+                            {% endif %}
+
+                            <div class="row g-3">
+                                <!-- Filtre Catégorie -->
+                                <div class="col-lg-3 col-md-6">
+                                    <label class="form-label fw-semibold text-muted small mb-2">
+                                        <i class="bi bi-bookmark-fill me-1"></i> CATÉGORIE
+                                    </label>
+                                    <select name="categorie" class="form-select form-select-lg border rounded-3" onchange="this.form.submit()">
+                                        <option value="">Toutes les catégories</option>
+                                        {% for cat in categories %}
+                                            <option value="{{ cat }}" {{ currentCategorie == cat ? 'selected' : '' }}>
+                                                {{ cat }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Filtre Niveau -->
+                                <div class="col-lg-3 col-md-6">
+                                    <label class="form-label fw-semibold text-muted small mb-2">
+                                        <i class="bi bi-bar-chart-fill me-1"></i> NIVEAU
+                                    </label>
+                                    <select name="niveau" class="form-select form-select-lg border rounded-3" onchange="this.form.submit()">
+                                        <option value="">Tous les niveaux</option>
+                                        {% for niv in niveaux %}
+                                            <option value="{{ niv }}" {{ currentNiveau == niv ? 'selected' : '' }}>
+                                                {{ niv }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+
+                                <!-- Filtre Type d'accès -->
+                                <div class="col-lg-3 col-md-6">
+                                    <label class="form-label fw-semibold text-muted small mb-2">
+                                        <i class="bi bi-tag-fill me-1"></i> TYPE D'ACCÈS
+                                    </label>
+                                    <select name="typeAcces" class="form-select form-select-lg border rounded-3" onchange="this.form.submit()">
+                                        <option value="">Tous</option>
+                                        <option value="gratuit" {{ currentTypeAcces == 'gratuit' ? 'selected' : '' }}>Gratuit</option>
+                                        <option value="payant" {{ currentTypeAcces == 'payant' ? 'selected' : '' }}>Payant</option>
+                                    </select>
+                                </div>
+
+                                <!-- Bouton Réinitialiser -->
+                                <div class="col-lg-3 col-md-6 d-flex align-items-end">
+                                    {% if currentCategorie or currentNiveau or currentTypeAcces or currentSearch %}
+                                        <a href="{{ path('apprenant_formations_index') }}" class="btn btn-outline-secondary w-100 rounded-pill">
+                                            <i class="bi bi-arrow-clockwise me-2"></i>Réinitialiser
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des formations -->
+        <div class="col-12">
+            <div class="row g-4">
+                {% for formation in formations %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card tera-card h-100 border-0 overflow-hidden">
+                            <!-- HEADER IMAGE -->
+                            <div class="tera-cover position-relative">
+                                {% if formation.imageCouverture %}
+                                    <img
+                                        src="{{ asset('uploads/images/' ~ formation.imageCouverture) }}"
+                                        class="tera-cover-img"
+                                        alt="{{ formation.titre }}"
+                                    >
+                                {% else %}
+                                    <div class="tera-cover-img d-flex align-items-center justify-content-center"
+                                         style="background:#f2f4f7;">
+                                        <i class="bi bi-mortarboard-fill" style="font-size:4rem;opacity:.15;"></i>
+                                    </div>
+                                {% endif %}
+
+                                <!-- Ribbon (TERA) -->
+                                <div class="tera-ribbon">TERA</div>
+
+                                <!-- Ribbon dynamique -->
+                                {% if formation.typeAcces == 'gratuit' %}
+                                    <div class="tera-ribbon tera-ribbon-free">GRATUIT</div>
+                                {% elseif formation.prixPromo and formation.prixPromo < formation.prix %}
+                                    <div class="tera-ribbon tera-ribbon-promo">PROMO</div>
+                                {% endif %}
+
+                       
+                            </div>
+
+                            <!-- BODY -->
+                            <div class="p-3 p-md-4">
+                                <div class="tera-category mb-2">
+                                    {{ formation.categorie }}
+                                </div>
+
+                                <h5 class="tera-title mb-3">
+                                    {{ formation.titre }}
+                                </h5>
+
+                                <div class="tera-live mb-3">
+                                    <span class="tera-live-dot"></span>
+                                    <span class="tera-live-text">Live Assistance</span>
+                                    <span class="tera-live-sub">included</span>
+                                </div>
+
+                                <p class="tera-desc mb-4">
+                                    {{ formation.descriptionCourte }}
+                                </p>
+
+                                <!-- FOOTER -->
+                                <div class="d-flex align-items-center justify-content-between gap-3">
+                                    <div class="tera-price">
+                                        {% if formation.typeAcces == 'gratuit' %}
+                                            <span>0</span> <small>DT</small>
+                                        {% elseif formation.prixPromo and formation.prixPromo < formation.prix %}
+                                            <div class="d-flex flex-column">
+                                                <span class="tera-price-old">{{ formation.prix }} DT</span>
+                                                <div>
+                                                    <span>{{ formation.prixPromo }}</span> <small>DT</small>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <span>{{ formation.prix }}</span> <small>DT</small>
+                                        {% endif %}
+                                    </div>
+
+                                    <a href="{{ path('apprenant_formation_show', {'id': formation.id}) }}"
+                                       class="btn tera-btn">
+                                        En savoir plus <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+
+                                <!-- Formateur Section -->
+                                <div class="tera-teacher-footer mt-4 pt-3 border-top">
+                                    <div class="d-flex align-items-center gap-2">
+                                        {% if formation.formateur.photo %}
+                                            <img src="{{ asset('uploads/' ~ formation.formateur.photo) }}" 
+                                                 alt="{{ formation.formateur.prenom }}"
+                                                 class="tera-teacher-avatar-card">
+                                        {% else %}
+                                            <div class="tera-teacher-avatar-card tera-teacher-avatar-default-card">
+                                                {{ formation.formateur.prenom|slice(0,1) }}{{ formation.formateur.nom|slice(0,1) }}
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="tera-teacher-label" style="margin-left: 3px;">Formateur</div>
+                                            <div class="tera-teacher-name-card" style="margin-left: 4px;">
+                                                {{ formation.formateur.prenom }} {{ formation.formateur.nom }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info text-center py-5">
+                            <i class="bi bi-inbox display-4 d-block mb-3"></i>
+                            <h5>Aucune formation trouvée</h5>
+                            <p class="mb-0">Essayez de modifier vos critères de recherche</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* CARD */
+.tera-card{
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, .08);
+  background: #fff;
+}
+
+/* IMAGE HEADER */
+.tera-cover{
+  height: 230px;
+  overflow: hidden;
+  background: #eef2f6;
+}
+.tera-cover-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+
+/* Ribbon */
+.tera-ribbon{
+  position: absolute;
+  top: 14px;
+  right: -38px;
+  transform: rotate(45deg);
+  background: #3b1d7a;          /* violet comme l’exemple */
+  color: #fff;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 8px 56px;
+  font-size: 12px;
+  text-transform: uppercase;
+  box-shadow: 0 10px 18px rgba(0,0,0,.15);
+}
+
+/* Text styles */
+.tera-category{
+  color: #64748b;
+  font-weight: 600;
+  font-size: 14px;
+}
+.tera-title{
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.2;
+  font-size: 20px;
+}
+
+/* Live Assistance row */
+.tera-live{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.tera-live-dot{
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ff3b30;
+  display: inline-block;
+  position: relative;
+}
+.tera-live-dot::after{
+  content:"";
+  position:absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.85);
+  opacity: .9;
+}
+.tera-live-text{
+  color: #ff3b30;
+}
+.tera-live-sub{
+  color: #64748b;
+  font-weight: 600;
+}
+
+/* Description clamp like the example */
+.tera-desc{
+  color: #64748b;
+  line-height: 1.6;
+  font-size: 14px;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Price + button */
+.tera-price{
+  font-weight: 900;
+  color: #0f172a;
+  font-size: 34px;
+  line-height: 1;
+}
+.tera-price small{
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* Prix barré */
+.tera-price-old{
+  font-size: 16px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: line-through;
+  margin-bottom: 4px;
+}
+
+.tera-btn{
+  background: #17a2b8;          /* bleu/teal comme l’exemple */
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 800;
+  border: 0;
+  box-shadow: 0 10px 18px rgba(23, 162, 184, .25);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.tera-btn:hover{
+  color:#fff;
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+  box-shadow: 0 14px 24px rgba(23, 162, 184, .30);
+}
+
+/* Ribbon Gratuit */
+.tera-ribbon-free{
+  background: #10b981;  /* vert pour gratuit */
+}
+
+/* Ribbon Promo */
+.tera-ribbon-promo{
+  background: #f59e0b;  /* orange pour promo */
+}
+
+/* Formateur Footer Card */
+.tera-teacher-footer{
+  border-top: 2px solid #f1f5f9 !important;
+}
+
+.tera-teacher-avatar-card{
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+
+.tera-teacher-avatar-default-card{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.tera-teacher-label{
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.tera-teacher-name-card{
+  font-weight: 700;
+  font-size: 15px;
+  color: #0f172a;
+  letter-spacing: 0.2px;
+}
+
+</style>
+
+{% endblock %}

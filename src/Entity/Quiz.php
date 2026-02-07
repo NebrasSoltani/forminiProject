@@ -18,52 +18,31 @@ class Quiz
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: 'Le titre est obligatoire')]
-    #[Assert\Length(
-        min: 3,
-        max: 255,
-        minMessage: 'Le titre doit contenir au moins {{ limit }} caractères.',
-        maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères.'
-    )]
     private ?string $titre = null;
 
     #[ORM\Column(length: 500, nullable: true)]
-    #[Assert\Length(max: 500, maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $description = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La durée est obligatoire')]
-    #[Assert\Positive(message: 'La durée doit être supérieure à 0')]
-    #[Assert\Range(
-        min: 5,
-        max: 300,
-        notInRangeMessage: 'La durée doit être comprise entre 5 et 300 minutes.'
-    )]
-    private ?int $duree = 30;
+    #[Assert\Positive]
+    private ?int $duree = 30; // durée en minutes
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La note minimale est obligatoire')]
-    #[Assert\Range(
-        min: 0,
-        max: 100,
-        notInRangeMessage: 'La note minimale doit être comprise entre 0 et 100%.'
-    )]
-    private ?int $noteMinimale = 50;
+    #[Assert\Range(min: 0, max: 100)]
+    private ?int $noteMinimale = 50; // note minimale pour réussir (en %)
 
     #[ORM\ManyToOne(targetEntity: Formation::class, inversedBy: 'quizzes')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull(message: 'La formation est obligatoire')]
     private ?Formation $formation = null;
 
-    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['persist', 'remove'])]
     private Collection $questions;
 
     #[ORM\Column]
-    #[Assert\Type('bool')]
-    private bool $afficherCorrection = true;
+    private ?bool $afficherCorrection = true;
 
     #[ORM\Column]
-    #[Assert\Type('bool')]
-    private bool $melanger = true;
+    private ?bool $melanger = true; // mélanger les questions
 
     public function __construct()
     {
@@ -80,7 +59,7 @@ class Quiz
         return $this->titre;
     }
 
-    public function setTitre(string $titre): self
+    public function setTitre(string $titre): static
     {
         $this->titre = $titre;
         return $this;
@@ -91,7 +70,7 @@ class Quiz
         return $this->description;
     }
 
-    public function setDescription(?string $description): self
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
         return $this;
@@ -102,7 +81,7 @@ class Quiz
         return $this->duree;
     }
 
-    public function setDuree(int $duree): self
+    public function setDuree(int $duree): static
     {
         $this->duree = $duree;
         return $this;
@@ -113,7 +92,7 @@ class Quiz
         return $this->noteMinimale;
     }
 
-    public function setNoteMinimale(int $noteMinimale): self
+    public function setNoteMinimale(int $noteMinimale): static
     {
         $this->noteMinimale = $noteMinimale;
         return $this;
@@ -124,59 +103,53 @@ class Quiz
         return $this->formation;
     }
 
-    public function setFormation(?Formation $formation): self
+    public function setFormation(?Formation $formation): static
     {
         $this->formation = $formation;
         return $this;
     }
 
-    /**
-     * @return Collection<int, Question>
-     */
     public function getQuestions(): Collection
     {
         return $this->questions;
     }
 
-    public function addQuestion(Question $question): self
+    public function addQuestion(Question $question): static
     {
         if (!$this->questions->contains($question)) {
             $this->questions->add($question);
             $question->setQuiz($this);
         }
-
         return $this;
     }
 
-    public function removeQuestion(Question $question): self
+    public function removeQuestion(Question $question): static
     {
         if ($this->questions->removeElement($question)) {
-            // set the owning side to null (unless already changed)
             if ($question->getQuiz() === $this) {
                 $question->setQuiz(null);
             }
         }
-
         return $this;
     }
 
-    public function isAfficherCorrection(): bool
+    public function isAfficherCorrection(): ?bool
     {
         return $this->afficherCorrection;
     }
 
-    public function setAfficherCorrection(bool $afficherCorrection): self
+    public function setAfficherCorrection(bool $afficherCorrection): static
     {
         $this->afficherCorrection = $afficherCorrection;
         return $this;
     }
 
-    public function isMelanger(): bool
+    public function isMelanger(): ?bool
     {
         return $this->melanger;
     }
 
-    public function setMelanger(bool $melanger): self
+    public function setMelanger(bool $melanger): static
     {
         $this->melanger = $melanger;
         return $this;
