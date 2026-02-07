@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Apprenant{% endblock %}
+
+{% block body %}
+<h1>Modifier Apprenant</h1>
+
+{{ form_start(form) }}
+    {{ form_row(form.email) }}
+    {{ form_row(form.nom) }}
+    {{ form_row(form.niveau) }}
+    
+    <h5>Centres d'intérêt</h5>
+    <ul id="centres-list" data-prototype="{{ form_widget(form.centresInteret.vars.prototype)|e('html_attr') }}">
+        {% for ci in form.centresInteret %}
+            <li>
+                {{ form_widget(ci) }}
+                <button type="button" class="remove-ci btn btn-sm btn-danger">Supprimer</button>
+            </li>
+        {% endfor %}
+    </ul>
+    <button type="button" id="add-ci" class="btn btn-sm btn-success mt-2">Ajouter un centre d'intérêt</button>
+
+    <button class="btn btn-primary mt-3">Enregistrer</button>
+{{ form_end(form) }}
+
+<a href="{{ path('apprenant_index') }}" class="btn btn-secondary mt-2">Retour à la liste</a>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const collectionHolder = document.getElementById('centres-list');
+    const addButton = document.getElementById('add-ci');
+
+    // index pour le prototype
+    let index = collectionHolder.querySelectorAll('input').length;
+
+    // Ajouter un nouveau centre d'intérêt
+    addButton.addEventListener('click', () => {
+        const prototype = collectionHolder.dataset.prototype;
+        const newForm = prototype.replace(/__name__/g, index);
+        const li = document.createElement('li');
+        li.innerHTML = newForm + '<button type="button" class="remove-ci btn btn-sm btn-danger">Supprimer</button>';
+        collectionHolder.appendChild(li);
+
+        // bouton supprimer
+        li.querySelector('.remove-ci').addEventListener('click', () => li.remove());
+
+        index++;
+    });
+
+    // supprimer déjà existants
+    collectionHolder.querySelectorAll('.remove-ci').forEach(btn => {
+        btn.addEventListener('click', () => btn.closest('li').remove());
+    });
+});
+</script>
+{% endblock %}
