@@ -1,0 +1,465 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Blogs{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .sortable {
+        cursor: pointer;
+        position: relative;
+        white-space: nowrap;
+    }
+    .sortable:hover {
+        background-color: #f8f9fa;
+    }
+    .sortable:after {
+        content: '↕';
+        margin-left: 5px;
+        color: #6c757d;
+        font-size: 12px;
+    }
+    .sortable.asc:after {
+        content: '↑';
+        color: #007bff;
+    }
+    .sortable.desc:after {
+        content: '↓';
+        color: #007bff;
+    }
+    .filter-form .form-control {
+        font-size: 0.875rem;
+    }
+    .filter-badge {
+        font-size: 11px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .active-filters {
+        background-color: #e7f1ff;
+        border-left: 4px solid #007bff;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 0 5px 5px 0;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-blog me-2"></i>Gestion des Blogs
+                </h1>
+                <div class="btn-group">
+    <a href="{{ path('admin_blog_new') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> Nouveau Blog
+    </a>
+    <a href="{{ path('admin_blog_statistiques') }}" class="btn btn-info">
+        <i class="fas fa-chart-bar me-1"></i> Statistiques
+    </a>
+    <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown">
+        <span class="visually-hidden">Actions</span>
+    </button>
+    <div class="dropdown-menu dropdown-menu-end">
+        {% set exportParams = app.request.query.all %}
+        <a class="dropdown-item" href="{{ path('admin_blog_export_pdf', exportParams) }}">
+            <i class="fas fa-file-pdf me-2"></i> Exporter en PDF
+        </a>
+    </div>
+</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Filtres actifs #}
+    {% if currentFilters is not empty %}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="active-filters">
+                <small class="text-muted d-block mb-2">
+                    <i class="fas fa-filter me-1"></i> Filtres actifs :
+                </small>
+                <div>
+                    {% for key, value in currentFilters %}
+                        {% if value is not empty %}
+                            {% if key == 'isPublie' %}
+                                <span class="badge filter-badge bg-info">
+                                    Statut: {{ value == '1' ? 'Publiés' : 'Brouillons' }}
+                                    <a href="javascript:void(0)" onclick="removeFilter('{{ key }}')" class="text-white ms-1">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </span>
+                            {% elseif key == 'categorie' %}
+                                <span class="badge filter-badge bg-info">
+                                    Catégorie: {{ value }}
+                                    <a href="javascript:void(0)" onclick="removeFilter('{{ key }}')" class="text-white ms-1">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </span>
+                            {% elseif key == 'search' %}
+                                <span class="badge filter-badge bg-info">
+                                    Recherche: "{{ value }}"
+                                    <a href="javascript:void(0)" onclick="removeFilter('{{ key }}')" class="text-white ms-1">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </span>
+                            {% elseif key == 'dateFrom' %}
+                                <span class="badge filter-badge bg-info">
+                                    Du: {{ value }}
+                                    <a href="javascript:void(0)" onclick="removeFilter('{{ key }}')" class="text-white ms-1">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </span>
+                            {% elseif key == 'dateTo' %}
+                                <span class="badge filter-badge bg-info">
+                                    Au: {{ value }}
+                                    <a href="javascript:void(0)" onclick="removeFilter('{{ key }}')" class="text-white ms-1">
+                                        <i class="fas fa-times"></i>
+                                    </a>
+                                </span>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    <a href="{{ path('admin_blog_index') }}" class="btn btn-sm btn-outline-danger ms-2">
+                        <i class="fas fa-times me-1"></i> Tout effacer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Formulaire de filtres #}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-search me-2"></i>Filtrer les blogs
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(filterForm, {
+                        'attr': {
+                            'class': 'filter-form',
+                            'novalidate': 'novalidate',
+                            'id': 'filter-form'
+                        }
+                    }) }}
+                    <div class="row g-3">
+                        {# Ligne 1 #}
+                        <div class="col-md-4">
+                            <label class="form-label">{{ form_label(filterForm.search) }}</label>
+                            {{ form_widget(filterForm.search, {
+                                'attr': {
+                                    'class': 'form-control',
+                                    'placeholder': 'Titre, contenu, auteur...'
+                                }
+                            }) }}
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label class="form-label">{{ form_label(filterForm.categorie) }}</label>
+                            {{ form_widget(filterForm.categorie, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label class="form-label">{{ form_label(filterForm.isPublie) }}</label>
+                            {{ form_widget(filterForm.isPublie, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label class="form-label">{{ form_label(filterForm.auteur) }}</label>
+                            {{ form_widget(filterForm.auteur, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <label class="form-label">{{ form_label(filterForm.evenement) }}</label>
+                            {{ form_widget(filterForm.evenement, {
+                                'attr': {'class': 'form-control'}
+                            }) }}
+                        </div>
+
+                        {# Ligne 2 - Dates #}
+                        <div class="col-md-3">
+                            <label class="form-label">{{ form_label(filterForm.dateFrom) }}</label>
+                            {{ form_widget(filterForm.dateFrom, {
+                                'attr': {
+                                    'class': 'form-control flatpickr',
+                                    'placeholder': 'Date de début'
+                                }
+                            }) }}
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label">{{ form_label(filterForm.dateTo) }}</label>
+                            {{ form_widget(filterForm.dateTo, {
+                                'attr': {
+                                    'class': 'form-control flatpickr',
+                                    'placeholder': 'Date de fin'
+                                }
+                            }) }}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                {{ form_widget(filterForm.filter, {
+                                    'attr': {'class': 'btn btn-primary flex-grow-1'}
+                                }) }}
+                                {{ form_widget(filterForm.reset, {
+                                    'attr': {'class': 'btn btn-secondary flex-grow-1'}
+                                }) }}
+                            </div>
+                        </div>
+                    </div>
+                    {{ form_end(filterForm) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Tableau des blogs #}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        Liste des blogs ({{ blogs|length }})
+                    </h5>
+                    <div class="text-muted small">
+                        Tri: {{ currentSort }} ({{ currentDirection }})
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50">ID</th>
+                                    <th class="sortable {% if currentSort == 'titre' %}{{ currentDirection|lower }}{% endif %}"
+                                        onclick="sortTable('titre')">
+                                        Titre
+                                    </th>
+                                    <th class="sortable {% if currentSort == 'categorie' %}{{ currentDirection|lower }}{% endif %}"
+                                        onclick="sortTable('categorie')">
+                                        Catégorie
+                                    </th>
+                                    <th class="sortable {% if currentSort == 'auteur' %}{{ currentDirection|lower }}{% endif %}"
+                                        onclick="sortTable('auteur')">
+                                        Auteur
+                                    </th>
+                                    <th class="sortable {% if currentSort == 'datePublication' %}{{ currentDirection|lower }}{% endif %}"
+                                        onclick="sortTable('datePublication')">
+                                        Date
+                                    </th>
+                                    <th>Événement</th>
+                                    <th class="sortable {% if currentSort == 'statut' %}{{ currentDirection|lower }}{% endif %}"
+                                        onclick="sortTable('statut')">
+                                        Statut
+                                    </th>
+                                    <th width="120" class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for blog in blogs %}
+                                    <tr>
+                                        <td class="text-muted fw-bold">#{{ blog.id }}</td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if blog.image %}
+                                                    <img src="{{ asset('uploads/blogs/' ~ blog.image) }}" 
+                                                         alt="{{ blog.titre }}" 
+                                                         class="rounded me-2"
+                                                         style="width: 40px; height: 40px; object-fit: cover;">
+                                                {% else %}
+                                                    <div class="bg-light rounded d-flex align-items-center justify-content-center me-2"
+                                                         style="width: 40px; height: 40px;">
+                                                        <i class="fas fa-image text-muted"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    <strong class="d-block">{{ blog.titre }}</strong>
+                                                    {% if blog.resume %}
+                                                        <small class="text-muted d-block" style="font-size: 0.85em;">
+                                                            {{ blog.resume|length > 60 ? blog.resume|slice(0, 60) ~ '...' : blog.resume }}
+                                                        </small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info">{{ blog.categorie }}</span>
+                                        </td>
+                                        <td>{{ blog.auteur.prenom }} {{ blog.auteur.nom }}</td>
+                                        <td>
+                                            <span title="{{ blog.datePublication|date('d/m/Y H:i:s') }}">
+                                                {{ blog.datePublication|date('d/m/Y') }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if blog.evenement %}
+                                                <span class="badge bg-secondary" title="{{ blog.evenement.titre }}">
+                                                    {{ blog.evenement.titre|slice(0, 15) }}{% if blog.evenement.titre|length > 15 %}...{% endif %}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if blog.isPublie %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Publié
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">
+                                                    <i class="fas fa-clock me-1"></i>Brouillon
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+    <div class="btn-group btn-group-sm" role="group">
+        {# Bouton QR Code #}
+        <a href="{{ path('admin_blog_qrcode', {id: blog.id}) }}" 
+           class="btn btn-outline-info" 
+           title="QR Code">
+            <i class="fas fa-qrcode"></i>
+        </a>
+
+        {# Bouton Modifier #}
+        <a href="{{ path('admin_blog_edit', {id: blog.id}) }}" 
+           class="btn btn-outline-primary" 
+           title="Modifier">
+            <i class="fas fa-edit"></i>
+        </a>
+
+        {# Bouton Supprimer #}
+        <button type="button" 
+                class="btn btn-outline-danger" 
+                title="Supprimer"
+                onclick="confirmDelete({{ blog.id }}, '{{ blog.titre|escape('js') }}')">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="8" class="text-center py-5">
+                                            <div class="text-muted">
+                                                <i class="fas fa-inbox fa-2x mb-3"></i>
+                                                <h5 class="mt-3">Aucun blog trouvé</h5>
+                                                {% if currentFilters is not empty %}
+                                                    <p class="mb-0">Aucun résultat ne correspond à vos critères de recherche.</p>
+                                                    <a href="{{ path('admin_blog_index') }}" class="btn btn-sm btn-outline-primary mt-2">
+                                                        <i class="fas fa-times me-1"></i> Effacer les filtres
+                                                    </a>
+                                                {% else %}
+                                                    <p class="mb-0">Commencez par créer votre premier blog.</p>
+                                                    <a href="{{ path('admin_blog_new') }}" class="btn btn-sm btn-primary mt-2">
+                                                        <i class="fas fa-plus me-1"></i> Créer un blog
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Formulaires de suppression cachés #}
+{% for blog in blogs %}
+    <form id="delete-form-{{ blog.id }}" 
+          method="post" 
+          action="{{ path('admin_blog_delete', {id: blog.id}) }}"
+          style="display: none;">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ blog.id) }}">
+    </form>
+{% endfor %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
+<script>
+// Configuration de flatpickr
+document.addEventListener('DOMContentLoaded', function() {
+    flatpickr('.flatpickr', {
+        locale: 'fr',
+        dateFormat: 'Y-m-d',
+        altInput: true,
+        altFormat: 'd/m/Y',
+        allowInput: true,
+        static: true
+    });
+});
+
+// Tri du tableau
+function sortTable(field) {
+    const url = new URL(window.location.href);
+    let direction = 'DESC';
+    
+    if (url.searchParams.get('sort') === field) {
+        direction = url.searchParams.get('direction') === 'DESC' ? 'ASC' : 'DESC';
+    }
+    
+    url.searchParams.set('sort', field);
+    url.searchParams.set('direction', direction);
+    window.location.href = url.toString();
+}
+
+// Suppression avec confirmation
+function confirmDelete(id, title) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer le blog "${title}" ?\nCette action est irréversible.`)) {
+        document.getElementById(`delete-form-${id}`).submit();
+    }
+}
+
+// Supprimer un filtre individuel
+function removeFilter(filterName) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete(filterName);
+    window.location.href = url.toString();
+}
+
+// Validation des dates
+document.addEventListener('DOMContentLoaded', function() {
+    const dateFrom = document.querySelector('[name="dateFrom"]');
+    const dateTo = document.querySelector('[name="dateTo"]');
+    
+    if (dateFrom && dateTo) {
+        dateFrom.addEventListener('change', function() {
+            if (dateTo.value && new Date(this.value) > new Date(dateTo.value)) {
+                alert('La date "Du" ne peut pas être après la date "Au"');
+                this.value = '';
+            }
+        });
+        
+        dateTo.addEventListener('change', function() {
+            if (dateFrom.value && new Date(this.value) < new Date(dateFrom.value)) {
+                alert('La date "Au" ne peut pas être avant la date "Du"');
+                this.value = '';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
