@@ -139,4 +139,19 @@ class Blog
 
         return $this;
     }
+    #[ORM\ManyToOne(targetEntity: Evenement::class)]
+#[ORM\JoinColumn(nullable: true)]
+private ?Evenement $evenement = null;
+
+public function getEvenement(): ?Evenement
+{
+    return $this->evenement;
+}
+
+public function setEvenement(?Evenement $evenement): self
+{
+    $this->evenement = $evenement;
+    return $this;
+}
+
 }

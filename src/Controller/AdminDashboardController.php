@@ -7,6 +7,7 @@ use App\Repository\FormationRepository;
 use App\Repository\InscriptionRepository;
 use App\Repository\PaiementRepository;
 use App\Repository\CommandeRepository;
+use App\Repository\EvenementRepository;  // ← AJOUTEZ CETTE LIGNE
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,7 +23,8 @@ class AdminDashboardController extends AbstractController
         FormationRepository $formationRepository,
         InscriptionRepository $inscriptionRepository,
         PaiementRepository $paiementRepository,
-        CommandeRepository $commandeRepository
+        CommandeRepository $commandeRepository,
+        EvenementRepository $evenementRepository  // ← AJOUTEZ CETTE LIGNE
     ): Response {
         // Statistiques globales
         $totalUsers = $userRepository->count([]);
@@ -64,6 +66,9 @@ class AdminDashboardController extends AbstractController
             }
         }
 
+        // ← AJOUTEZ CES LIGNES POUR LES STATISTIQUES ÉVÉNEMENTS
+        $statsEvenements = $evenementRepository->getStatistiques();
+
         // Dernières inscriptions
         $dernieresInscriptions = $inscriptionRepository->findBy([], ['dateInscription' => 'DESC'], 10);
 
@@ -100,6 +105,11 @@ class AdminDashboardController extends AbstractController
                 'commandes_en_attente' => $commandesEnAttente,
                 'commandes_livrees' => $commandesLivrees,
                 'chiffre_affaires_boutique' => $chiffreAffairesBoutique,
+                // ← AJOUTEZ CES LIGNES
+                'total_evenements' => $statsEvenements['total'],
+                'evenements_actifs' => $statsEvenements['actifs'],
+                'evenements_a_venir' => $statsEvenements['a_venir'],
+                'evenements_en_cours' => $statsEvenements['en_cours'],
             ],
             'dernieres_inscriptions' => $dernieresInscriptions,
             'derniers_utilisateurs' => $derniersUtilisateurs,
