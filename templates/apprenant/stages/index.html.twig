@@ -1,0 +1,373 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Offres de Stage{% endblock %}
+
+{% block body %}
+<div class="container-fluid px-3 px-md-4 py-4">
+    <!-- En-tête moderne avec gradient -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="text-center py-4">
+                <h1 class="display-4 fw-bold text-dark mb-3">
+                    <i class="bi bi-briefcase-fill me-3" style="color: #667eea;"></i>Offres de Stage
+                </h1>
+                <p class="lead text-muted mb-0">Trouvez votre opportunité professionnelle</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Section Filtres -->
+        <div class="col-12 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0 text-muted">
+                    <span class="badge rounded-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">{{ offres|length }}</span>
+                    offre(s) disponible(s)
+                </h5>
+            </div>
+
+            <!-- Filtres Pills modernes -->
+            <div class="tera-stage-filters">
+                <a href="{{ path('apprenant_stages_index') }}" 
+                   class="tera-filter-pill {{ typeFilter is null ? 'active' : '' }}">
+                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Toutes
+                </a>
+                <a href="{{ path('apprenant_stages_index', {type: 'stage_observation'}) }}" 
+                   class="tera-filter-pill {{ typeFilter == 'stage_observation' ? 'active' : '' }}">
+                    <i class="bi bi-eye-fill me-2"></i>Stage observation
+                </a>
+                <a href="{{ path('apprenant_stages_index', {type: 'stage_application'}) }}" 
+                   class="tera-filter-pill {{ typeFilter == 'stage_application' ? 'active' : '' }}">
+                    <i class="bi bi-code-square me-2"></i>Stage application
+                </a>
+                <a href="{{ path('apprenant_stages_index', {type: 'stage_perfectionnement'}) }}" 
+                   class="tera-filter-pill {{ typeFilter == 'stage_perfectionnement' ? 'active' : '' }}">
+                    <i class="bi bi-star-fill me-2"></i>Stage perfectionnement
+                </a>
+                <a href="{{ path('apprenant_stages_index', {type: 'pfe'}) }}" 
+                   class="tera-filter-pill {{ typeFilter == 'pfe' ? 'active' : '' }}">
+                    <i class="bi bi-mortarboard-fill me-2"></i>PFE
+                </a>
+            </div>
+        </div>
+
+        <!-- Liste des offres -->
+        <div class="col-12">
+    {% if offres is empty %}
+        <div class="text-center py-5">
+            <div class="tera-empty-state">
+                <i class="bi bi-inbox display-1 mb-4"></i>
+                <h4 class="mb-3">Aucune offre disponible</h4>
+                <p class="text-muted mb-0">Revenez plus tard pour découvrir de nouvelles opportunités</p>
+            </div>
+        </div>
+    {% else %}
+        <div class="row g-4">
+            {% for offre in offres %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="job-card h-100">
+
+                        <!-- Top: logo + title -->
+                        <div class="job-card-top">
+                            <div class="job-logo">
+                                {# Si tu as un logo: <img src="{{ asset('uploads/' ~ offre.logo) }}" alt="logo"> #}
+                                <i class="bi bi-building"></i>
+                            </div>
+
+                            <div class="job-head">
+                                <h5 class="job-title mb-1">{{ offre.titre }}</h5>
+                                <div class="job-company">{{ offre.entreprise }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Description du poste -->
+                        {% if offre.description %}
+                            <div class="job-description">
+                                <div class="job-section-title">Description du poste</div>
+                                <p class="job-desc-text">
+                                    {{ offre.description|length > 150 ? offre.description|slice(0, 150) ~ '...' : offre.description }}
+                                </p>
+                            </div>
+                        {% endif %}
+
+                        <!-- Info grid -->
+                        <div class="job-grid">
+                            <div class="job-item">
+                                <div class="job-label">Domaine</div>
+                                <div class="job-value">{{ offre.domaine ?? '—' }}</div>
+                            </div>
+
+                            <div class="job-item">
+                                <div class="job-label">Type de stage</div>
+                                <div class="job-value">{{ offre.typeStage ? offre.typeStage|replace({'_': ' '})|title : '—' }}</div>
+                            </div>
+
+                            <div class="job-item">
+                                <div class="job-label">Lieu</div>
+                                <div class="job-value">{{ offre.lieu ?? '—' }}</div>
+                            </div>
+
+                            <div class="job-item">
+                                <div class="job-label">Profil demandé</div>
+                                <div class="job-value">
+                                    {{ offre.profilDemande ? offre.profilDemande : '—' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Published -->
+                        <div class="job-published">
+                            <i class="bi bi-calendar3"></i>
+                            Publié : {{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}
+                        </div>
+
+                        <!-- CTA -->
+                        <div class="job-cta">
+                            <a href="{{ path('apprenant_stage_show', {id: offre.id}) }}" class="job-btn">
+                                <i class="bi bi-rocket-takeoff me-2"></i> Postuler
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+    </div>
+</div>
+
+<style>
+.job-card{
+  background:#fff;
+  border-radius:22px;
+  border:1px solid #eef2f7;
+  box-shadow:0 10px 30px rgba(15, 23, 42, .06);
+  padding:18px;
+  transition:.25s ease;
+}
+
+.job-card:hover{
+  transform: translateY(-4px);
+  box-shadow:0 16px 40px rgba(15, 23, 42, .10);
+}
+
+.job-card-top{
+  display:flex;
+  gap:14px;
+  align-items:center;
+  margin-bottom:14px;
+}
+
+.job-logo{
+  width:54px;
+  height:54px;
+  border-radius:14px;
+  background:#f4f7ff;
+  border:1px solid #e8eeff;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+}
+
+.job-logo i{
+  font-size:22px;
+  color:#2f5bff;
+}
+
+.job-head .job-title{
+  font-weight:800;
+  font-size:1.05rem;
+  color:#0f172a;
+  line-height:1.2;
+}
+
+.job-company{
+  color:#64748b;
+  font-weight:600;
+  font-size:.95rem;
+}
+
+/* Description du poste */
+.job-description{
+  margin-bottom:14px;
+}
+
+.job-desc-text{
+  font-size:.90rem;
+  color:#64748b;
+  line-height:1.6;
+  margin-bottom:0;
+}
+
+/* Grid infos (2 colonnes) */
+.job-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:12px 14px;
+  margin-top:10px;
+  margin-bottom:14px;
+}
+
+.job-item{
+  background:#f8fafc;
+  border:1px solid #eef2f7;
+  border-radius:14px;
+  padding:10px 12px;
+}
+
+.job-label{
+  font-size:.78rem;
+  color:#94a3b8;
+  font-weight:700;
+  margin-bottom:2px;
+}
+
+.job-value{
+  font-size:.95rem;
+  color:#0f172a;
+  font-weight:800;
+}
+
+/* Skills */
+.job-section-title{
+  font-weight:800;
+  color:#0f172a;
+  margin:6px 0 10px;
+}
+
+.job-skills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.job-pill{
+  background:#eaf1ff;
+  color:#2563eb;
+  border:1px solid #dbe7ff;
+  padding:7px 12px;
+  border-radius:999px;
+  font-weight:800;
+  font-size:.82rem;
+  line-height:1;
+  white-space:nowrap;
+}
+
+.job-pill-more{
+  background:#f1f5f9;
+  color:#0f172a;
+  border-color:#e2e8f0;
+}
+
+/* Published */
+.job-published{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  color:#94a3b8;
+  font-weight:700;
+  font-size:.85rem;
+  margin:10px 0 14px;
+}
+
+.job-published i{
+  font-size:1rem;
+}
+
+/* CTA Button */
+.job-cta{
+  display:flex;
+  justify-content:center;
+}
+
+.job-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  max-width:260px;
+  padding:12px 16px;
+  border-radius:14px;
+  background:#2f5bff;
+  color:#fff;
+  font-weight:900;
+  text-decoration:none;
+  box-shadow:0 10px 22px rgba(47, 91, 255, .25);
+  transition:.2s ease;
+}
+
+.job-btn:hover{
+  background:#2449d6;
+  transform: translateY(-1px);
+  color:#fff;
+}
+
+/* Responsive */
+@media (max-width: 420px){
+  .job-grid{ grid-template-columns: 1fr; }
+}
+
+/* FILTRES STYLES */
+.tera-stage-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.tera-filter-pill {
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #64748b;
+    background: #f8fafc;
+    border: 2px solid transparent;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.tera-filter-pill:hover {
+    color: #667eea;
+    background: #f1f5f9;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.tera-filter-pill.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border-color: transparent;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.tera-filter-pill.active:hover {
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.tera-filter-pill i {
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .tera-stage-filters {
+        padding: 16px;
+    }
+    
+    .tera-filter-pill {
+        padding: 10px 18px;
+        font-size: 13px;
+    }
+}
+
+</style>
+{% endblock %}
