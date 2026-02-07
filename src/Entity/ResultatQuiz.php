@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\ResultatQuizRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ResultatQuizRepository::class)]
 class ResultatQuiz
@@ -17,45 +16,34 @@ class ResultatQuiz
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull]
     private ?User $apprenant = null;
 
     #[ORM\ManyToOne(targetEntity: Quiz::class)]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull]
     private ?Quiz $quiz = null;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
-    #[Assert\NotNull]
-    #[Assert\Range(min: 0, max: 100)]
-    private ?string $note = null;
+    private ?string $note = null; // note en %
 
     #[ORM\Column]
-    #[Assert\NotNull]
-    #[Assert\PositiveOrZero]
     private ?int $nombreBonnesReponses = null;
 
     #[ORM\Column]
-    #[Assert\NotNull]
-    #[Assert\Positive]
     private ?int $nombreTotalQuestions = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Assert\NotNull]
     private ?\DateTimeInterface $dateTentative = null;
 
     #[ORM\Column]
-    private bool $reussi = false;
+    private ?bool $reussi = false;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    private ?string $detailsReponses = null;
+    private ?string $detailsReponses = null; // JSON des réponses
 
     public function __construct()
     {
         $this->dateTentative = new \DateTime();
     }
-
-    // Getters & Setters ...
 
     public function getId(): ?int
     {
@@ -67,7 +55,7 @@ class ResultatQuiz
         return $this->apprenant;
     }
 
-    public function setApprenant(?User $apprenant): self
+    public function setApprenant(?User $apprenant): static
     {
         $this->apprenant = $apprenant;
         return $this;
@@ -78,7 +66,7 @@ class ResultatQuiz
         return $this->quiz;
     }
 
-    public function setQuiz(?Quiz $quiz): self
+    public function setQuiz(?Quiz $quiz): static
     {
         $this->quiz = $quiz;
         return $this;
@@ -89,7 +77,7 @@ class ResultatQuiz
         return $this->note;
     }
 
-    public function setNote(string $note): self
+    public function setNote(string $note): static
     {
         $this->note = $note;
         return $this;
@@ -100,7 +88,7 @@ class ResultatQuiz
         return $this->nombreBonnesReponses;
     }
 
-    public function setNombreBonnesReponses(int $nombreBonnesReponses): self
+    public function setNombreBonnesReponses(int $nombreBonnesReponses): static
     {
         $this->nombreBonnesReponses = $nombreBonnesReponses;
         return $this;
@@ -111,7 +99,7 @@ class ResultatQuiz
         return $this->nombreTotalQuestions;
     }
 
-    public function setNombreTotalQuestions(int $nombreTotalQuestions): self
+    public function setNombreTotalQuestions(int $nombreTotalQuestions): static
     {
         $this->nombreTotalQuestions = $nombreTotalQuestions;
         return $this;
@@ -122,18 +110,18 @@ class ResultatQuiz
         return $this->dateTentative;
     }
 
-    public function setDateTentative(\DateTimeInterface $dateTentative): self
+    public function setDateTentative(\DateTimeInterface $dateTentative): static
     {
         $this->dateTentative = $dateTentative;
         return $this;
     }
 
-    public function isReussi(): bool
+    public function isReussi(): ?bool
     {
         return $this->reussi;
     }
 
-    public function setReussi(bool $reussi): self
+    public function setReussi(bool $reussi): static
     {
         $this->reussi = $reussi;
         return $this;
@@ -144,7 +132,7 @@ class ResultatQuiz
         return $this->detailsReponses;
     }
 
-    public function setDetailsReponses(?string $detailsReponses): self
+    public function setDetailsReponses(?string $detailsReponses): static
     {
         $this->detailsReponses = $detailsReponses;
         return $this;
