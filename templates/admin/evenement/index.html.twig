@@ -1,0 +1,195 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Événements{% endblock %}
+
+{% block body %}
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0">Gestion des Événements</h4>
+                    <div class="page-title-right">
+                        <a href="{{ path('admin_evenement_statistiques') }}" class="btn btn-info me-2">
+                            <i class="mdi mdi-chart-bar"></i> Statistiques
+                        </a>
+                        <a href="{{ path('admin_evenement_new') }}" class="btn btn-primary">
+                            <i class="mdi mdi-plus"></i> Nouvel Événement
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Barre de recherche et filtres #}
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-3">
+                                <label for="search" class="form-label">Recherche</label>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       value="{{ currentSearch ?? '' }}" placeholder="Titre, description, lieu...">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="type" class="form-label">Type</label>
+                                <select class="form-select" id="type" name="type">
+                                    <option value="">Tous les types</option>
+                                    {% for t in typesDisponibles %}
+                                        <option value="{{ t }}" {% if currentType == t %}selected{% endif %}>{{ t }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="statut" class="form-label">Statut</label>
+                                <select class="form-select" id="statut" name="statut">
+                                    <option value="">Tous</option>
+                                    <option value="actif" {% if currentStatut == 'actif' %}selected{% endif %}>Actifs</option>
+                                    <option value="inactif" {% if currentStatut == 'inactif' %}selected{% endif %}>Inactifs</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sort" class="form-label">Trier par</label>
+                                <select class="form-select" id="sort" name="sort">
+                                    <option value="dateDebut" {% if currentSort == 'dateDebut' %}selected{% endif %}>Date début</option>
+                                    <option value="titre" {% if currentSort == 'titre' %}selected{% endif %}>Titre</option>
+                                    <option value="type" {% if currentSort == 'type' %}selected{% endif %}>Type</option>
+                                    <option value="nombrePlaces" {% if currentSort == 'nombrePlaces' %}selected{% endif %}>Places</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <label for="order" class="form-label">Ordre</label>
+                                <select class="form-select" id="order" name="order">
+                                    <option value="DESC" {% if currentOrder == 'DESC' %}selected{% endif %}>↓</option>
+                                    <option value="ASC" {% if currentOrder == 'ASC' %}selected{% endif %}>↑</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">&nbsp;</label>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary flex-fill">
+                                        <i class="mdi mdi-magnify"></i> Filtrer
+                                    </button>
+                                    <a href="{{ path('admin_evenement_index') }}" class="btn btn-secondary">
+                                        <i class="mdi mdi-refresh"></i>
+                                    </a>
+                                    <a href="{{ path('admin_evenement_export_pdf', app.request.query.all) }}" 
+                                       class="btn btn-danger" title="Export PDF">
+                                        <i class="mdi mdi-file-pdf"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="mb-3 d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-calendar-multiple"></i> Liste des Événements 
+                                <span class="badge bg-primary">{{ evenements|length }}</span>
+                            </h5>
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Image</th>
+                                        <th>
+                                            <a href="{{ path('admin_evenement_index', app.request.query.all|merge({'sort': 'titre', 'order': currentSort == 'titre' and currentOrder == 'ASC' ? 'DESC' : 'ASC'})) }}" class="text-dark">
+                                                Titre {% if currentSort == 'titre' %}<i class="mdi mdi-arrow-{{ currentOrder == 'ASC' ? 'up' : 'down' }}"></i>{% endif %}
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="{{ path('admin_evenement_index', app.request.query.all|merge({'sort': 'type', 'order': currentSort == 'type' and currentOrder == 'ASC' ? 'DESC' : 'ASC'})) }}" class="text-dark">
+                                                Type {% if currentSort == 'type' %}<i class="mdi mdi-arrow-{{ currentOrder == 'ASC' ? 'up' : 'down' }}"></i>{% endif %}
+                                            </a>
+                                        </th>
+                                        <th>
+                                            <a href="{{ path('admin_evenement_index', app.request.query.all|merge({'sort': 'dateDebut', 'order': currentSort == 'dateDebut' and currentOrder == 'ASC' ? 'DESC' : 'ASC'})) }}" class="text-dark">
+                                                Date Début {% if currentSort == 'dateDebut' %}<i class="mdi mdi-arrow-{{ currentOrder == 'ASC' ? 'up' : 'down' }}"></i>{% endif %}
+                                            </a>
+                                        </th>
+                                        <th>Lieu</th>
+                                        <th>
+                                            <a href="{{ path('admin_evenement_index', app.request.query.all|merge({'sort': 'nombrePlaces', 'order': currentSort == 'nombrePlaces' and currentOrder == 'ASC' ? 'DESC' : 'ASC'})) }}" class="text-dark">
+                                                Places {% if currentSort == 'nombrePlaces' %}<i class="mdi mdi-arrow-{{ currentOrder == 'ASC' ? 'up' : 'down' }}"></i>{% endif %}
+                                            </a>
+                                        </th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for evenement in evenements %}
+                                        <tr>
+                                            <td>
+                                                {% if evenement.image %}
+                                                    <img src="{{ asset('uploads/evenements/' ~ evenement.image) }}" alt="{{ evenement.titre }}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                                                {% else %}
+                                                    <div style="width: 60px; height: 60px; background: #f0f0f0; border-radius: 5px; display: flex; align-items: center; justify-content: center;">
+                                                        <i class="mdi mdi-calendar" style="font-size: 24px; color: #ccc;"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <strong>{{ evenement.titre }}</strong>
+                                            </td>
+                                            <td><span class="badge badge-info">{{ evenement.type }}</span></td>
+                                            <td>{{ evenement.dateDebut|date('d/m/Y H:i') }}</td>
+                                            <td>{{ evenement.lieu|length > 30 ? evenement.lieu|slice(0, 30) ~ '...' : evenement.lieu }}</td>
+                                            <td class="text-center">
+                                                {% if evenement.nombrePlaces %}
+                                                    <strong>{{ evenement.nombrePlaces }}</strong>
+                                                {% else %}
+                                                    <span class="text-muted">∞</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                {% if evenement.isActif %}
+                                                    <span class="badge badge-success">Actif</span>
+                                                {% else %}
+                                                    <span class="badge badge-secondary">Inactif</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ path('admin_evenement_single_pdf', {id: evenement.id}) }}" 
+                                                   class="btn btn-sm btn-danger" title="Export PDF">
+                                                    <i class="mdi mdi-file-pdf"></i>
+                                                </a>
+                                                <a href="{{ path('admin_evenement_edit', {id: evenement.id}) }}" class="btn btn-sm btn-primary">
+                                                    <i class="mdi mdi-pencil"></i>
+                                                </a>
+                                                <form method="post" action="{{ path('admin_evenement_delete', {id: evenement.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted py-4">
+                                                <i class="mdi mdi-calendar-remove" style="font-size: 48px;"></i>
+                                                <p class="mt-2">Aucun événement trouvé</p>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
