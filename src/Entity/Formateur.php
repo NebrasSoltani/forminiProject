@@ -55,12 +55,11 @@ class Formateur
         return $this->user;
     }
 
-    public function setUser(?User $user): self
-{
-    $this->user = $user;
-    return $this;
-}
-
+    public function setUser(User $user): static
+    {
+        $this->user = $user;
+        return $this;
+    }
 
     public function getSpecialite(): ?string
     {

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Formation;
 use App\Entity\Quiz;
 use App\Form\QuizType;
 use App\Repository\FormationRepository;
@@ -14,24 +15,23 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/formateur/formation/{formationId}/quiz')]
-#[IsGranted('ROLE_FORMATEUR')]
+#[IsGranted('ROLE_USER')]
 class QuizController extends AbstractController
 {
     #[Route('/', name: 'quiz_index', methods: ['GET'])]
-    public function index(
-        int $formationId,
-        FormationRepository $formationRepository,
-        QuizRepository $quizRepository
-    ): Response {
+    public function index(int $formationId, FormationRepository $formationRepository, QuizRepository $quizRepository): Response
+    {
         $formation = $formationRepository->find($formationId);
-
+        
         if (!$formation) {
             throw $this->createNotFoundException('Formation non trouvée');
         }
 
-        $this->denyAccessUnlessGranted('edit', $formation); // ou votre voter
+        if ($formation->getFormateur() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
 
-        $quizzes = $quizRepository->findBy(['formation' => $formation], ['id' => 'DESC']);
+        $quizzes = $quizRepository->findByFormation($formationId);
 
         return $this->render('quiz/index.html.twig', [
             'formation' => $formation,
@@ -40,19 +40,17 @@ class QuizController extends AbstractController
     }
 
     #[Route('/new', name: 'quiz_new', methods: ['GET', 'POST'])]
-    public function new(
-        Request $request,
-        int $formationId,
-        FormationRepository $formationRepository,
-        EntityManagerInterface $em
-    ): Response {
+    public function new(Request $request, int $formationId, FormationRepository $formationRepository, EntityManagerInterface $em): Response
+    {
         $formation = $formationRepository->find($formationId);
-
+        
         if (!$formation) {
             throw $this->createNotFoundException('Formation non trouvée');
         }
 
-        $this->denyAccessUnlessGranted('edit', $formation);
+        if ($formation->getFormateur() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
 
         $quiz = new Quiz();
         $quiz->setFormation($formation);
@@ -71,25 +69,23 @@ class QuizController extends AbstractController
         return $this->render('quiz/new.html.twig', [
             'formation' => $formation,
             'quiz' => $quiz,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'quiz_show', methods: ['GET'])]
-    public function show(
-        int $formationId,
-        int $id,
-        FormationRepository $formationRepository,
-        QuizRepository $quizRepository
-    ): Response {
+    public function show(int $formationId, int $id, FormationRepository $formationRepository, QuizRepository $quizRepository): Response
+    {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($id);
-
-        if (!$formation || !$quiz || $quiz->getFormation() !== $formation) {
-            throw $this->createNotFoundException('Quiz ou formation introuvable');
+        
+        if (!$formation || !$quiz) {
+            throw $this->createNotFoundException();
         }
 
-        $this->denyAccessUnlessGranted('view', $quiz);
+        if ($formation->getFormateur() !== $this->getUser() || $quiz->getFormation() !== $formation) {
+            throw $this->createAccessDeniedException();
+        }
 
         return $this->render('quiz/show.html.twig', [
             'formation' => $formation,
@@ -98,22 +94,18 @@ class QuizController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'quiz_edit', methods: ['GET', 'POST'])]
-    public function edit(
-        Request $request,
-        int $formationId,
-        int $id,
-        FormationRepository $formationRepository,
-        QuizRepository $quizRepository,
-        EntityManagerInterface $em
-    ): Response {
+    public function edit(Request $request, int $formationId, int $id, FormationRepository $formationRepository, QuizRepository $quizRepository, EntityManagerInterface $em): Response
+    {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($id);
-
-        if (!$formation || !$quiz || $quiz->getFormation() !== $formation) {
-            throw $this->createNotFoundException('Quiz ou formation introuvable');
+        
+        if (!$formation || !$quiz) {
+            throw $this->createNotFoundException();
         }
 
-        $this->denyAccessUnlessGranted('edit', $quiz);
+        if ($formation->getFormateur() !== $this->getUser() || $quiz->getFormation() !== $formation) {
+            throw $this->createAccessDeniedException();
+        }
 
         $form = $this->createForm(QuizType::class, $quiz);
         $form->handleRequest($request);
@@ -128,29 +120,25 @@ class QuizController extends AbstractController
         return $this->render('quiz/edit.html.twig', [
             'formation' => $formation,
             'quiz' => $quiz,
-            'form' => $form->createView(),
+            'form' => $form,
         ]);
     }
 
     #[Route('/{id}', name: 'quiz_delete', methods: ['POST'])]
-    public function delete(
-        Request $request,
-        int $formationId,
-        int $id,
-        FormationRepository $formationRepository,
-        QuizRepository $quizRepository,
-        EntityManagerInterface $em
-    ): Response {
+    public function delete(Request $request, int $formationId, int $id, FormationRepository $formationRepository, QuizRepository $quizRepository, EntityManagerInterface $em): Response
+    {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($id);
-
-        if (!$formation || !$quiz || $quiz->getFormation() !== $formation) {
-            throw $this->createNotFoundException('Quiz ou formation introuvable');
+        
+        if (!$formation || !$quiz) {
+            throw $this->createNotFoundException();
         }
 
-        $this->denyAccessUnlessGranted('delete', $quiz);
+        if ($formation->getFormateur() !== $this->getUser() || $quiz->getFormation() !== $formation) {
+            throw $this->createAccessDeniedException();
+        }
 
-        if ($this->isCsrfTokenValid('delete' . $quiz->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$quiz->getId(), $request->request->get('_token'))) {
             $em->remove($quiz);
             $em->flush();
 

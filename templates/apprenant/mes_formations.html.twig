@@ -1,0 +1,470 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Formations{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <!-- En-tête moderne -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-5 fw-bold text-dark mb-2">Mes Formations</h1>
+                    <p class="lead text-muted mb-0">Suivez votre progression et continuez votre apprentissage</p>
+                </div>
+                <a href="{{ path('apprenant_formations_index') }}" class="tera-btn-discover">
+                    <i class="bi bi-search me-2"></i>Découvrir plus
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% if inscriptions is empty %}
+        <div class="tera-empty-state">
+            <div class="tera-empty-icon">
+                <i class="bi bi-book"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-3">Aucune formation pour le moment</h3>
+            <p class="text-muted mb-4">Commencez votre parcours d'apprentissage dès maintenant !</p>
+            <a href="{{ path('apprenant_formations_index') }}" class="tera-btn-explore">
+                <i class="bi bi-mortarboard me-2"></i>Explorer les formations
+            </a>
+        </div>
+    {% else %}
+        <!-- Filtres modernes -->
+        <div class="tera-filter-pills mb-4">
+            <button class="tera-filter-pill active" data-filter="all">
+                <span class="tera-filter-label">Toutes</span>
+                <span class="tera-filter-count">{{ inscriptions|length }}</span>
+            </button>
+            <button class="tera-filter-pill" data-filter="en_cours">
+                <span class="tera-filter-label">En cours</span>
+                <span class="tera-filter-count">{{ inscriptions|filter(i => i.statut == 'en_cours')|length }}</span>
+            </button>
+            <button class="tera-filter-pill" data-filter="terminee">
+                <span class="tera-filter-label">Terminées</span>
+                <span class="tera-filter-count">{{ inscriptions|filter(i => i.statut == 'terminee')|length }}</span>
+            </button>
+        </div>
+
+        <div class="row g-4">
+            {% for inscription in inscriptions %}
+            <div class="col-lg-4 col-md-6 formation-card" data-statut="{{ inscription.statut }}">
+                <div class="card tera-card h-100 border-0 overflow-hidden">
+                    <!-- HEADER IMAGE -->
+                    <div class="tera-cover position-relative">
+                        {% if inscription.formation.imageCouverture %}
+                            <img src="{{ asset('uploads/images/' ~ inscription.formation.imageCouverture) }}" 
+                                 class="tera-cover-img"
+                                 alt="{{ inscription.formation.titre }}">
+                        {% else %}
+                            <div class="tera-cover-img d-flex align-items-center justify-content-center"
+                                 style="background:#f2f4f7;">
+                                <i class="bi bi-mortarboard-fill" style="font-size:4rem;opacity:.15;"></i>
+                            </div>
+                        {% endif %}
+
+                        <!-- Badge Statut -->
+                        {% if inscription.statut == 'en_cours' %}
+                            <div class="tera-status-badge tera-status-progress">
+                                <i class="bi bi-play-circle me-1"></i>En cours
+                            </div>
+                        {% elseif inscription.statut == 'terminee' %}
+                            <div class="tera-status-badge tera-status-completed">
+                                <i class="bi bi-check-circle me-1"></i>Terminée
+                            </div>
+                        {% elseif inscription.statut == 'abandonnee' %}
+                            <div class="tera-status-badge tera-status-abandoned">
+                                <i class="bi bi-x-circle me-1"></i>Abandonnée
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="p-3 p-md-4">
+                        <div class="tera-category mb-2">
+                            {{ inscription.formation.categorie }}
+                        </div>
+
+                        <h5 class="tera-title mb-3">
+                            {{ inscription.formation.titre }}
+                        </h5>
+
+                        <!-- Progression -->
+                        <div class="tera-progress-section mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="tera-progress-label">Progression</span>
+                                <span class="tera-progress-value">{{ inscription.progression }}%</span>
+                            </div>
+                            <div class="tera-progress-bar-container">
+                                <div class="tera-progress-bar" style="width: {{ inscription.progression }}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Infos dates -->
+                        <div class="tera-info-dates mb-3">
+                            <div class="tera-info-date-item">
+                                <i class="bi bi-calendar-check"></i>
+                                <span>Inscrit le {{ inscription.dateInscription|date('d/m/Y') }}</span>
+                            </div>
+                            {% if inscription.dateTerminee %}
+                                <div class="tera-info-date-item text-success">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Terminé le {{ inscription.dateTerminee|date('d/m/Y') }}</span>
+                                </div>
+                            {% endif %}
+                            {% if inscription.certificatObtenu %}
+                                <div class="tera-info-date-item tera-certificat">
+                                    <i class="bi bi-award-fill"></i>
+                                    <span>Certificat obtenu</span>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Bouton d'action -->
+                        <div class="mt-auto">
+                            {% if inscription.statut == 'en_cours' %}
+                                <a href="{{ path('apprenant_suivre_formation', {'id': inscription.formation.id}) }}" 
+                                   class="tera-btn-continue-formation w-100">
+                                    <i class="bi bi-play-circle me-2"></i>Continuer
+                                </a>
+                            {% elseif inscription.statut == 'terminee' %}
+                                <a href="{{ path('apprenant_suivre_formation', {'id': inscription.formation.id}) }}" 
+                                   class="tera-btn-review-formation w-100">
+                                    <i class="bi bi-eye me-2"></i>Revoir
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* Bouton Découvrir */
+.tera-btn-discover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.tera-btn-discover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+/* Empty State */
+.tera-empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.tera-empty-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    color: #667eea;
+}
+
+.tera-btn-explore {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 40px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 16px;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.tera-btn-explore:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+/* Filter Pills */
+.tera-filter-pills {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tera-filter-pill {
+    background: white;
+    border: 2px solid #e2e8f0;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tera-filter-pill:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+}
+
+.tera-filter-pill.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.tera-filter-label {
+    font-size: 14px;
+}
+
+.tera-filter-count {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.tera-filter-pill.active .tera-filter-count {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* CARD (réutilisation du style index) */
+.tera-card {
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, .08);
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.tera-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(15, 23, 42, .12);
+}
+
+/* IMAGE HEADER */
+.tera-cover {
+    height: 230px;
+    overflow: hidden;
+    background: #eef2f6;
+    position: relative;
+}
+
+.tera-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Status Badge */
+.tera-status-badge {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 13px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tera-status-progress {
+    background: rgba(23, 162, 184, 0.9);
+    color: white;
+}
+
+.tera-status-completed {
+    background: rgba(16, 185, 129, 0.9);
+    color: white;
+}
+
+.tera-status-abandoned {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+}
+
+/* Text styles */
+.tera-category {
+    color: #64748b;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.tera-title {
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    font-size: 20px;
+}
+
+/* Progression */
+.tera-progress-section {
+    background: #f8f9fa;
+    padding: 14px;
+    border-radius: 12px;
+}
+
+.tera-progress-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.tera-progress-value {
+    font-size: 15px;
+    font-weight: 800;
+    color: #667eea;
+}
+
+.tera-progress-bar-container {
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 50px;
+    overflow: hidden;
+}
+
+.tera-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50px;
+    transition: width 0.5s ease;
+}
+
+/* Info Dates */
+.tera-info-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.tera-info-date-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.tera-info-date-item i {
+    font-size: 16px;
+}
+
+.tera-certificat {
+    color: #f59e0b !important;
+    font-weight: 700;
+}
+
+/* Boutons d'action */
+.tera-btn-continue-formation {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    box-shadow: 0 8px 20px rgba(23, 162, 184, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tera-btn-continue-formation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(23, 162, 184, 0.4);
+    color: white;
+}
+
+.tera-btn-review-formation {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 800;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tera-btn-review-formation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.4);
+    color: white;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tera-filter-pills {
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.tera-filter-pill');
+    const cards = document.querySelectorAll('.formation-card');
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active button
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            const filter = this.dataset.filter;
+
+            // Filter cards with animation
+            cards.forEach(card => {
+                if (filter === 'all' || card.dataset.statut === filter) {
+                    card.style.display = 'block';
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'scale(1)';
+                    }, 10);
+                } else {
+                    card.style.opacity = '0';
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                    }, 300);
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}
