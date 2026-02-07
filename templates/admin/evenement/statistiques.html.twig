@@ -1,0 +1,313 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques des Événements{% endblock %}
+
+{% block body %}
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0"><i class="mdi mdi-chart-bar"></i> Statistiques des Événements</h4>
+                    <div class="page-title-right">
+                        <a href="{{ path('admin_evenement_index') }}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Cartes statistiques principales #}
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Événements
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-calendar-multiple text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Événements Actifs
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.actifs }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-check-circle text-success" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    À Venir
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.a_venir }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-clock-outline text-info" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    En Cours
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.en_cours }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-play-circle text-warning" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-secondary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                    Événements Passés
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.passes }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-history text-secondary" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-dark shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                                    Moyenne Places
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.moyenne_places }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-account-multiple text-dark" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Graphiques #}
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="mdi mdi-chart-pie"></i> Répartition par Type</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if stats.par_type|length > 0 %}
+                            <canvas id="chartType" width="400" height="300"></canvas>
+                            
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Type</th>
+                                            <th class="text-end">Nombre</th>
+                                            <th class="text-end">%</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in stats.par_type %}
+                                            <tr>
+                                                <td><span class="badge badge-info">{{ item.type }}</span></td>
+                                                <td class="text-end"><strong>{{ item.nombre }}</strong></td>
+                                                <td class="text-end">
+                                                    {{ ((item.nombre / stats.total) * 100)|number_format(1) }}%
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">Aucune donnée disponible</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="mdi mdi-trophy"></i> Top 5 Événements par Capacité</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if topEvenements|length > 0 %}
+                            <div class="list-group">
+                                {% for evenement in topEvenements %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ evenement.titre }}</h6>
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-calendar"></i> {{ evenement.dateDebut|date('d/m/Y') }}
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-primary rounded-pill fs-6">
+                                                {{ evenement.nombrePlaces }} places
+                                            </span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">Aucun événement avec nombre de places défini</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Graphique d'état #}
+        <div class="row">
+            <div class="col-12 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="mdi mdi-chart-bar"></i> État des Événements</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartStatut" width="400" height="150"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Chart.js #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Graphique par type (Pie Chart)
+    {% if stats.par_type|length > 0 %}
+    const ctxType = document.getElementById('chartType').getContext('2d');
+    new Chart(ctxType, {
+        type: 'pie',
+        data: {
+            labels: [{% for item in stats.par_type %}'{{ item.type }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for item in stats.par_type %}{{ item.nombre }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                    '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+    {% endif %}
+
+    // Graphique de statut (Bar Chart)
+    const ctxStatut = document.getElementById('chartStatut').getContext('2d');
+    new Chart(ctxStatut, {
+        type: 'bar',
+        data: {
+            labels: ['À Venir', 'En Cours', 'Passés', 'Actifs', 'Total'],
+            datasets: [{
+                label: 'Nombre d\'événements',
+                data: [
+                    {{ stats.a_venir }},
+                    {{ stats.en_cours }},
+                    {{ stats.passes }},
+                    {{ stats.actifs }},
+                    {{ stats.total }}
+                ],
+                backgroundColor: [
+                    'rgba(23, 162, 184, 0.8)',
+                    'rgba(255, 193, 7, 0.8)',
+                    'rgba(108, 117, 125, 0.8)',
+                    'rgba(40, 167, 69, 0.8)',
+                    'rgba(0, 123, 255, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(23, 162, 184, 1)',
+                    'rgba(255, 193, 7, 1)',
+                    'rgba(108, 117, 125, 1)',
+                    'rgba(40, 167, 69, 1)',
+                    'rgba(0, 123, 255, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+
+<style>
+.border-left-primary { border-left: 4px solid #4e73df !important; }
+.border-left-success { border-left: 4px solid #1cc88a !important; }
+.border-left-info { border-left: 4px solid #36b9cc !important; }
+.border-left-warning { border-left: 4px solid #f6c23e !important; }
+.border-left-secondary { border-left: 4px solid #858796 !important; }
+.border-left-dark { border-left: 4px solid #5a5c69 !important; }
+.text-xs { font-size: .7rem; }
+</style>
+{% endblock %}
