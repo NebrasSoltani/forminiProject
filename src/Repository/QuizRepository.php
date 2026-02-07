@@ -16,29 +16,28 @@ class QuizRepository extends ServiceEntityRepository
         parent::__construct($registry, Quiz::class);
     }
 
-    /**
-     * Trouver tous les quiz d'une formation
-     */
-    public function findByFormation(int $formationId): array
-    {
-        return $this->createQueryBuilder('q')
-            ->andWhere('q.formation = :formationId')
-            ->setParameter('formationId', $formationId)
-            ->orderBy('q.id', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
+//    /**
+//     * @return Quiz[] Returns an array of Quiz objects
+//     */
+//    public function findByExampleField($value): array
+//    {
+//        return $this->createQueryBuilder('q')
+//            ->andWhere('q.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->orderBy('q.id', 'ASC')
+//            ->setMaxResults(10)
+//            ->getQuery()
+//            ->getResult()
+//        ;
+//    }
 
-    /**
-     * Compter le nombre de quiz d'une formation
-     */
-    public function countByFormation(int $formationId): int
-    {
-        return $this->createQueryBuilder('q')
-            ->select('COUNT(q.id)')
-            ->andWhere('q.formation = :formationId')
-            ->setParameter('formationId', $formationId)
-            ->getQuery()
-            ->getSingleScalarResult();
-    }
+//    public function findOneBySomeField($value): ?Quiz
+//    {
+//        return $this->createQueryBuilder('q')
+//            ->andWhere('q.exampleField = :val')
+//            ->setParameter('val', $value)
+//            ->getQuery()
+//            ->getOneOrNullResult()
+//        ;
+//    }
 }
