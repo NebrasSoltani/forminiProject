@@ -1,12 +1,11 @@
 <?php
 
 namespace App\Controller;
-use App\Entity\User;
 
+use App\Entity\User;
 use App\Entity\Formateur;
 use App\Entity\Apprenant;
 use App\Entity\Societe;
-
 use App\Form\ProfileEditType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
