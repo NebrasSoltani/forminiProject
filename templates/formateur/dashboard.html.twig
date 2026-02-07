@@ -1,0 +1,268 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Formateur{% endblock %}
+
+{% block body %}
+<style>
+
+body{
+    font-size: 14px;
+}
+    .formation-card {
+        border: none;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border-left: 4px solid #667eea;
+        background: #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .formation-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateX(5px);
+    }
+
+</style>
+
+
+
+ <div class="page-breadcrumb">
+                <div class="row">
+                    <div class="col-7 align-self-center">
+                        <h3 class="page-title text-truncate text-dark font-weight-medium mb-1">Good Morning Jason!</h3>
+                        <div class="d-flex align-items-center">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb m-0 p-0">
+                                    <li class="breadcrumb-item"><a href="index.html">Dashboard Formateur</a>
+                                    </li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                    <div class="col-5 align-self-center">
+                        <div class="customize-input float-right">
+                            <select class="custom-select custom-select-set form-control bg-white border-0 custom-shadow custom-radius">
+                                <option selected>Aug 19</option>
+                                <option value="1">July 19</option>
+                                <option value="2">Jun 19</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+          <div class="container-fluid">
+                <!-- *************************************************************** -->
+                <!-- Start First Cards -->
+                <!-- *************************************************************** -->
+                <div class="card-group">
+                    <div class="card border-right">
+                        <div class="card-body">
+                            <div class="d-flex d-lg-flex d-md-block align-items-center">
+                                <div>
+                                    <div class="d-inline-flex align-items-center">
+                                        <h2 class="text-dark mb-1 font-weight-medium">{{ stats.total_formations }}</h2>
+                                        <span
+                                            class="badge bg-primary font-12 text-white font-weight-medium badge-pill ml-2 d-lg-block d-md-none">+18.33%</span>
+                                    </div>
+                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Mes formation</h6>
+                                </div>
+<div class="ml-auto mt-md-3 mt-lg-0">
+    <span class="opacity-7 text-muted">
+        <i data-feather="book-open"></i>
+    </span>
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card border-right">
+                        <div class="card-body">
+                            <div class="d-flex d-lg-flex d-md-block align-items-center">
+                                <div>
+                                    <h2 class="text-dark mb-1 w-100 text-truncate font-weight-medium">{{ stats.formations_publiees }}</h2>
+                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Publiée
+                                    </h6>
+                                </div>
+                       <div class="ml-auto mt-md-3 mt-lg-0">
+    <span class="opacity-7 text-muted">
+        <i data-feather="check-circle"></i>
+    </span>
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card border-right">
+                        <div class="card-body">
+                            <div class="d-flex d-lg-flex d-md-block align-items-center">
+                                <div>
+                                    <div class="d-inline-flex align-items-center">
+                                        <h2 class="text-dark mb-1 font-weight-medium">{{ stats.formations_brouillon }}</h2>
+                                        <span
+                                            class="badge bg-danger font-12 text-white font-weight-medium badge-pill ml-2 d-md-none d-lg-block">-18.33%</span>
+                                    </div>
+                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Brouillons</h6>
+                                </div>
+                        <div class="ml-auto mt-md-3 mt-lg-0">
+    <span class="opacity-7 text-muted">
+        <i data-feather="edit-3"></i>
+    </span>
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex d-lg-flex d-md-block align-items-center">
+                                <div>
+                                    <h2 class="text-dark mb-1 font-weight-medium">{{ stats.total_inscrits }}</h2>
+                                    <h6 class="text-muted font-weight-normal mb-0 w-100 text-truncate">Total Inscrits</h6>
+                                </div>
+                        <div class="ml-auto mt-md-3 mt-lg-0">
+    <span class="opacity-7 text-muted">
+        <i data-feather="users"></i>
+    </span>
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+    <!-- Mes Formations -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card" style="border-radius: 12px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <div class="card-header bg-white border-0" style="border-radius: 12px 12px 0 0;">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h4 class="mb-0"><i class="fas fa-graduation-cap mr-2 text-primary"></i>Mes formations récentes</h4>
+                        <div class="dropdown">
+                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" id="dd1" data-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="{{ path('formation_index') }}">
+                                    <i class="fas fa-list mr-2"></i>Voir tout
+                                </a>
+                                <a class="dropdown-item" href="{{ path('formation_new') }}">
+                                    <i class="fas fa-plus-circle mr-2"></i>Nouvelle formation
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    {% if formations is empty %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                            <p class="text-muted">Aucune formation créée pour le moment</p>
+                            <a href="{{ path('formation_new') }}" class="btn btn-primary mt-3">
+                                <i class="fas fa-plus-circle mr-2"></i>Créer ma première formation
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="list-group list-group-flush">
+                            {% for formation in formations|slice(0, 5) %}
+                                <a href="{{ path('formation_show', {'id': formation.id}) }}" 
+                                   class="list-group-item list-group-item-action formation-card mb-3 p-3">
+                                    <div class="d-flex w-100 justify-content-between align-items-start">
+                                        <div>
+                                            <h6 class="mb-2 font-weight-bold">
+                                                <i class="fas fa-book mr-2 text-primary"></i>{{ formation.titre }}
+                                            </h6>
+                                            <div class="d-flex align-items-center">
+                                                <small class="text-muted mr-3">
+                                                    <i class="fas fa-users mr-1"></i>{{ formation.inscriptions|length }} inscrit(s)
+                                                </small>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-file-alt mr-1"></i>{{ formation.nombreLecons }} leçons
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            {% if formation.statut == 'publiee' %}
+                                                <span class="badge badge-success px-3 py-2">
+                                                    <i class="fas fa-check-circle mr-1"></i>Publiée
+                                                </span>
+                                            {% else %}
+                                                <span class="badge badge-secondary px-3 py-2">
+                                                    <i class="fas fa-pencil-alt mr-1"></i>{{ formation.statut|capitalize }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+
+                        {% if formations|length > 5 %}
+                            <div class="text-center mt-3">
+                                <a href="{{ path('formation_index') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-arrow-right mr-2"></i>Voir toutes mes formations
+                                </a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Rapides -->
+        <div class="col-lg-4 mb-4">
+            <div class="card action-card" style="border: none;">
+                <div class="card-body p-4">
+                    <h5 class="mb-4 text-white"><i class="fas fa-bolt mr-2"></i>Actions rapides</h5>
+                    
+                    <a href="{{ path('formation_new') }}" class="btn btn-light btn-block mb-3 py-3">
+                        <i class="fas fa-plus-circle mr-2"></i>Nouvelle formation
+                    </a>
+                    
+                    <a href="{{ path('formation_index') }}" class="btn btn-outline-light btn-block mb-3 py-3">
+                        <i class="fas fa-list mr-2"></i>Mes formations
+                    </a>
+                </div>
+            </div>
+
+            <!-- Statistiques supplémentaires -->
+            <div class="card mt-4" style="border-radius: 12px; border: none; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                <div class="card-body">
+                    <h5 class="mb-4"><i class="fas fa-chart-line mr-2 text-success"></i>Statistiques</h5>
+                    
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted"><i class="fas fa-user-graduate mr-2"></i>Inscrits actifs</span>
+                            <strong class="text-success">{{ stats.total_inscrits }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted"><i class="fas fa-book-open mr-2"></i>Formations publiées</span>
+                            <strong class="text-primary">{{ stats.formations_publiees }}</strong>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted"><i class="fas fa-percentage mr-2"></i>Taux de publication</span>
+                            <strong class="text-info">
+                                {% if stats.total_formations > 0 %}
+                                    {{ ((stats.formations_publiees / stats.total_formations) * 100)|round }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock %}
