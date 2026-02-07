@@ -1,0 +1,666 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ offre.titre }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <!-- Breadcrumb Modern -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-transparent p-0">
+            <li class="breadcrumb-item"><a href="{{ path('apprenant_stages_index') }}" class="text-decoration-none"><i class="bi bi-briefcase me-1"></i>Stages</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('apprenant_stages_index', {type: offre.typeStage}) }}" class="text-decoration-none">{{ offre.typeStage|replace({'_': ' '})|title }}</a></li>
+            <li class="breadcrumb-item active">{{ offre.titre }}</li>
+        </ol>
+    </nav>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('warning') %}
+        <div class="alert alert-warning alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+            <i class="bi bi-x-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    <div class="row g-4">
+        <!-- Colonne principale -->
+        <div class="col-lg-8">
+            <!-- En-tête de l'offre -->
+            <div class="mb-4">
+                <h1 class="display-5 fw-bold text-dark mb-3">{{ offre.titre }}</h1>
+                
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="badge tera-badge-type">
+                        {% if offre.typeStage == 'stage_observation' %}
+                            <i class="bi bi-eye-fill me-1"></i>
+                        {% elseif offre.typeStage == 'stage_application' %}
+                            <i class="bi bi-code-square me-1"></i>
+                        {% elseif offre.typeStage == 'stage_perfectionnement' %}
+                            <i class="bi bi-star-fill me-1"></i>
+                        {% elseif offre.typeStage == 'pfe' %}
+                            <i class="bi bi-mortarboard-fill me-1"></i>
+                        {% endif %}
+                        {{ offre.typeStage|replace({'_': ' '})|title }}
+                    </span>
+                    {% if offre.domaine %}
+                        <span class="badge tera-badge-domain">{{ offre.domaine }}</span>
+                    {% endif %}
+                    {% if offre.remuneration %}
+                        <span class="badge tera-badge-salary"><i class="bi bi-cash-coin me-1"></i>Rémunéré</span>
+                    {% endif %}
+                </div>
+
+                <!-- Stats Offre -->
+                <div class="d-flex flex-wrap gap-4 text-muted mb-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="tera-icon-badge">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <span class="fw-semibold">{{ offre.entreprise }}</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="tera-icon-badge">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <span>{{ offre.lieu }}</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="tera-icon-badge">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <span>{{ offre.duree }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description du poste -->
+            <div class="tera-content-card mb-4">
+                <div class="card-body">
+                    <h4 class="tera-section-title">Description du poste</h4>
+                    <p class="tera-text-content">{{ offre.description|nl2br }}</p>
+
+                    <hr class="my-4">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="tera-info-box">
+                                <div class="tera-info-icon">
+                                    <i class="bi bi-calendar-event"></i>
+                                </div>
+                                <div>
+                                    <div class="tera-info-label">Date de début</div>
+                                    <div class="tera-info-value">{{ offre.dateDebut|date('d/m/Y') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="tera-info-box">
+                                <div class="tera-info-icon">
+                                    <i class="bi bi-calendar-check"></i>
+                                </div>
+                                <div>
+                                    <div class="tera-info-label">Date de fin</div>
+                                    <div class="tera-info-value">{{ offre.dateFin|date('d/m/Y') }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profil demandé -->
+            {% if offre.profilDemande %}
+            <div class="tera-content-card mb-4">
+                <div class="card-body">
+                    <h4 class="tera-section-title"><i class="bi bi-person-check me-2"></i>Profil recherché</h4>
+                    <p class="tera-text-content">{{ offre.profilDemande|nl2br }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Compétences -->
+            {% if offre.competencesRequises %}
+            <div class="tera-content-card mb-4">
+                <div class="card-body">
+                    <h4 class="tera-section-title"><i class="bi bi-gear me-2"></i>Compétences requises</h4>
+                    <p class="tera-text-content">{{ offre.competencesRequises|nl2br }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Contact -->
+            {% if offre.contactEmail or offre.contactTel %}
+            <div class="tera-content-card mb-4">
+                <div class="card-body">
+                    <h4 class="tera-section-title"><i class="bi bi-telephone me-2"></i>Informations de contact</h4>
+                    
+                    <div class="row g-3">
+                        {% if offre.contactEmail %}
+                        <div class="col-md-6">
+                            <div class="tera-contact-item">
+                                <div class="tera-contact-icon">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="tera-contact-label">Email</div>
+                                    <a href="mailto:{{ offre.contactEmail }}" class="tera-contact-value">{{ offre.contactEmail }}</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if offre.contactTel %}
+                        <div class="col-md-6">
+                            <div class="tera-contact-item">
+                                <div class="tera-contact-icon">
+                                    <i class="bi bi-telephone-fill"></i>
+                                </div>
+                                <div>
+                                    <div class="tera-contact-label">Téléphone</div>
+                                    <a href="tel:{{ offre.contactTel }}" class="tera-contact-value">{{ offre.contactTel }}</a>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar droit -->
+        <div class="col-lg-4">
+            <div class="tera-sidebar-card sticky-top" style="top: 20px;">
+                <div class="card-body p-4">
+                    <!-- Entreprise -->
+                    <div class="text-center mb-4">
+                        <div class="tera-company-logo-large mb-3">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <h4 class="fw-bold mb-1">{{ offre.entreprise }}</h4>
+                        <p class="text-muted mb-0">{{ offre.lieu }}</p>
+                    </div>
+
+                    <!-- Statut candidature -->
+                    {% if dejaPostule %}
+                        <div class="tera-status-applied mb-4">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            Candidature envoyée
+                        </div>
+                    {% else %}
+                        <a href="{{ path('apprenant_stage_postuler', {id: offre.id}) }}" class="tera-btn-postuler w-100 mb-3">
+                            <i class="bi bi-send-fill me-2"></i>Postuler maintenant
+                        </a>
+                    {% endif %}
+
+                    <a href="{{ path('apprenant_stages_index') }}" class="tera-btn-back w-100 mb-4">
+                        <i class="bi bi-arrow-left me-2"></i>Retour aux offres
+                    </a>
+
+                    <hr class="my-4">
+
+                    <!-- Informations clés -->
+                    <h5 class="tera-sidebar-title mb-3"><i class="bi bi-info-circle me-2"></i>Informations</h5>
+                    <div class="tera-info-list">
+                        <div class="tera-info-item">
+                            <i class="bi bi-calendar-range"></i>
+                            <div>
+                                <div class="tera-info-label">Durée</div>
+                                <div class="tera-info-value">{{ offre.duree }}</div>
+                            </div>
+                        </div>
+                        <div class="tera-info-item">
+                            <i class="bi bi-calendar-event"></i>
+                            <div>
+                                <div class="tera-info-label">Début</div>
+                                <div class="tera-info-value">{{ offre.dateDebut|date('d/m/Y') }}</div>
+                            </div>
+                        </div>
+                        <div class="tera-info-item">
+                            <i class="bi bi-calendar-check"></i>
+                            <div>
+                                <div class="tera-info-label">Fin</div>
+                                <div class="tera-info-value">{{ offre.dateFin|date('d/m/Y') }}</div>
+                            </div>
+                        </div>
+                        {% if offre.domaine %}
+                        <div class="tera-info-item">
+                            <i class="bi bi-tag"></i>
+                            <div>
+                                <div class="tera-info-label">Domaine</div>
+                                <div class="tera-info-value">{{ offre.domaine }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% if offre.remuneration %}
+                        <div class="tera-info-item">
+                            <i class="bi bi-cash-coin"></i>
+                            <div>
+                                <div class="tera-info-label">Rémunération</div>
+                                <div class="tera-info-value">{{ offre.remuneration }}</div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="tera-info-item">
+                            <i class="bi bi-calendar3"></i>
+                            <div>
+                                <div class="tera-info-label">Publié le</div>
+                                <div class="tera-info-value">{{ offre.datePublication|date('d/m/Y') }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Partage -->
+                    <h6 class="tera-sidebar-title mb-3"><i class="bi bi-share me-2"></i>Partager</h6>
+                    <div class="d-flex gap-2">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u={{ url('apprenant_stage_show', {'id': offre.id}) }}" 
+                           target="_blank" class="tera-share-btn tera-share-facebook flex-fill">
+                            <i class="bi bi-facebook"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?text={{ offre.titre|url_encode }}&url={{ url('apprenant_stage_show', {'id': offre.id}) }}" 
+                           target="_blank" class="tera-share-btn tera-share-twitter flex-fill">
+                            <i class="bi bi-twitter"></i>
+                        </a>
+                        <a href="mailto:?subject={{ offre.titre|url_encode }}&body={{ url('apprenant_stage_show', {'id': offre.id}) }}" 
+                           class="tera-share-btn tera-share-email flex-fill">
+                            <i class="bi bi-envelope"></i>
+                        </a>
+                        <button class="tera-share-btn tera-share-link flex-fill" onclick="copyToClipboard()">
+                            <i class="bi bi-link-45deg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        alert('Lien copié dans le presse-papiers !');
+    });
+}
+</script>
+
+<style>
+/* Badges Modernes */
+.tera-badge-type {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+}
+
+.tera-badge-domain {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+.tera-badge-salary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 20px;
+}
+
+/* Icon Badges */
+.tera-icon-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: #667eea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+/* Navigation Pills */
+.tera-nav-pills {
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 12px;
+    gap: 4px;
+}
+
+.tera-nav-pills .nav-link {
+    border-radius: 8px;
+    color: #64748b;
+    font-weight: 700;
+    padding: 12px 20px;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.tera-nav-pills .nav-link:hover {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+.tera-nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Content Cards */
+.tera-content-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: none;
+    overflow: hidden;
+}
+
+.tera-content-card .card-body {
+    padding: 32px;
+}
+
+.tera-section-title {
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+.tera-text-content {
+    color: #64748b;
+    line-height: 1.8;
+    font-size: 15px;
+}
+
+/* Info Box */
+.tera-info-box {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.tera-info-box .tera-info-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+/* Contact Item */
+.tera-contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.tera-contact-item:hover {
+    border-color: #667eea;
+    background: #f1f5f9;
+}
+
+.tera-contact-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.tera-contact-label {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.tera-contact-value {
+    font-size: 15px;
+    color: #667eea;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.tera-contact-value:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+/* Sidebar Card */
+.tera-sidebar-card {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: none;
+}
+
+/* Company Logo */
+.tera-company-logo-large {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.tera-company-logo-large i {
+    font-size: 48px;
+    color: white;
+}
+
+/* Status Applied */
+.tera-status-applied {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 16px;
+    text-align: center;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+}
+
+/* Boutons d'Action */
+.tera-btn-postuler {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tera-btn-postuler:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.tera-btn-back {
+    background: white;
+    color: #64748b;
+    border: 2px solid #e2e8f0;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 15px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s ease;
+}
+
+.tera-btn-back:hover {
+    border-color: #667eea;
+    color: #667eea;
+    background: #f8f9ff;
+}
+
+/* Sidebar Title */
+.tera-sidebar-title {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 16px;
+}
+
+/* Info List */
+.tera-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tera-info-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.tera-info-item i {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    color: #667eea;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.tera-info-label {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.tera-info-value {
+    font-size: 15px;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* Share Buttons */
+.tera-share-btn {
+    padding: 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    transition: all 0.3s ease;
+    border: 2px solid #e2e8f0;
+    color: #64748b;
+    background: white;
+}
+
+.tera-share-btn:hover {
+    transform: translateY(-2px);
+}
+
+.tera-share-facebook:hover {
+    background: #1877f2;
+    color: white;
+    border-color: #1877f2;
+}
+
+.tera-share-twitter:hover {
+    background: #1da1f2;
+    color: white;
+    border-color: #1da1f2;
+}
+
+.tera-share-email:hover {
+    background: #dc2626;
+    color: white;
+    border-color: #dc2626;
+}
+
+.tera-share-link:hover {
+    background: #0f172a;
+    color: white;
+    border-color: #0f172a;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tera-content-card .card-body {
+        padding: 20px;
+    }
+    
+    .tera-nav-pills .nav-link {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+    
+    .tera-company-logo-large {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .tera-company-logo-large i {
+        font-size: 36px;
+    }
+}
+</style>
+{% endblock %}
