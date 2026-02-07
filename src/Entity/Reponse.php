@@ -1,5 +1,5 @@
 <?php
-// filepath: c:\xampp\htdocs\formation\formation\src\Entity\Reponse.php
+
 namespace App\Entity;
 
 use App\Repository\ReponseRepository;
@@ -16,13 +16,19 @@ class Reponse
 
     #[ORM\Column(length: 500)]
     #[Assert\NotBlank(message: 'Le texte de la réponse est obligatoire')]
+    #[Assert\Length(
+        min: 1,
+        max: 500,
+        maxMessage: 'Le texte de la réponse ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $texte = null;
 
     #[ORM\Column]
-    private ?bool $estCorrecte = false;
+    private bool $estCorrecte = false;
 
     #[ORM\ManyToOne(targetEntity: Question::class, inversedBy: 'reponses')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
     private ?Question $question = null;
 
     public function getId(): ?int
@@ -35,18 +41,18 @@ class Reponse
         return $this->texte;
     }
 
-    public function setTexte(string $texte): static
+    public function setTexte(string $texte): self
     {
         $this->texte = $texte;
         return $this;
     }
 
-    public function isEstCorrecte(): ?bool
+    public function isEstCorrecte(): bool
     {
         return $this->estCorrecte;
     }
 
-    public function setEstCorrecte(bool $estCorrecte): static
+    public function setEstCorrecte(bool $estCorrecte): self
     {
         $this->estCorrecte = $estCorrecte;
         return $this;
@@ -57,7 +63,7 @@ class Reponse
         return $this->question;
     }
 
-    public function setQuestion(?Question $question): static
+    public function setQuestion(?Question $question): self
     {
         $this->question = $question;
         return $this;
