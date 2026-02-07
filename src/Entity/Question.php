@@ -18,42 +18,28 @@ class Question
     private ?int $id = null;
 
     #[ORM\Column(type: Types::TEXT)]
-    #[Assert\NotBlank(message: 'L\'énoncé de la question est obligatoire')]
-    #[Assert\Length(
-        min: 8,
-        minMessage: 'L\'énoncé doit contenir au moins {{ limit }} caractères.'
-    )]
+    #[Assert\NotBlank(message: 'La question est obligatoire')]
     private ?string $enonce = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: 'Le type de question est obligatoire')]
-    #[Assert\Choice(
-        choices: ['qcm', 'vrai_faux', 'texte'],
-        message: 'Choisissez un type valide : qcm, vrai_faux ou texte.'
-    )]
-    private string $type = 'qcm';
+    #[Assert\Choice(choices: ['qcm', 'vrai_faux', 'texte'])]
+    private ?string $type = 'qcm';
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'Le nombre de points est obligatoire')]
-    #[Assert\Positive(message: 'Le nombre de points doit être positif')]
-    #[Assert\Range(min: 1, max: 100)]
+    #[Assert\Positive]
     private ?int $points = 1;
 
     #[ORM\Column]
-    #[Assert\NotNull]
-    #[Assert\PositiveOrZero]
     private ?int $ordre = 1;
 
     #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: 'questions')]
     #[ORM\JoinColumn(nullable: false)]
-    #[Assert\NotNull]
     private ?Quiz $quiz = null;
 
-    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Reponse::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Reponse::class, cascade: ['persist', 'remove'])]
     private Collection $reponses;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-    #[Assert\Length(max: 3000, maxMessage: 'L\'explication ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $explication = null;
 
     public function __construct()
@@ -71,18 +57,18 @@ class Question
         return $this->enonce;
     }
 
-    public function setEnonce(string $enonce): self
+    public function setEnonce(string $enonce): static
     {
         $this->enonce = $enonce;
         return $this;
     }
 
-    public function getType(): string
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function setType(string $type): self
+    public function setType(string $type): static
     {
         $this->type = $type;
         return $this;
@@ -93,7 +79,7 @@ class Question
         return $this->points;
     }
 
-    public function setPoints(int $points): self
+    public function setPoints(int $points): static
     {
         $this->points = $points;
         return $this;
@@ -104,7 +90,7 @@ class Question
         return $this->ordre;
     }
 
-    public function setOrdre(int $ordre): self
+    public function setOrdre(int $ordre): static
     {
         $this->ordre = $ordre;
         return $this;
@@ -115,39 +101,33 @@ class Question
         return $this->quiz;
     }
 
-    public function setQuiz(?Quiz $quiz): self
+    public function setQuiz(?Quiz $quiz): static
     {
         $this->quiz = $quiz;
         return $this;
     }
 
-    /**
-     * @return Collection<int, Reponse>
-     */
     public function getReponses(): Collection
     {
         return $this->reponses;
     }
 
-    public function addReponse(Reponse $reponse): self
+    public function addReponse(Reponse $reponse): static
     {
         if (!$this->reponses->contains($reponse)) {
             $this->reponses->add($reponse);
             $reponse->setQuestion($this);
         }
-
         return $this;
     }
 
-    public function removeReponse(Reponse $reponse): self
+    public function removeReponse(Reponse $reponse): static
     {
         if ($this->reponses->removeElement($reponse)) {
-            // set the owning side to null (unless already changed)
             if ($reponse->getQuestion() === $this) {
                 $reponse->setQuestion(null);
             }
         }
-
         return $this;
     }
 
@@ -156,25 +136,9 @@ class Question
         return $this->explication;
     }
 
-    public function setExplication(?string $explication): self
+    public function setExplication(?string $explication): static
     {
         $this->explication = $explication;
         return $this;
-    }
-
-    // Méthode métier utile
-    public function hasAtLeastOneCorrectAnswer(): bool
-    {
-        if ($this->type === 'texte') {
-            return true;
-        }
-
-        foreach ($this->reponses as $reponse) {
-            if ($reponse->isEstCorrecte()) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

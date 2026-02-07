@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Question - {{ quiz.titre }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Modifier la question</h4>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        {{ form_row(form.enonce) }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form_row(form.type) }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_row(form.points) }}
+                            </div>
+                            <div class="col-md-3">
+                                {{ form_row(form.ordre) }}
+                            </div>
+                        </div>
+                        
+                        {{ form_row(form.explication) }}
+                        
+                        <div class="d-flex justify-content-between mt-3">
+                            <a href="{{ path('question_index', {'formationId': formation.id, 'quizId': quiz.id}) }}" class="btn btn-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">💾 Enregistrer</button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Réponses ({{ question.reponses|length }})</h4>
+                </div>
+                <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+
+                    <!-- Formulaire pour ajouter une réponse -->
+                    <form method="post" action="{{ path('question_add_reponse', {'formationId': formation.id, 'quizId': quiz.id, 'id': question.id}) }}" class="mb-4">
+                        <div class="mb-2">
+                            <label class="form-label">Nouvelle réponse</label>
+                            <input type="text" name="texte" class="form-control" placeholder="Texte de la réponse" required>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input type="checkbox" name="estCorrecte" value="1" class="form-check-input" id="estCorrecte">
+                            <label class="form-check-label" for="estCorrecte">
+                                Cette réponse est correcte
+                            </label>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm">➕ Ajouter la réponse</button>
+                    </form>
+
+                    <hr>
+
+                    <!-- Liste des réponses existantes -->
+                    {% if question.reponses is empty %}
+                        <p class="text-muted text-center">Aucune réponse pour cette question</p>
+                    {% else %}
+                        <div class="list-group">
+                            {% for reponse in question.reponses %}
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge {{ reponse.estCorrecte ? 'bg-success' : 'bg-secondary' }} me-2">
+                                        {{ reponse.estCorrecte ? '✓' : '✗' }}
+                                    </span>
+                                    {{ reponse.texte }}
+                                </div>
+                                <form method="post" action="{{ path('question_delete_reponse', {'formationId': formation.id, 'quizId': quiz.id, 'questionId': question.id, 'reponseId': reponse.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reponse.id) }}">
+                                    <button class="btn btn-sm btn-danger" onclick="return confirm('Supprimer cette réponse ?')">🗑️</button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if question.reponses is empty %}
+                        <div class="alert alert-warning mt-3">
+                            <strong>⚠️ Attention :</strong> N'oubliez pas d'ajouter au moins une réponse correcte !
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
