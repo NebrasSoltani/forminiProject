@@ -1,0 +1,1112 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ formation.titre }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-3">
+    <div class="row">
+        <!-- Sidebar des leçons -->
+        <div class="col-md-3 tera-sidebar" style="max-height: 100vh; overflow-y: auto;">
+            <div class="p-4">
+                <div class="tera-formation-header mb-4">
+                    <div class="tera-formation-icon mb-3">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <h5 class="tera-formation-title mb-3">{{ formation.titre }}</h5>
+                    
+                    <!-- Progression moderne -->
+                    <div class="tera-progress-container mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="tera-progress-label">Progression</span>
+                            <span class="tera-progress-value">{{ inscription.progression }}%</span>
+                        </div>
+                        <div class="tera-progress">
+                            <div class="tera-progress-bar" style="width: {{ inscription.progression }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des leçons -->
+                <div class="tera-lecons-list">
+                    {% for lecon in formation.lecons %}
+                    <a href="#" 
+                       class="tera-lecon-item lecon-link {% if progressions[lecon.id] %}tera-lecon-completed{% endif %}" 
+                       data-lecon-id="{{ lecon.id }}">
+                        <div class="tera-lecon-number">{{ loop.index }}</div>
+                        <div class="tera-lecon-content">
+                            <div class="tera-lecon-title">{{ lecon.titre }}</div>
+                            {% if lecon.duree %}
+                                <div class="tera-lecon-duration">
+                                    <i class="bi bi-clock"></i> {{ lecon.duree }} min
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="tera-lecon-status">
+                            {% if progressions[lecon.id] %}
+                                <i class="bi bi-check-circle-fill"></i>
+                            {% else %}
+                                <i class="bi bi-play-circle"></i>
+                            {% endif %}
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Bouton Quiz -->
+                <div class="mt-4">
+                    <a href="{{ path('apprenant_quiz_index', {'formationId': formation.id}) }}" 
+                       class="tera-quiz-btn">
+                        <i class="bi bi-trophy-fill me-2"></i>Accéder aux Quiz
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu principal -->
+        <div class="col-md-9 tera-main-content">
+            {% for lecon in formation.lecons %}
+            <div class="lecon-content" id="lecon-{{ lecon.id }}" style="display: none;">
+                <div class="p-3 p-md-4">
+                    <!-- En-tête de la leçon -->
+                    <div class="tera-lecon-header mb-5">
+                        <div class="tera-breadcrumb mb-3">
+                            <i class="bi bi-house-fill me-2"></i>
+                            <span>{{ formation.titre }}</span>
+                            <i class="bi bi-chevron-right mx-2"></i>
+                            <span class="text-muted">Leçon {{ loop.index }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="flex-grow-1">
+                                <div class="tera-lecon-badge mb-2">
+                                    <i class="bi bi-play-circle-fill me-1"></i>Leçon {{ loop.index }} sur {{ formation.lecons|length }}
+                                </div>
+                                <h2 class="tera-lecon-main-title mb-2">{{ lecon.titre }}</h2>
+                            </div>
+                        </div>
+                        {% if lecon.duree %}
+                            <div class="tera-lecon-meta">
+                                <span class="tera-meta-item">
+                                    <i class="bi bi-clock-fill me-1"></i>{{ lecon.duree }} minutes
+                                </span>
+                                <span class="tera-meta-item">
+                                    <i class="bi bi-camera-video-fill me-1"></i>Vidéo HD
+                                </span>
+                                <span class="tera-meta-item">
+                                    <i class="bi bi-badge-cc-fill me-1"></i>Sous-titres
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Vidéo de la leçon -->
+                    {% if lecon.videoUrl %}
+                        <div class="tera-video-wrapper-large mb-5">
+                            <!-- Overlay de lecture -->
+                            <div class="tera-video-player-container-large">
+                                <div class="tera-video-overlay">
+                                    <div class="tera-play-button-large">
+                                        <i class="bi bi-play-circle-fill"></i>
+                                    </div>
+                                    <div class="tera-video-info-overlay">
+                                        <h6 class="mb-1"><i class="bi bi-camera-video-fill me-2"></i>{{ lecon.titre }}</h6>
+                                        <p class="mb-0"><i class="bi bi-clock me-1"></i>{{ lecon.duree }} minutes</p>
+                                    </div>
+                                </div>
+                                <div class="tera-video-frame-large">
+                                    <div class="ratio ratio-21x9">
+                                        <iframe 
+                                            src="{{ lecon.videoUrl|convertYoutubeToEmbed }}?autoplay=0&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=1&cc_load_policy=1" 
+                                            title="{{ lecon.titre }}"
+                                            frameborder="0" 
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                            allowfullscreen>
+                                        </iframe>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Contrôles et informations -->
+                            <div class="tera-video-footer">
+                                <div class="row g-3 align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex gap-2">
+                                            <button class="tera-video-action-btn" onclick="toggleFullscreen(this)">
+                                                <i class="bi bi-arrows-fullscreen me-2"></i>Plein écran
+                                            </button>
+                                            <button class="tera-video-action-btn">
+                                                <i class="bi bi-volume-up-fill me-2"></i>Qualité HD
+                                            </button>
+                                            <button class="tera-video-action-btn">
+                                                <i class="bi bi-badge-cc-fill me-2"></i>Sous-titres
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-md-end">
+                                        <div class="tera-video-duration-badge">
+                                            <i class="bi bi-clock-history me-2"></i>{{ lecon.duree }} min
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Description de la leçon -->
+                    {% if lecon.description %}
+                        <div class="tera-alert tera-alert-info mb-4">
+                            <div class="tera-alert-icon">
+                                <i class="bi bi-info-circle-fill"></i>
+                            </div>
+                            <div class="tera-alert-content">
+                                <h5 class="tera-alert-title">Description</h5>
+                                <p class="mb-0">{{ lecon.description }}</p>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Contenu de la leçon -->
+                    {% if lecon.contenu %}
+                        <div class="tera-content-card mb-5">
+                            <div class="tera-content-header">
+                                <i class="bi bi-file-text-fill me-2"></i>Contenu de la leçon
+                            </div>
+                            <div class="tera-content-body">
+                                {{ lecon.contenu|raw }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Fichier téléchargeable -->
+                    {% if lecon.fichier %}
+                        <div class="tera-download-card mb-5">
+                            <div class="tera-download-icon">
+                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                            </div>
+                            <div class="tera-download-content">
+                                <h6 class="mb-1">Ressources de la leçon</h6>
+                                <p class="mb-2 text-muted small">Téléchargez le fichier pour approfondir vos connaissances</p>
+                                <a href="{{ asset('uploads/fichiers/' ~ lecon.fichier) }}" 
+                                   download 
+                                   class="tera-download-btn">
+                                    <i class="bi bi-download me-2"></i>Télécharger le fichier
+                                </a>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Navigation -->
+                    <div class="tera-navigation-bar">
+                        <button class="tera-nav-btn tera-nav-btn-prev btn-prev" disabled>
+                            <i class="bi bi-arrow-left me-2"></i>Leçon précédente
+                        </button>
+                        <button class="tera-nav-btn tera-nav-btn-complete btn-marquer-termine {% if progressions[lecon.id] %}tera-nav-btn-completed{% endif %}" 
+                                data-lecon-id="{{ lecon.id }}"
+                                {% if progressions[lecon.id] %}disabled{% endif %}>
+                            {% if progressions[lecon.id] %}
+                                <i class="bi bi-check-circle-fill me-2"></i>Terminée
+                            {% else %}
+                                <i class="bi bi-check-circle me-2"></i>Marquer comme terminée
+                            {% endif %}
+                        </button>
+                        <button class="tera-nav-btn tera-nav-btn-next btn-next">
+                            Leçon suivante<i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Sidebar */
+.tera-sidebar {
+    background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+    border-right: 1px solid #e2e8f0;
+}
+
+.tera-formation-header {
+    text-align: center;
+}
+
+.tera-formation-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    font-size: 40px;
+    color: white;
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+.tera-formation-title {
+    font-weight: 800;
+    color: #0f172a;
+    font-size: 18px;
+    line-height: 1.3;
+}
+
+/* Progression */
+.tera-progress-container {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tera-progress-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tera-progress-value {
+    font-size: 18px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.tera-progress {
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 50px;
+    overflow: hidden;
+}
+
+.tera-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50px;
+    transition: width 0.6s ease;
+}
+
+/* Liste des leçons */
+.tera-lecons-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tera-lecon-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: white;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tera-lecon-item:hover {
+    transform: translateX(4px);
+    border-color: #667eea;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.15);
+}
+
+.tera-lecon-item.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.tera-lecon-number {
+    width: 36px;
+    height: 36px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.tera-lecon-item.active .tera-lecon-number {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.tera-lecon-content {
+    flex: 1;
+}
+
+.tera-lecon-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #0f172a;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.tera-lecon-item.active .tera-lecon-title {
+    color: white;
+}
+
+.tera-lecon-duration {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.tera-lecon-item.active .tera-lecon-duration {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.tera-lecon-status {
+    font-size: 20px;
+    color: #cbd5e1;
+}
+
+.tera-lecon-item.active .tera-lecon-status {
+    color: white;
+}
+
+.tera-lecon-completed .tera-lecon-status {
+    color: #10b981;
+}
+
+.tera-lecon-item.active.tera-lecon-completed .tera-lecon-status {
+    color: white;
+}
+
+/* Bouton Quiz */
+.tera-quiz-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    text-align: center;
+    border-radius: 12px;
+    font-weight: 800;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tera-quiz-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(245, 158, 11, 0.4);
+    color: white;
+}
+
+/* Contenu principal */
+.tera-main-content {
+    background: #f8f9fa;
+}
+
+.tera-lecon-header {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    border: 2px solid #e2e8f0;
+    border-radius: 18px;
+    padding: 24px;
+}
+
+.tera-lecon-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tera-breadcrumb {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.tera-lecon-main-title {
+    font-weight: 900;
+    font-size: 32px;
+    color: #0f172a;
+    line-height: 1.2;
+}
+
+.tera-lecon-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tera-meta-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    background: white;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #667eea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Vidéo - Design ultra moderne et LARGE */
+.tera-video-wrapper-large {
+    background: #000;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+    position: relative;
+    margin: 0 -20px;
+}
+
+.tera-video-player-container-large {
+    position: relative;
+    background: #000;
+    min-height: 450px;
+}
+
+.tera-video-frame-large {
+    position: relative;
+    border-radius: 0;
+}
+
+.tera-video-frame-large iframe {
+    border: none;
+    width: 100%;
+    height: 100%;
+}
+
+/* Wrapper original pour compatibilité */
+.tera-video-wrapper {
+    background: #000;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.tera-video-player-container {
+    position: relative;
+    background: #000;
+}
+
+.tera-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0.3) 50%, rgba(0, 0, 0, 0.8) 100%);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.tera-video-player-container:hover .tera-video-overlay {
+    opacity: 1;
+}
+
+.tera-play-button-large {
+    font-size: 100px;
+    color: white;
+    text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    animation: pulse-play-large 2s ease-in-out infinite;
+    cursor: pointer;
+}
+
+@keyframes pulse-play-large {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.9;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+}
+
+.tera-video-info-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.tera-video-info-overlay h6 {
+    font-weight: 800;
+    font-size: 16px;
+    margin: 0;
+}
+
+.tera-video-info-overlay p {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.tera-video-frame {
+    position: relative;
+    border-radius: 0;
+}
+
+.tera-video-frame iframe {
+    border: none;
+}
+
+.tera-video-footer {
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+}
+
+.tera-video-action-btn {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50px;
+    color: white;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.tera-video-action-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.tera-video-duration-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50px;
+    color: white;
+    font-weight: 800;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Alertes */
+.tera-alert {
+    display: flex;
+    gap: 16px;
+    padding: 20px;
+    border-radius: 16px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tera-alert-info {
+    border-left: 4px solid #17a2b8;
+}
+
+.tera-alert-icon {
+    font-size: 28px;
+    color: #17a2b8;
+}
+
+.tera-alert-title {
+    font-weight: 800;
+    font-size: 16px;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.tera-alert-content p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+/* Carte de contenu */
+.tera-content-card {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.tera-content-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 24px;
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.tera-content-body {
+    padding: 24px;
+    color: #475569;
+    line-height: 1.8;
+}
+
+.tera-content-body h1, .tera-content-body h2, .tera-content-body h3 {
+    color: #0f172a;
+    font-weight: 800;
+    margin-top: 24px;
+    margin-bottom: 16px;
+}
+
+.tera-content-body p {
+    margin-bottom: 16px;
+}
+
+.tera-content-body ul, .tera-content-body ol {
+    margin-bottom: 16px;
+    padding-left: 24px;
+}
+
+/* Téléchargement */
+.tera-download-card {
+    display: flex;
+    gap: 20px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 150, 105, 0.05) 100%);
+    border: 2px solid #10b981;
+    border-radius: 16px;
+}
+
+.tera-download-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.tera-download-content h6 {
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.tera-download-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border-radius: 50px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tera-download-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    color: white;
+}
+
+/* Navigation */
+.tera-navigation-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.tera-nav-btn {
+    padding: 14px 24px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 14px;
+    border: 2px solid;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.tera-nav-btn-prev {
+    background: white;
+    color: #64748b;
+    border-color: #e2e8f0;
+}
+
+.tera-nav-btn-prev:not(:disabled):hover {
+    background: #f8f9fa;
+    border-color: #cbd5e1;
+    transform: translateX(-4px);
+}
+
+.tera-nav-btn-prev:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.tera-nav-btn-complete {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.tera-nav-btn-complete:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+}
+
+.tera-nav-btn-completed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.tera-nav-btn-next {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 8px 20px rgba(23, 162, 184, 0.3);
+}
+
+.tera-nav-btn-next:not(:disabled):hover {
+    transform: translateX(4px);
+    box-shadow: 0 12px 28px rgba(23, 162, 184, 0.4);
+}
+
+.tera-nav-btn-next:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tera-navigation-bar {
+        flex-direction: column;
+    }
+    
+    .tera-nav-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tera-lecon-main-title {
+        font-size: 24px;
+    }
+    
+    .tera-video-action-btn {
+        font-size: 11px;
+        padding: 8px 12px;
+    }
+    
+    .tera-play-button-large {
+        font-size: 80px;
+    }
+    
+    .tera-video-footer {
+        padding: 16px;
+    }
+    
+    .tera-video-wrapper-large {
+        margin: 0 -10px;
+        border-radius: 16px;
+    }
+    
+    .tera-video-player-container-large {
+        min-height: 300px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .tera-video-player-container-large {
+        min-height: 520px;
+    }
+    
+    .tera-video-wrapper-large {
+        margin: 0 -40px;
+    }
+}
+
+/* Animation pulse pour le bouton play */
+@keyframes pulse-play {
+    0%, 100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7);
+    }
+    50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(102, 126, 234, 0);
+    }
+}
+
+.tera-lecon-item.active .tera-lecon-status i {
+    animation: pulse-play 2s infinite;
+}
+
+/* Amélioration générale de la page */
+.tera-sidebar {
+    background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
+    border-right: 1px solid #e2e8f0;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.03);
+}
+
+.tera-main-content {
+    background: linear-gradient(180deg, #fafbfc 0%, #f3f4f6 100%);
+    min-height: 100vh;
+}
+
+/* Amélioration des cartes */
+.tera-content-card {
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e2e8f0;
+}
+
+.tera-alert {
+    border: 2px solid;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.tera-download-card {
+    box-shadow: 0 6px 24px rgba(16, 185, 129, 0.15);
+}
+
+</style>
+
+<script>
+// Fonction pour plein écran
+function toggleFullscreen(button) {
+    const videoWrapper = button.closest('.tera-video-wrapper-large') || button.closest('.tera-video-wrapper');
+    
+    if (!document.fullscreenElement) {
+        videoWrapper.requestFullscreen().catch(err => {
+            console.error('Erreur plein écran:', err);
+        });
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const leconLinks = document.querySelectorAll('.lecon-link');
+    const leconContents = document.querySelectorAll('.lecon-content');
+    let currentLeconIndex = 0;
+
+    // Afficher la première leçon par défaut
+    if (leconContents.length > 0) {
+        leconContents[0].style.display = 'block';
+        leconLinks[0].classList.add('active');
+    }
+    
+    // Cacher l'overlay vidéo après 3 secondes
+    setTimeout(() => {
+        const overlays = document.querySelectorAll('.tera-video-overlay');
+        overlays.forEach(overlay => {
+            overlay.style.opacity = '0';
+        });
+    }, 3000);
+
+    // Navigation entre leçons
+    leconLinks.forEach((link, index) => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            showLecon(index);
+        });
+    });
+
+    // Boutons suivant/précédent
+    document.querySelectorAll('.btn-next').forEach((btn, index) => {
+        btn.addEventListener('click', function() {
+            if (currentLeconIndex < leconContents.length - 1) {
+                showLecon(currentLeconIndex + 1);
+            }
+        });
+    });
+
+    document.querySelectorAll('.btn-prev').forEach((btn, index) => {
+        btn.addEventListener('click', function() {
+            if (currentLeconIndex > 0) {
+                showLecon(currentLeconIndex - 1);
+            }
+        });
+    });
+
+    function showLecon(index) {
+        // Cacher toutes les leçons
+        leconContents.forEach(content => content.style.display = 'none');
+        leconLinks.forEach(link => link.classList.remove('active'));
+
+        // Afficher la leçon sélectionnée
+        leconContents[index].style.display = 'block';
+        leconLinks[index].classList.add('active');
+        currentLeconIndex = index;
+
+        // Gérer les boutons prev/next
+        const prevButtons = document.querySelectorAll('.btn-prev');
+        const nextButtons = document.querySelectorAll('.btn-next');
+
+        prevButtons[index].disabled = (index === 0);
+        nextButtons[index].disabled = (index === leconContents.length - 1);
+
+        // Scroll en haut avec animation douce
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+
+    // Marquer comme terminée
+    document.querySelectorAll('.btn-marquer-termine').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const leconId = this.dataset.leconId;
+            const button = this;
+            
+            // Désactiver le bouton pendant la requête
+            button.disabled = true;
+            button.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>En cours...';
+            
+            // Appel AJAX pour marquer la leçon comme terminée
+            fetch(`/apprenant/lecon/${leconId}/marquer-terminee`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mettre à jour la barre de progression avec animation
+                    const progressBar = document.querySelector('.tera-progress-bar');
+                    const progressValue = document.querySelector('.tera-progress-value');
+                    progressBar.style.width = data.progression + '%';
+                    progressValue.textContent = data.progression + '%';
+                    
+                    // Marquer le bouton comme terminé
+                    button.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i>Terminée';
+                    button.classList.add('tera-nav-btn-completed');
+                    
+                    // Animation de succès
+                    showSuccessToast(`Leçon marquée comme terminée ! Progression : ${data.progression}%`);
+                    
+                    // Mettre à jour l'icône de la leçon dans la sidebar
+                    const leconLink = document.querySelector(`.lecon-link[data-lecon-id="${leconId}"]`);
+                    if (leconLink) {
+                        leconLink.classList.add('tera-lecon-completed');
+                        const statusIcon = leconLink.querySelector('.tera-lecon-status i');
+                        if (statusIcon) {
+                            statusIcon.classList.replace('bi-play-circle', 'bi-check-circle-fill');
+                        }
+                    }
+                    
+                    // Passer à la leçon suivante après un délai
+                    setTimeout(() => {
+                        if (currentLeconIndex < leconContents.length - 1) {
+                            showLecon(currentLeconIndex + 1);
+                        } else {
+                            if (data.progression >= 100) {
+                                showSuccessToast('🎉 Félicitations ! Vous avez terminé toutes les leçons. Vous pouvez maintenant passer les quiz !');
+                            }
+                        }
+                    }, 1500);
+                } else {
+                    showErrorToast('Erreur : ' + data.message);
+                    button.disabled = false;
+                    button.innerHTML = '<i class="bi bi-check-circle me-2"></i>Marquer comme terminée';
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showErrorToast('Une erreur est survenue. Veuillez réessayer.');
+                button.disabled = false;
+                button.innerHTML = '<i class="bi bi-check-circle me-2"></i>Marquer comme terminée';
+            });
+        });
+    });
+    
+    // Fonctions toast simples
+    function showSuccessToast(message) {
+        showToast(message, 'success');
+    }
+    
+    function showErrorToast(message) {
+        showToast(message, 'error');
+    }
+    
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = `tera-toast tera-toast-${type}`;
+        toast.innerHTML = `
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'} me-2"></i>
+            ${message}
+        `;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+});
+
+// Style pour les toasts
+const toastStyle = document.createElement('style');
+toastStyle.textContent = `
+.tera-toast {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    max-width: 400px;
+}
+
+.tera-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.tera-toast-success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+}
+
+.tera-toast-error {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+}
+`;
+document.head.appendChild(toastStyle);
+</script>
+{% endblock %}

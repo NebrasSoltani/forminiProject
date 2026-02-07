@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Quiz - {{ formation.titre }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('apprenant_mes_formations') }}">Mes Formations</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('apprenant_suivre_formation', {'id': formation.id}) }}">{{ formation.titre }}</a></li>
+                <li class="breadcrumb-item active">Quiz</li>
+            </ol>
+        </nav>
+    </div>
+
+    <h1 class="mb-4">🎯 Quiz de la formation</h1>
+    <p class="lead text-muted">{{ formation.titre }}</p>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('warning') %}
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    <!-- Progression des leçons -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>📚 Progression des leçons</h5>
+            <div class="progress mb-2" style="height: 25px;">
+                <div class="progress-bar {% if toutesLeconsTerminees %}bg-success{% endif %}" 
+                     role="progressbar" 
+                     style="width: {{ totalLecons > 0 ? (leconsTerminees / totalLecons * 100)|round : 0 }}%">
+                    {{ leconsTerminees }} / {{ totalLecons }} leçons terminées
+                </div>
+            </div>
+            {% if totalLecons == 0 %}
+                <p class="text-warning small mb-0">
+                    ⚠️ Aucune leçon n'est disponible pour cette formation.
+                </p>
+            {% elseif not toutesLeconsTerminees %}
+                <p class="text-muted small mb-0">
+                    ⚠️ Vous devez terminer toutes les leçons avant de pouvoir passer les quiz.
+                </p>
+            {% else %}
+                <p class="text-success small mb-0">
+                    ✅ Toutes les leçons sont terminées ! Vous pouvez maintenant passer les quiz.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Liste des quiz -->
+    {% if quizzes is empty %}
+        <div class="alert alert-info text-center">
+            <h4>Aucun quiz disponible</h4>
+            <p class="mb-0">Le formateur n'a pas encore créé de quiz pour cette formation.</p>
+        </div>
+    {% else %}
+        <div class="row">
+            {% for quiz in quizzes %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ quiz.titre }}</h5>
+                        {% if quiz.description %}
+                            <p class="card-text text-muted">{{ quiz.description }}</p>
+                        {% endif %}
+                        
+                        <ul class="list-unstyled mb-3">
+                            <li><strong>⏱️ Durée :</strong> {{ quiz.duree }} minutes</li>
+                            <li><strong>❓ Questions :</strong> {{ quiz.questions|length }}</li>
+                            <li><strong>📊 Note minimale :</strong> {{ quiz.noteMinimale }}%</li>
+                        </ul>
+
+                        {% if toutesLeconsTerminees %}
+                            <a href="{{ path('apprenant_quiz_passer', {'formationId': formation.id, 'quizId': quiz.id}) }}" 
+                               class="btn btn-primary w-100">
+                                🎯 Passer le quiz
+                            </a>
+                        {% else %}
+                            <button class="btn btn-secondary w-100" disabled>
+                                🔒 Terminez toutes les leçons
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{{ path('apprenant_suivre_formation', {'id': formation.id}) }}" class="btn btn-secondary">
+            ← Retour à la formation
+        </a>
+    </div>
+</div>
+{% endblock %}
