@@ -1,0 +1,409 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">🎛️ Dashboard Administrateur</h1>
+            <p class="text-muted mb-0">Vue d'ensemble de la plateforme</p>
+        </div>
+        <div>
+            <span class="badge bg-primary">{{ "now"|date('d/m/Y H:i') }}</span>
+        </div>
+    </div>
+
+    <!-- Cartes de statistiques -->
+    <div class="row mb-4">
+        <!-- Utilisateurs -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Utilisateurs
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_users }}</div>
+                            <div class="mt-2 small">
+                                <span class="text-success">{{ stats.total_apprenants }} apprenants</span> • 
+                                <span class="text-info">{{ stats.total_formateurs }} formateurs</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formations -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Formations
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_formations }}</div>
+                            <div class="mt-2 small">
+                                <span class="text-success">{{ stats.formations_publiees }} publiées</span> • 
+                                <span class="text-muted">{{ stats.formations_brouillon }} brouillons</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-book-fill text-success" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inscriptions -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Inscriptions
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_inscriptions }}</div>
+                            <div class="mt-2 small">
+                                <span class="text-primary">{{ stats.inscriptions_en_cours }} en cours</span> • 
+                                <span class="text-success">{{ stats.inscriptions_terminees }} terminées</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-clipboard-check-fill text-info" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenus -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Revenus
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.montant_total|number_format(2) }} TND</div>
+                            <div class="mt-2 small">
+                                <span class="text-success">{{ stats.paiements_valides }} validés</span> • 
+                                <span class="text-warning">{{ stats.paiements_en_attente }} en attente</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-cash-stack text-warning" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques Boutique -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Commandes
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_commandes }}</div>
+                            <div class="mt-2 small">
+                                <span class="text-warning">{{ stats.commandes_en_attente }} en attente</span> • 
+                                <span class="text-success">{{ stats.commandes_livrees }} livrées</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                CA Boutique
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.chiffre_affaires_boutique|number_format(2) }} €</div>
+                            <div class="mt-2 small">
+                                <span class="text-muted">Chiffre d'affaires boutique</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-euro-sign text-success" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-md-12 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Gestion Boutique
+                            </div>
+                            <div class="mt-2">
+                                <a href="{{ path('produit_index') }}" class="btn btn-sm btn-primary me-2">
+                                    <i class="fas fa-box"></i> Gérer Produits
+                                </a>
+                                <a href="{{ path('produit_new') }}" class="btn btn-sm btn-success">
+                                    <i class="fas fa-plus"></i> Nouveau Produit
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-store text-info" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accès rapides -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🚀 Accès rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ path('formation_index') }}" class="btn btn-outline-success w-100">
+                                <i class="bi bi-book"></i> Toutes les formations
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="#" class="btn btn-outline-info w-100">
+                                <i class="bi bi-people"></i> Gestion utilisateurs
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="#" class="btn btn-outline-warning w-100">
+                                <i class="bi bi-gear"></i> Paramètres
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Dernières inscriptions -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">📝 Dernières inscriptions</h5>
+                </div>
+                <div class="card-body">
+                    {% if dernieres_inscriptions is empty %}
+                        <p class="text-muted text-center">Aucune inscription</p>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Apprenant</th>
+                                        <th>Formation</th>
+                                        <th>Date</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for inscription in dernieres_inscriptions %}
+                                    <tr>
+                                        <td>{{ inscription.apprenant.nom }} {{ inscription.apprenant.prenom }}</td>
+                                        <td>{{ inscription.formation.titre|slice(0, 30) }}...</td>
+                                        <td>{{ inscription.dateInscription|date('d/m/Y') }}</td>
+                                        <td>
+                                            {% if inscription.statut == 'terminee' %}
+                                                <span class="badge bg-success">Terminée</span>
+                                            {% else %}
+                                                <span class="badge bg-primary">En cours</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Dernières commandes -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">🛒 Dernières commandes</h5>
+                    <a href="{{ path('produit_index') }}" class="btn btn-sm btn-primary">Voir tout</a>
+                </div>
+                <div class="card-body">
+                    {% if dernieres_commandes is empty %}
+                        <p class="text-muted text-center">Aucune commande</p>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Référence</th>
+                                        <th>Client</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for commande in dernieres_commandes %}
+                                    <tr>
+                                        <td><strong>{{ commande.reference }}</strong></td>
+                                        <td>{{ commande.utilisateur.nom }} {{ commande.utilisateur.prenom|slice(0,1) }}.</td>
+                                        <td><strong>{{ commande.calculerTotal()|number_format(2) }} €</strong></td>
+                                        <td>
+                                            {% if commande.statut == 'en_attente' %}
+                                                <span class="badge bg-warning">En attente</span>
+                                            {% elseif commande.statut == 'confirmee' %}
+                                                <span class="badge bg-info">Confirmée</span>
+                                            {% elseif commande.statut == 'en_cours' %}
+                                                <span class="badge bg-primary">En cours</span>
+                                            {% elseif commande.statut == 'livree' %}
+                                                <span class="badge bg-success">Livrée</span>
+                                            {% else %}
+                                                <span class="badge bg-danger">Annulée</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Derniers utilisateurs -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">👥 Derniers utilisateurs</h5>
+                </div>
+                <div class="card-body">
+                    {% if derniers_utilisateurs is empty %}
+                        <p class="text-muted text-center">Aucun utilisateur</p>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Email</th>
+                                        <th>Rôle</th>
+                                        <th>ID</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in derniers_utilisateurs %}
+                                    <tr>
+                                        <td>{{ user.nom }} {{ user.prenom }}</td>
+                                        <td>{{ user.email }}</td>
+                                        <td>
+                                            {% if 'ROLE_ADMIN' in user.roles %}
+                                                <span class="badge bg-danger">Admin</span>
+                                            {% elseif user.roleUtilisateur == 'formateur' %}
+                                                <span class="badge bg-info">Formateur</span>
+                                            {% else %}
+                                                <span class="badge bg-success">Apprenant</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>#{{ user.id }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formations populaires -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">🔥 Formations récentes</h5>
+                </div>
+                <div class="card-body">
+                    {% if formations_populaires is empty %}
+                        <p class="text-muted text-center">Aucune formation</p>
+                    {% else %}
+                        <div class="row">
+                            {% for formation in formations_populaires %}
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">{{ formation.titre }}</h6>
+                                        <p class="card-text small text-muted">
+                                            {{ formation.descriptionCourte|slice(0, 80) }}...
+                                        </p>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-primary">{{ formation.typeAcces }}</span>
+                                            <span class="text-muted small">{{ formation.formateur.nom }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.border-left-primary {
+    border-left: 4px solid #4e73df !important;
+}
+.border-left-success {
+    border-left: 4px solid #1cc88a !important;
+}
+.border-left-info {
+    border-left: 4px solid #36b9cc !important;
+}
+.border-left-warning {
+    border-left: 4px solid #f6c23e !important;
+}
+.text-xs {
+    font-size: .7rem;
+}
+</style>
+{% endblock %}
