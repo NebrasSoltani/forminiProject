@@ -66,7 +66,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
-   
+    #[ORM\OneToMany(mappedBy: 'formateur', targetEntity: Formation::class)]
+    private Collection $formations;
+
+    #[ORM\OneToMany(mappedBy: 'apprenant', targetEntity: Inscription::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $inscriptions;
+
+    #[ORM\OneToMany(mappedBy: 'apprenant', targetEntity: Favori::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $favoris;
 
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Formateur $formateur = null;
@@ -79,7 +86,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function __construct()
     {
-       
+        $this->formations = new ArrayCollection();
+        $this->inscriptions = new ArrayCollection();
+        $this->favoris = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -229,40 +238,148 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->photo = $photo;
         return $this;
     }
+
+    /**
+     * @return Collection<int, Formation>
+     */
+    public function getFormations(): Collection
+    {
+        return $this->formations;
+    }
+
+    public function addFormation(Formation $formation): static
+    {
+        if (!$this->formations->contains($formation)) {
+            $this->formations->add($formation);
+            $formation->setFormateur($this);
+        }
+        return $this;
+    }
+
+    public function removeFormation(Formation $formation): static
+    {
+        if ($this->formations->removeElement($formation)) {
+            if ($formation->getFormateur() === $this) {
+                $formation->setFormateur(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Inscription>
+     */
+    public function getInscriptions(): Collection
+    {
+        return $this->inscriptions;
+    }
+
+    public function addInscription(Inscription $inscription): static
+    {
+        if (!$this->inscriptions->contains($inscription)) {
+            $this->inscriptions->add($inscription);
+            $inscription->setApprenant($this);
+        }
+        return $this;
+    }
+
+    public function removeInscription(Inscription $inscription): static
+    {
+        if ($this->inscriptions->removeElement($inscription)) {
+            if ($inscription->getApprenant() === $this) {
+                $inscription->setApprenant(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Favori>
+     */
+    public function getFavoris(): Collection
+    {
+        return $this->favoris;
+    }
+
+    public function addFavori(Favori $favori): static
+    {
+        if (!$this->favoris->contains($favori)) {
+            $this->favoris->add($favori);
+            $favori->setApprenant($this);
+        }
+        return $this;
+    }
+
+    public function removeFavori(Favori $favori): static
+    {
+        if ($this->favoris->removeElement($favori)) {
+            if ($favori->getApprenant() === $this) {
+                $favori->setApprenant(null);
+            }
+        }
+        return $this;
+    }
+
+    public function getFormateur(): ?Formateur
+    {
+        return $this->formateur;
+    }
+
+    public function setFormateur(?Formateur $formateur): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($formateur === null && $this->formateur !== null) {
+            $this->formateur->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($formateur !== null && $formateur->getUser() !== $this) {
+            $formateur->setUser($this);
+        }
+
+        $this->formateur = $formateur;
+        return $this;
+    }
+
     public function getApprenant(): ?Apprenant
-{
-    return $this->apprenant;
-}
+    {
+        return $this->apprenant;
+    }
 
-public function setApprenant(?Apprenant $apprenant): static
-{
-    $this->apprenant = $apprenant;
-    return $this;
-}
+    public function setApprenant(?Apprenant $apprenant): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($apprenant === null && $this->apprenant !== null) {
+            $this->apprenant->setUser(null);
+        }
 
-public function getSociete(): ?Societe
-{
-    return $this->societe;
-}
+        // set the owning side of the relation if necessary
+        if ($apprenant !== null && $apprenant->getUser() !== $this) {
+            $apprenant->setUser($this);
+        }
 
-public function setSociete(?Societe $societe): static
-{
-    $this->societe = $societe;
-    return $this;
-}
+        $this->apprenant = $apprenant;
+        return $this;
+    }
 
+    public function getSociete(): ?Societe
+    {
+        return $this->societe;
+    }
 
-   public function getFormateur(): ?Formateur
-{
-    return $this->formateur;
-}
+    public function setSociete(?Societe $societe): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($societe === null && $this->societe !== null) {
+            $this->societe->setUser(null);
+        }
 
-public function setFormateur(?Formateur $formateur): static
-{
-    $this->formateur = $formateur;
-    return $this;
-}
+        // set the owning side of the relation if necessary
+        if ($societe !== null && $societe->getUser() !== $this) {
+            $societe->setUser($this);
+        }
 
-
-   
+        $this->societe = $societe;
+        return $this;
+    }
 }
