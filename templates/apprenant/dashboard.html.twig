@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Apprenant{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <h1 class="mb-4">🎓 Mon Espace Apprenant</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">📚 Mes Formations</h5>
+                    <h2 class="mb-0">{{ stats.total_formations }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">⏳ En cours</h5>
+                    <h2 class="mb-0">{{ stats.formations_en_cours }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">✅ Terminées</h5>
+                    <h2 class="mb-0">{{ stats.formations_terminees }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-danger">
+                <div class="card-body">
+                    <h5 class="card-title">❤️ Favoris</h5>
+                    <h2 class="mb-0">{{ stats.total_favoris }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Mes formations en cours</h5>
+                    <a href="{{ path('apprenant_mes_formations') }}" class="btn btn-sm btn-primary">Voir tout</a>
+                </div>
+                <div class="card-body">
+                    {% set formations_en_cours = inscriptions|filter(i => i.statut == 'en_cours') %}
+                    {% if formations_en_cours is empty %}
+                        <p class="text-muted text-center py-4">Aucune formation en cours</p>
+                        <div class="text-center">
+                            <a href="{{ path('apprenant_formations_index') }}" class="btn btn-primary">
+                                🔍 Explorer les formations
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="list-group">
+                            {% for inscription in formations_en_cours|slice(0, 5) %}
+                            <a href="{{ path('apprenant_suivre_formation', {'id': inscription.formation.id}) }}" class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ inscription.formation.titre }}</h6>
+                                    <small class="text-muted">{{ inscription.progression }}%</small>
+                                </div>
+                                <div class="progress mt-2" style="height: 5px;">
+                                    <div class="progress-bar" style="width: {{ inscription.progression }}%"></div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">⚡ Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('apprenant_formations_index') }}" class="btn btn-primary">
+                            🔍 Explorer les formations
+                        </a>
+                        <a href="{{ path('apprenant_mes_formations') }}" class="btn btn-outline-primary">
+                            📚 Mes formations
+                        </a>
+                        <a href="{{ path('apprenant_mes_favoris') }}" class="btn btn-outline-danger">
+                            ❤️ Mes favoris
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
