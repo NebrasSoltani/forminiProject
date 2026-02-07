@@ -2,6 +2,8 @@
 
 namespace App\Form;
 
+use App\Entity\Evenement;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use App\Entity\Blog;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -67,6 +69,14 @@ class BlogType extends AbstractType
                 'label' => 'Publier immédiatement',
                 'required' => false,
                 'attr' => ['class' => 'form-check-input']
+            ])
+            ->add('evenement', EntityType::class, [
+                'class' => Evenement::class,
+                'choice_label' => 'titre', // affiche le titre de l'événement
+                'label' => 'Événement associé',
+                'placeholder' => 'Aucun événement',
+                'required' => false,
+                'attr' => ['class' => 'form-control']
             ])
         ;
     }
