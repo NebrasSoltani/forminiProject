@@ -2,83 +2,123 @@
 
 namespace App\Controller;
 
-use App\Entity\Apprenant;
-use App\Form\ApprenantType;
-use App\Repository\ApprenantRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\FormationRepository;
+use App\Repository\InscriptionRepository;
+use App\Repository\FavoriRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 
-#[Route('/apprenant')]
-final class ApprenantController extends AbstractController
+#[Route('/formations')]
+class ApprenantController extends AbstractController
 {
-    #[Route('/listApprenant', name: 'apprenant_index')]
-    public function listApprenants(ApprenantRepository $repo): Response
+    #[Route('/', name: 'apprenant_formations_index', methods: ['GET'])]
+    public function index(Request $request, FormationRepository $formationRepository): Response
     {
-        $apprenants = $repo->findAll();
-        return $this->render('apprenant/list.html.twig', ['apprenants'=>$apprenants]);
-    }
-   /* #[Route('/new', name: 'apprenant_new', methods: ['GET','POST'])]
-public function new(Request $request, EntityManagerInterface $em): Response
-{
-    $apprenant = new Apprenant();
-    $form = $this->createForm(ApprenantType::class, $apprenant);
-    $form->handleRequest($request);
+        // Récupérer les filtres
+        $categorie = $request->query->get('categorie');
+        $niveau = $request->query->get('niveau');
+        $typeAcces = $request->query->get('typeAcces');
+        $search = $request->query->get('search');
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $apprenant->setPassword(password_hash($apprenant->getPassword(), PASSWORD_BCRYPT));
+        // Construire la requête avec filtres
+        $qb = $formationRepository->createQueryBuilder('f')
+            ->where('f.statut = :statut')
+            ->setParameter('statut', 'publiee')
+            ->orderBy('f.datePublication', 'DESC');
 
-        $em->persist($apprenant);
-        $em->flush();
-
-        return $this->redirectToRoute('apprenant_index');
-    }
-
-    return $this->render('apprenant/new.html.twig', [
-        'form' => $form->createView(),
-    ]);
-    }
-
-    #[Route('/{id}/edit', name: 'apprenant_edit', methods: ['GET','POST'])]
-    // src/Controller/ApprenantController.php
-
-public function edit(Request $request, Apprenant $apprenant, UserPasswordHasherInterface $passwordHasher,
-    EntityManagerInterface $em): Response
-{
-    $form = $this->createForm(ApprenantType::class, $apprenant);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        $newPassword = $form->get('password')->getData();
-
-        if (!empty($newPassword)) {
-            $hashedPassword = $passwordHasher->hashPassword($apprenant, $newPassword);
-            $apprenant->setPassword($hashedPassword);
+        if ($categorie) {
+            $qb->andWhere('f.categorie = :categorie')
+               ->setParameter('categorie', $categorie);
         }
 
-        $em->flush();
+        if ($niveau) {
+            $qb->andWhere('f.niveau = :niveau')
+               ->setParameter('niveau', $niveau);
+        }
 
-        $this->addFlash('success', 'Apprenant mis à jour avec succès !');
-        return $this->redirectToRoute('apprenant_index');
+        if ($typeAcces) {
+            $qb->andWhere('f.typeAcces = :typeAcces')
+               ->setParameter('typeAcces', $typeAcces);
+        }
+
+        if ($search) {
+            $qb->andWhere('f.titre LIKE :search OR f.descriptionCourte LIKE :search')
+               ->setParameter('search', '%' . $search . '%');
+        }
+
+        $formations = $qb->getQuery()->getResult();
+
+        // Récupérer les catégories et niveaux uniques pour les filtres
+        $categories = $formationRepository->createQueryBuilder('f')
+            ->select('DISTINCT f.categorie')
+            ->where('f.statut = :statut')
+            ->setParameter('statut', 'publiee')
+            ->getQuery()
+            ->getScalarResult();
+
+        $niveaux = $formationRepository->createQueryBuilder('f')
+            ->select('DISTINCT f.niveau')
+            ->where('f.statut = :statut')
+            ->setParameter('statut', 'publiee')
+            ->getQuery()
+            ->getScalarResult();
+
+        return $this->render('apprenant/formations/index.html.twig', [
+            'formations' => $formations,
+            'categories' => array_column($categories, 'categorie'),
+            'niveaux' => array_column($niveaux, 'niveau'),
+            'currentCategorie' => $categorie,
+            'currentNiveau' => $niveau,
+            'currentTypeAcces' => $typeAcces,
+            'currentSearch' => $search,
+        ]);
     }
 
-    return $this->render('apprenant/edit.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
+    #[Route('/{id}', name: 'apprenant_formation_show', methods: ['GET'])]
+    public function show(
+        int $id, 
+        FormationRepository $formationRepository,
+        InscriptionRepository $inscriptionRepository,
+        FavoriRepository $favoriRepository
+    ): Response {
+        $formation = $formationRepository->find($id);
 
-    #[Route('/{id}/delete', name: 'apprenant_delete', methods: ['POST'])]
-#[Route('/{id}/delete', name: 'apprenant_delete', methods: ['POST'])]
-public function delete(Apprenant $apprenant, Request $request, EntityManagerInterface $em): Response
-{
-    if ($this->isCsrfTokenValid('delete'.$apprenant->getId(), $request->request->get('_token'))) {
-        $em->remove($apprenant);
-        $em->flush();
+        if (!$formation || $formation->getStatut() !== 'publiee') {
+            throw $this->createNotFoundException('Formation non trouvée ou non publiée');
+        }
+
+        $inscription = null;
+        $favori = null;
+
+        if ($this->getUser()) {
+            $inscription = $inscriptionRepository->findOneByApprenantAndFormation($this->getUser(), $id);
+            $favori = $favoriRepository->findOneByApprenantAndFormation($this->getUser(), $id);
+        }
+
+        return $this->render('apprenant/formations/show.html.twig', [
+            'formation' => $formation,
+            'inscription' => $inscription,
+            'favori' => $favori,
+        ]);
     }
 
-    return $this->redirectToRoute('apprenant_index');
-}*/
+    #[Route('/categorie/{categorie}', name: 'apprenant_formations_by_category', methods: ['GET'])]
+    public function byCategory(string $categorie, FormationRepository $formationRepository): Response
+    {
+        $formations = $formationRepository->createQueryBuilder('f')
+            ->where('f.statut = :statut')
+            ->andWhere('f.categorie = :categorie')
+            ->setParameter('statut', 'publiee')
+            ->setParameter('categorie', $categorie)
+            ->orderBy('f.datePublication', 'DESC')
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('apprenant/formations/category.html.twig', [
+            'formations' => $formations,
+            'categorie' => $categorie,
+        ]);
+    }
 }

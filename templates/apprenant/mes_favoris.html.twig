@@ -1,0 +1,935 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Favoris{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <!-- En-tête moderne -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="display-5 fw-bold text-dark mb-2">
+                       Mes Favoris
+                    </h1>
+                    <p class="lead text-muted mb-0">Retrouvez vos formations préférées en un clin d'œil</p>
+                </div>
+                <a href="{{ path('apprenant_formations_index') }}" class="tera-btn-discover">
+                    <i class="bi bi-search me-2"></i>Découvrir plus
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {% if favoris is empty %}
+        <div class="tera-empty-state">
+            <div class="tera-empty-icon">
+                <i class="bi bi-star"></i>
+            </div>
+            <h3 class="fw-bold text-dark mb-3">Aucune formation favorite</h3>
+            <p class="text-muted mb-4">Ajoutez des formations à vos favoris pour les retrouver facilement !</p>
+            <a href="{{ path('apprenant_formations_index') }}" class="tera-btn-explore">
+                <i class="bi bi-mortarboard me-2"></i>Explorer les formations
+            </a>
+        </div>
+    {% else %}
+        <!-- Barre d'actions -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="tera-sort-options">
+                <button class="tera-sort-btn active" data-sort="date">
+                    <i class="bi bi-calendar me-1"></i>Plus récents
+                </button>
+                <button class="tera-sort-btn" data-sort="title">
+                    <i class="bi bi-sort-alpha-down me-1"></i>A-Z
+                </button>
+                <button class="tera-sort-btn" data-sort="price">
+                    <i class="bi bi-cash me-1"></i>Prix
+                </button>
+            </div>
+            <button class="tera-btn-clear-all" onclick="confirmClearAll()">
+                <i class="bi bi-trash me-1"></i>Tout retirer
+            </button>
+        </div>
+
+        <div class="row g-4" id="favorisContainer">
+            {% for favori in favoris %}
+            <div class="col-lg-4 col-md-6 formation-item" data-date="{{ favori.dateAjout|date('Y-m-d') }}" data-title="{{ favori.formation.titre }}" data-price="{{ favori.formation.typeAcces == 'gratuit' ? 0 : (favori.formation.prixPromo ?: favori.formation.prix) }}">
+                <div class="card tera-card h-100 border-0 overflow-hidden">
+                    <!-- HEADER IMAGE -->
+                    <div class="tera-cover position-relative">
+                        {% if favori.formation.imageCouverture %}
+                            <img src="{{ asset('uploads/images/' ~ favori.formation.imageCouverture) }}" 
+                                 class="tera-cover-img"
+                                 alt="{{ favori.formation.titre }}">
+                        {% else %}
+                            <div class="tera-cover-img d-flex align-items-center justify-content-center"
+                                 style="background:#f2f4f7;">
+                                <i class="bi bi-mortarboard-fill" style="font-size:4rem;opacity:.15;"></i>
+                            </div>
+                        {% endif %}
+
+                        <!-- Badge Favori Enhanced -->
+                        <div class="tera-favorite-badge-enhanced">
+                            <div class="tera-star-wrapper">
+                                <i class="bi bi-star-fill"></i>
+                                <div class="tera-star-ripple"></div>
+                                <div class="tera-star-ripple tera-star-ripple-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- Ribbon dynamique -->
+                        {% if favori.formation.typeAcces == 'gratuit' %}
+                            <div class="tera-ribbon tera-ribbon-free">GRATUIT</div>
+                        {% elseif favori.formation.prixPromo and favori.formation.prixPromo < favori.formation.prix %}
+                            <div class="tera-ribbon tera-ribbon-promo">PROMO</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- BODY -->
+                    <div class="p-3 p-md-4">
+                        <div class="d-flex gap-2 mb-2 flex-wrap">
+                            <span class="badge tera-badge-category">{{ favori.formation.categorie }}</span>
+                            <span class="badge tera-badge-level">{{ favori.formation.niveau }}</span>
+                            <span class="badge tera-badge-langue">
+                                <i class="bi bi-globe2 me-1"></i>{{ favori.formation.langue }}
+                            </span>
+                        </div>
+
+                        <h5 class="tera-title mb-3">
+                            {{ favori.formation.titre }}
+                        </h5>
+
+                        <div class="tera-live mb-3">
+                            <span class="tera-live-dot"></span>
+                            <span class="tera-live-text">Live Assistance</span>
+                            <span class="tera-live-sub">included</span>
+                        </div>
+
+                        <p class="tera-desc mb-4">
+                            {{ favori.formation.descriptionCourte }}
+                        </p>
+
+                        <!-- FOOTER -->
+                        <div class="d-flex align-items-center justify-content-between gap-3 mb-4">
+                            <div class="tera-price">
+                                {% if favori.formation.typeAcces == 'gratuit' %}
+                                    <span>0</span> <small>DT</small>
+                                {% elseif favori.formation.prixPromo and favori.formation.prixPromo < favori.formation.prix %}
+                                    <div class="d-flex flex-column">
+                                        <span class="tera-price-old">{{ favori.formation.prix }} DT</span>
+                                        <div>
+                                            <span>{{ favori.formation.prixPromo }}</span> <small>DT</small>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <span>{{ favori.formation.prix }}</span> <small>DT</small>
+                                {% endif %}
+                            </div>
+
+                            <a href="{{ path('apprenant_formation_show', {'id': favori.formation.id}) }}"
+                               class="btn tera-btn">
+                                En savoir plus <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+
+                        <!-- Formateur Section -->
+                        <div class="tera-teacher-footer pt-3 border-top">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if favori.formation.formateur.photo %}
+                                        <img src="{{ asset('uploads/' ~ favori.formation.formateur.photo) }}" 
+                                             alt="{{ favori.formation.formateur.prenom }}"
+                                             class="tera-teacher-avatar-card">
+                                    {% else %}
+                                        <div class="tera-teacher-avatar-card tera-teacher-avatar-default-card">
+                                            {{ favori.formation.formateur.prenom|slice(0,1) }}{{ favori.formation.formateur.nom|slice(0,1) }}
+                                        </div>
+                                    {% endif %}
+                                    <div>
+                                        <div class="tera-teacher-label" style="margin-left: 3px;">Formateur</div>
+                                        <div class="tera-teacher-name-card" style="margin-left: 4px;">
+                                            {{ favori.formation.formateur.prenom }} {{ favori.formation.formateur.nom }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <form method="post" action="{{ path('apprenant_toggle_favori', {'id': favori.formation.id}) }}" class="d-inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('favori' ~ favori.formation.id) }}">
+                                    <button type="submit" class="tera-btn-star-remove" title="Retirer des favoris">
+                                        <i class="bi bi-star-fill"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="tera-date-added mt-2">
+                                <i class="bi bi-calendar-check me-1"></i>
+                                <span>Ajouté le {{ favori.dateAjout|date('d M Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* Stats Cards */
+.tera-stat-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.3s ease;
+}
+
+.tera-stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
+.tera-stat-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.tera-stat-icon-blue {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.tera-stat-icon-green {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.tera-stat-icon-orange {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.tera-stat-value {
+    font-size: 28px;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.tera-stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Sort Options */
+.tera-sort-options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tera-sort-btn {
+    background: white;
+    border: 2px solid #e2e8f0;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 14px;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tera-sort-btn:hover {
+    border-color: #667eea;
+    background: rgba(102, 126, 234, 0.05);
+    color: #667eea;
+}
+
+.tera-sort-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    color: white;
+}
+
+.tera-btn-clear-all {
+    background: white;
+    border: 2px solid #ef4444;
+    color: #ef4444;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tera-btn-clear-all:hover {
+    background: #ef4444;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* Bouton Découvrir */
+.tera-btn-discover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 28px;
+    border-radius: 50px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.tera-btn-discover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+/* Empty State */
+.tera-empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+.tera-empty-icon {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 24px;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(217, 119, 6, 0.1) 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 56px;
+    color: #f59e0b;
+}
+
+.tera-btn-explore {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 16px 40px;
+    border-radius: 50px;
+    font-weight: 800;
+    font-size: 16px;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.tera-btn-explore:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+/* CARD */
+.tera-card {
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, .08);
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+.tera-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(15, 23, 42, .12);
+}
+
+/* IMAGE HEADER */
+.tera-cover {
+    height: 230px;
+    overflow: hidden;
+    background: #eef2f6;
+    position: relative;
+}
+
+.tera-cover-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Favorite Badge Enhanced */
+.tera-favorite-badge-enhanced {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    width: 48px;
+    height: 48px;
+}
+
+.tera-star-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 158, 11, 0.95);
+    border-radius: 50%;
+    color: white;
+    font-size: 22px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.5);
+    animation: star-pulse 2s ease-in-out infinite;
+}
+
+@keyframes star-pulse {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.08) rotate(5deg); }
+    50% { transform: scale(1) rotate(0deg); }
+    75% { transform: scale(1.08) rotate(-5deg); }
+}
+
+.tera-star-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border: 3px solid #f59e0b;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: ripple 2s ease-out infinite;
+}
+
+.tera-star-ripple-2 {
+    animation-delay: 1s;
+}
+
+@keyframes ripple {
+    0% {
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+    }
+    100% {
+        width: 200%;
+        height: 200%;
+        opacity: 0;
+    }
+}
+
+/* Ribbon */
+.tera-ribbon {
+    position: absolute;
+    top: 14px;
+    right: -38px;
+    transform: rotate(45deg);
+    background: #3b1d7a;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 8px 56px;
+    font-size: 12px;
+    text-transform: uppercase;
+    box-shadow: 0 10px 18px rgba(0,0,0,.15);
+}
+
+.tera-ribbon-free {
+    background: #10b981;
+}
+
+.tera-ribbon-promo {
+    background: #f59e0b;
+}
+
+/* Badges */
+.tera-badge-category {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.tera-badge-level {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.tera-badge-langue {
+    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+/* Formateur Mini */
+.tera-formateur-mini {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 12px;
+}
+
+.tera-formateur-avatar-mini {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tera-formateur-avatar-default-mini {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: white;
+}
+
+.tera-formateur-label-mini {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tera-formateur-name-mini {
+    font-size: 13px;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* Price Discount Badge */
+.tera-price-discount {
+    background: #dc2626;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+/* Date Added Badge */
+.tera-date-added-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 700;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 50px;
+}
+
+/* Badges (keeping existing) */
+.tera-badge-category {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+.tera-badge-level {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+}
+
+/* Text styles */
+.tera-title {
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.2;
+    font-size: 20px;
+}
+
+/* Live Assistance row */
+.tera-live{
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+.tera-live-dot{
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #ff3b30;
+  display: inline-block;
+  position: relative;
+}
+.tera-live-dot::after{
+  content:"";
+  position:absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.85);
+  opacity: .9;
+}
+.tera-live-text{
+  color: #ff3b30;
+}
+.tera-live-sub{
+  color: #64748b;
+  font-weight: 600;
+}
+
+.tera-desc {
+    color: #64748b;
+    line-height: 1.6;
+    font-size: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Stats Row */
+.tera-stats-row {
+    display: flex;
+    gap: 16px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.tera-stat-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.tera-stat-item i {
+    font-size: 16px;
+    color: #667eea;
+}
+
+/* Price + button */
+.tera-price{
+  font-weight: 900;
+  color: #0f172a;
+  font-size: 34px;
+  line-height: 1;
+}
+.tera-price small{
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* Prix barré */
+.tera-price-old{
+  font-size: 16px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-decoration: line-through;
+  margin-bottom: 4px;
+}
+
+.tera-btn{
+  background: #17a2b8;
+  color: #fff;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-weight: 800;
+  border: 0;
+  box-shadow: 0 10px 18px rgba(23, 162, 184, .25);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.tera-btn:hover{
+  color:#fff;
+  transform: translateY(-1px);
+  filter: brightness(0.98);
+  box-shadow: 0 14px 24px rgba(23, 162, 184, .30);
+}
+
+/* Formateur Footer Card */
+.tera-teacher-footer{
+  border-top: 2px solid #f1f5f9 !important;
+}
+
+.tera-teacher-avatar-card{
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tera-teacher-avatar-default-card{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.tera-teacher-label{
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.tera-teacher-name-card{
+  font-weight: 700;
+  font-size: 15px;
+  color: #0f172a;
+  letter-spacing: 0.2px;
+}
+
+.tera-btn-star-remove {
+    background: white;
+    color: #f59e0b;
+    border: 2px solid #f59e0b;
+    padding: 10px 14px;
+    border-radius: 50%;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tera-btn-star-remove:hover {
+    background: #f59e0b;
+    color: white;
+    transform: scale(1.1) rotate(20deg);
+}
+
+/* Date ajout */
+.tera-date-added {
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+/* Prix Section */
+.tera-price-section {
+    text-align: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.tera-price-free {
+    color: #10b981;
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.tera-price-old-small {
+    text-decoration: line-through;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.tera-price-promo-small {
+    color: #dc2626;
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.tera-price-regular-small {
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 18px;
+}
+
+/* Boutons */
+.tera-btn-details {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+}
+
+.tera-btn-details:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+
+.tera-btn-remove-fav {
+    background: white;
+    color: #f43f5e;
+    border: 2px solid #f43f5e;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tera-btn-remove-fav:hover {
+    background: #f43f5e;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Date ajout */
+.tera-date-added {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+    padding-top: 12px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .tera-stats-row {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .tera-sort-options {
+        justify-content: center;
+    }
+    
+    .tera-stat-card {
+        flex-direction: row;
+    }
+}
+
+/* Animations */
+.formation-item {
+    animation: fadeInUp 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+.formation-item:nth-child(1) { animation-delay: 0.1s; }
+.formation-item:nth-child(2) { animation-delay: 0.2s; }
+.formation-item:nth-child(3) { animation-delay: 0.3s; }
+.formation-item:nth-child(4) { animation-delay: 0.4s; }
+.formation-item:nth-child(5) { animation-delay: 0.5s; }
+.formation-item:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sortButtons = document.querySelectorAll('.tera-sort-btn');
+    const container = document.getElementById('favorisContainer');
+    const items = Array.from(document.querySelectorAll('.formation-item'));
+
+    // Fonction de tri
+    sortButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Update active button
+            sortButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+
+            const sortType = this.dataset.sort;
+            let sortedItems;
+
+            switch(sortType) {
+                case 'date':
+                    sortedItems = items.sort((a, b) => {
+                        return new Date(b.dataset.date) - new Date(a.dataset.date);
+                    });
+                    break;
+                case 'title':
+                    sortedItems = items.sort((a, b) => {
+                        return a.dataset.title.localeCompare(b.dataset.title);
+                    });
+                    break;
+                case 'price':
+                    sortedItems = items.sort((a, b) => {
+                        return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                    });
+                    break;
+            }
+
+            // Réorganiser les éléments
+            sortedItems.forEach(item => {
+                container.appendChild(item);
+            });
+        });
+    });
+});
+
+// Fonction pour tout retirer
+function confirmClearAll() {
+    if (confirm('Êtes-vous sûr de vouloir retirer toutes les formations de vos favoris ?')) {
+        const forms = document.querySelectorAll('.tera-btn-remove-fav').parentElement;
+        // Ici vous pouvez implémenter la logique pour tout retirer
+        alert('Fonctionnalité à implémenter dans le contrôleur');
+    }
+}
+</script>
+{% endblock %}
