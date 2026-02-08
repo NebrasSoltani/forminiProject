@@ -1,0 +1,111 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Événement{% endblock %}
+
+{% block body %}
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0">Créer un Nouvel Événement</h4>
+                    <div class="page-title-right">
+                        <a href="{{ path('admin_evenement_index') }}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_label(form.titre) }}
+                                {{ form_widget(form.titre) }}
+                                {{ form_errors(form.titre) }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.type) }}
+                                    {{ form_widget(form.type) }}
+                                    {{ form_errors(form.type) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.nombrePlaces) }}
+                                    {{ form_widget(form.nombrePlaces) }}
+                                    {{ form_errors(form.nombrePlaces) }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.description) }}
+                                {{ form_widget(form.description) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.dateDebut) }}
+                                    {{ form_widget(form.dateDebut) }}
+                                    {{ form_errors(form.dateDebut) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.dateFin) }}
+                                    {{ form_widget(form.dateFin) }}
+                                    {{ form_errors(form.dateFin) }}
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.lieu) }}
+                                {{ form_widget(form.lieu) }}
+                                {{ form_errors(form.lieu) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.image) }}
+                                {{ form_widget(form.image) }}
+                                {{ form_errors(form.image) }}
+                                <small class="text-muted">Formats acceptés: JPG, PNG, GIF (Max 5MB)</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form_widget(form.isActif) }}
+                                    {{ form_label(form.isActif) }}
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="mdi mdi-content-save"></i> Créer l'Événement
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Conseils</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Titre clair et descriptif</li>
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Description détaillée du programme</li>
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Dates et horaires précis</li>
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Lieu complet ou lien de visioconférence</li>
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Image attractive de l'événement</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

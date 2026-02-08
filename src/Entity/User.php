@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\Gouvernorat;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -44,9 +45,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: 'Le téléphone est obligatoire')]
     private ?string $telephone = null;
 
-    #[ORM\Column(length: 100)]
+    #[ORM\Column(enumType: Gouvernorat::class, nullable: true)]
     #[Assert\NotBlank(message: 'Le gouvernorat est obligatoire')]
-    private ?string $governorat = null;
+    private ?Gouvernorat $gouvernorat = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotNull(message: 'La date de naissance est obligatoire')]
@@ -173,14 +174,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getGovernorat(): ?string
+    public function getGouvernorat(): ?Gouvernorat
     {
-        return $this->governorat;
-    }
+        return $this->gouvernorat;
+    }   
 
-    public function setGovernorat(string $governorat): static
+    public function setGouvernorat(?Gouvernorat $gouvernorat): static
     {
-        $this->governorat = $governorat;
+        $this->gouvernorat = $gouvernorat;
         return $this;
     }
 
