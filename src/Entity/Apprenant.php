@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ApprenantRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints\Collection;
 
 #[ORM\Entity(repositoryClass: ApprenantRepository::class)]
 class Apprenant
@@ -32,6 +33,15 @@ class Apprenant
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $objectif = null;
+
+    #[ORM\ManyToOne(targetEntity: Domaine::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Domaine $domaine = null;
+
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $domainesInteret = [];
+
 
     public function getId(): ?int
     {
@@ -103,4 +113,26 @@ class Apprenant
         $this->objectif = $objectif;
         return $this;
     }
+   public function getDomaine(): ?Domaine
+{
+    return $this->domaine;
+}
+
+public function setDomaine(?Domaine $domaine): static
+{
+    $this->domaine = $domaine;
+    return $this;
+}
+
+public function getDomainesInteret(): array
+{
+    return $this->domainesInteret ?? [];
+}
+
+public function setDomainesInteret(array $domainesInteret): static
+{
+    $this->domainesInteret = $domainesInteret;
+    return $this;
+}
+
 }
