@@ -181,6 +181,102 @@
         </div>
     </div>
 
+    <!-- ============================================ -->
+    <!-- AJOUTEZ CETTE SECTION ICI - STATISTIQUES ÉVÉNEMENTS -->
+    <!-- ============================================ -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Événements
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_evenements ?? 0 }}</div>
+                            <div class="mt-2 small">
+                                <span class="text-success">{{ stats.evenements_actifs ?? 0 }} actifs</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar-event-fill text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                À Venir
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.evenements_a_venir ?? 0 }}</div>
+                            <div class="mt-2 small">
+                                <span class="text-muted">Événements planifiés</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-clock-fill text-success" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                En Cours
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.evenements_en_cours ?? 0 }}</div>
+                            <div class="mt-2 small">
+                                <span class="text-muted">Événements actifs</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-play-circle-fill text-info" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Gestion Événements
+                            </div>
+                            <div class="mt-2">
+                                <a href="{{ path('admin_evenement_statistiques') }}" class="btn btn-sm btn-info me-2">
+                                    <i class="bi bi-graph-up"></i> Stats
+                                </a>
+                                <a href="{{ path('admin_evenement_index') }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-calendar-check"></i> Gérer
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calendar-star-fill text-warning" style="font-size: 2rem;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ============================================ -->
+    <!-- FIN DE LA SECTION ÉVÉNEMENTS -->
+    <!-- ============================================ -->
+
     <!-- Accès rapides -->
     <div class="row mb-4">
         <div class="col-12">
@@ -198,6 +294,16 @@
                         <div class="col-md-3 mb-3">
                             <a href="#" class="btn btn-outline-info w-100">
                                 <i class="bi bi-people"></i> Gestion utilisateurs
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ path('admin_blog_index') }}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-newspaper"></i> Gestion des blogs
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ path('admin_evenement_index') }}" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-calendar-event"></i> Gestion des événements
                             </a>
                         </div>
                         <div class="col-md-3 mb-3">
