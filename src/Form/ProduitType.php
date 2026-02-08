@@ -76,13 +76,9 @@ class ProduitType extends AbstractType
             ])
             ->add('stock', NumberType::class, [
                 'label' => 'Stock disponible',
-                'constraints' => [
-                    new NotBlank(['message' => 'Le stock est obligatoire']),
-                    new GreaterThanOrEqual([
-                        'value' => 0,
-                        'message' => 'Le stock ne peut pas être négatif'
-                    ])
-                ]
+                
+                    
+                
             ])
             ->add('statut', ChoiceType::class, [
                 'label' => 'Statut',
