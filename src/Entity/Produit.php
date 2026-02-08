@@ -36,8 +36,9 @@ class Produit
     private ?string $prix = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank]
-    #[Assert\PositiveOrZero]
+    
+    #[Assert\PositiveOrZero(message: 'Le stock ne peut pas être négatif')]
+
     private ?int $stock = 0;
 
     #[ORM\Column(length: 255, nullable: true)]
