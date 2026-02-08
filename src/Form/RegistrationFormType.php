@@ -3,8 +3,9 @@
 namespace App\Form;
 
 use App\Entity\User;
-use Symfony\Component\Form\AbstractType;
+use App\Enum\Gouvernorat;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -78,13 +79,18 @@ class RegistrationFormType extends AbstractType
                     new Email(['message' => 'Email invalide'])
                 ]
             ])
-            ->add('governorat', TextType::class, [
-                'label' => 'Gouvernorat',
-                'constraints' => [
-                    new NotBlank(['message' => 'Le gouvernorat est obligatoire']),
-                    new Length(['max' => 100])
-                ]
-            ])
+             ->add('gouvernorat', ChoiceType::class, [
+        'label' => 'Gouvernorat',
+        'choices' => array_combine(
+            array_map(fn(Gouvernorat $g) => $g->name, Gouvernorat::cases()), 
+            Gouvernorat::cases()  
+        ),
+        'placeholder' => 'Choisissez un gouvernorat',
+        'constraints' => [
+            new NotBlank(['message' => 'Le gouvernorat est obligatoire'])
+        ],
+    ])
+
             ->add('dateNaissance', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de naissance',
@@ -215,7 +221,21 @@ class RegistrationFormType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control', 'rows' => 3, 'placeholder' => 'Décrivez vos objectifs...']
             ])
-            
+          ->add('domainesInteret', ChoiceType::class, [
+    'label' => 'Centres d\'intérêt',
+    'choices' => [
+        'Informatique' => 'informatique',
+        'Marketing' => 'marketing',
+        'Design' => 'design',
+        'Finance' => 'finance',
+        'Communication' => 'communication',
+    ],
+    'multiple' => true,     
+    'expanded' => true,     
+    'mapped' => false,
+    'required' => false,
+])
+
             // Champs spécifiques pour Société
             ->add('nomSociete', TextType::class, [
                 'label' => 'Nom de la société',
