@@ -56,4 +56,16 @@ class QuestionRepository extends ServiceEntityRepository
 
         return $result ? (int) $result : 0;
     }
+    public function countQuestionsValidesByQuiz(int $quizId): int
+{
+    return $this->createQueryBuilder('q')
+        ->select('COUNT(DISTINCT q.id)')
+        ->join('q.reponses', 'r')
+        ->andWhere('q.quiz = :quizId')
+        ->andWhere('r.estCorrecte = true')
+        ->setParameter('quizId', $quizId)
+        ->getQuery()
+        ->getSingleScalarResult();
+}
+
 }
