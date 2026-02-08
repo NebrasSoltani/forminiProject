@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20260208120340 extends AbstractMigration
+final class Version20260208192512 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -23,6 +23,7 @@ final class Version20260208120340 extends AbstractMigration
         $this->addSql('CREATE TABLE apprenant (id INT AUTO_INCREMENT NOT NULL, niveau_etude VARCHAR(100) DEFAULT NULL, date_naissance DATE DEFAULT NULL, genre VARCHAR(20) DEFAULT NULL, etat_civil VARCHAR(50) DEFAULT NULL, objectif LONGTEXT DEFAULT NULL, domaines_interet JSON DEFAULT NULL, user_id INT NOT NULL, domaine_id INT DEFAULT NULL, UNIQUE INDEX UNIQ_C4EB462EA76ED395 (user_id), INDEX IDX_C4EB462E4272FC9F (domaine_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE blog (id INT AUTO_INCREMENT NOT NULL, titre VARCHAR(255) NOT NULL, contenu LONGTEXT NOT NULL, image VARCHAR(255) DEFAULT NULL, date_publication DATETIME NOT NULL, categorie VARCHAR(100) NOT NULL, is_publie TINYINT NOT NULL, resume LONGTEXT DEFAULT NULL, auteur_id INT NOT NULL, evenement_id INT DEFAULT NULL, INDEX IDX_C015514360BB6FE6 (auteur_id), INDEX IDX_C0155143FD02F13 (evenement_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE candidature (id INT AUTO_INCREMENT NOT NULL, statut VARCHAR(50) NOT NULL, lettre_motivation LONGTEXT NOT NULL, cv VARCHAR(255) DEFAULT NULL, date_candidature DATETIME NOT NULL, commentaire LONGTEXT DEFAULT NULL, offre_stage_id INT NOT NULL, apprenant_id INT NOT NULL, INDEX IDX_E33BD3B8195A2A28 (offre_stage_id), INDEX IDX_E33BD3B8C5697D6D (apprenant_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
+        $this->addSql('CREATE TABLE certificat (id INT AUTO_INCREMENT NOT NULL, date_obtention DATETIME NOT NULL, apprenant_id INT NOT NULL, quiz_id INT NOT NULL, INDEX IDX_27448F77C5697D6D (apprenant_id), INDEX IDX_27448F77853CD175 (quiz_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE commande (id INT AUTO_INCREMENT NOT NULL, reference VARCHAR(100) NOT NULL, date_commande DATETIME NOT NULL, statut VARCHAR(50) NOT NULL, total NUMERIC(10, 2) NOT NULL, adresse_livraison LONGTEXT DEFAULT NULL, telephone VARCHAR(20) DEFAULT NULL, utilisateur_id INT NOT NULL, UNIQUE INDEX UNIQ_6EEAA67DAEA34913 (reference), INDEX IDX_6EEAA67DFB88E14F (utilisateur_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE commande_item (id INT AUTO_INCREMENT NOT NULL, nom_produit VARCHAR(255) NOT NULL, quantite INT NOT NULL, prix_unitaire NUMERIC(10, 2) NOT NULL, commande_id INT NOT NULL, produit_id INT NOT NULL, INDEX IDX_747724FD82EA2E54 (commande_id), INDEX IDX_747724FDF347EFB (produit_id), PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE domaine (id INT AUTO_INCREMENT NOT NULL, nom VARCHAR(100) NOT NULL, PRIMARY KEY (id)) DEFAULT CHARACTER SET utf8mb4');
@@ -49,6 +50,8 @@ final class Version20260208120340 extends AbstractMigration
         $this->addSql('ALTER TABLE blog ADD CONSTRAINT FK_C0155143FD02F13 FOREIGN KEY (evenement_id) REFERENCES evenement (id)');
         $this->addSql('ALTER TABLE candidature ADD CONSTRAINT FK_E33BD3B8195A2A28 FOREIGN KEY (offre_stage_id) REFERENCES offre_stage (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE candidature ADD CONSTRAINT FK_E33BD3B8C5697D6D FOREIGN KEY (apprenant_id) REFERENCES user (id) ON DELETE CASCADE');
+        $this->addSql('ALTER TABLE certificat ADD CONSTRAINT FK_27448F77C5697D6D FOREIGN KEY (apprenant_id) REFERENCES user (id)');
+        $this->addSql('ALTER TABLE certificat ADD CONSTRAINT FK_27448F77853CD175 FOREIGN KEY (quiz_id) REFERENCES quiz (id)');
         $this->addSql('ALTER TABLE commande ADD CONSTRAINT FK_6EEAA67DFB88E14F FOREIGN KEY (utilisateur_id) REFERENCES user (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE commande_item ADD CONSTRAINT FK_747724FD82EA2E54 FOREIGN KEY (commande_id) REFERENCES commande (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE commande_item ADD CONSTRAINT FK_747724FDF347EFB FOREIGN KEY (produit_id) REFERENCES produit (id)');
@@ -81,6 +84,8 @@ final class Version20260208120340 extends AbstractMigration
         $this->addSql('ALTER TABLE blog DROP FOREIGN KEY FK_C0155143FD02F13');
         $this->addSql('ALTER TABLE candidature DROP FOREIGN KEY FK_E33BD3B8195A2A28');
         $this->addSql('ALTER TABLE candidature DROP FOREIGN KEY FK_E33BD3B8C5697D6D');
+        $this->addSql('ALTER TABLE certificat DROP FOREIGN KEY FK_27448F77C5697D6D');
+        $this->addSql('ALTER TABLE certificat DROP FOREIGN KEY FK_27448F77853CD175');
         $this->addSql('ALTER TABLE commande DROP FOREIGN KEY FK_6EEAA67DFB88E14F');
         $this->addSql('ALTER TABLE commande_item DROP FOREIGN KEY FK_747724FD82EA2E54');
         $this->addSql('ALTER TABLE commande_item DROP FOREIGN KEY FK_747724FDF347EFB');
@@ -105,6 +110,7 @@ final class Version20260208120340 extends AbstractMigration
         $this->addSql('DROP TABLE apprenant');
         $this->addSql('DROP TABLE blog');
         $this->addSql('DROP TABLE candidature');
+        $this->addSql('DROP TABLE certificat');
         $this->addSql('DROP TABLE commande');
         $this->addSql('DROP TABLE commande_item');
         $this->addSql('DROP TABLE domaine');
