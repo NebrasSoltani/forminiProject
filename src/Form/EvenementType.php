@@ -21,15 +21,56 @@ class EvenementType extends AbstractType
     {
         $builder
             ->add('titre', TextType::class, [
-                'label' => 'Titre de l\'événement',
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Entrez le titre']
+                'label' => 'Titre',
+                'required' => false, // ← false pour désactiver required HTML5
+                'empty_data' => '',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Titre de l\'événement'
+                ]
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'attr' => ['class' => 'form-control', 'rows' => 6, 'placeholder' => 'Description complète de l\'événement']
+                'required' => false, // ← false pour désactiver required HTML5
+                'empty_data' => '',
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 5,
+                    'placeholder' => 'Description de l\'événement'
+                ]
+            ])
+            ->add('dateDebut', TextType::class, [ // ← CHANGÉ DE DateTimeType À TextType
+                'label' => 'Date de début',
+                'required' => false,
+                'mapped' => false, // ← Important : ne pas mapper directement
+                'attr' => [
+                    'class' => 'form-control',
+                    'style' => 'display: none;' // ← Caché car on utilise datetime-local
+                ]
+            ])
+            ->add('dateFin', TextType::class, [ // ← CHANGÉ DE DateTimeType À TextType
+                'label' => 'Date de fin',
+                'required' => false,
+                'mapped' => false, // ← Important : ne pas mapper directement
+                'attr' => [
+                    'class' => 'form-control',
+                    'style' => 'display: none;' // ← Caché car on utilise datetime-local
+                ]
+            ])
+            ->add('lieu', TextType::class, [
+                'label' => 'Lieu',
+                'required' => false, // ← false pour désactiver required HTML5
+                'empty_data' => '',
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Lieu de l\'événement'
+                ]
             ])
             ->add('type', ChoiceType::class, [
-                'label' => 'Type d\'événement',
+                'label' => 'Type',
+                'required' => false, // ← false pour désactiver required HTML5
+                'empty_data' => '',
+                'placeholder' => '-- Sélectionnez un type --',
                 'choices' => [
                     'Conférence' => 'Conférence',
                     'Atelier' => 'Atelier',
@@ -40,49 +81,46 @@ class EvenementType extends AbstractType
                     'Hackathon' => 'Hackathon',
                     'Autre' => 'Autre',
                 ],
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('dateDebut', DateTimeType::class, [
-                'label' => 'Date et heure de début',
-                'widget' => 'single_text',
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('dateFin', DateTimeType::class, [
-                'label' => 'Date et heure de fin',
-                'widget' => 'single_text',
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('lieu', TextType::class, [
-                'label' => 'Lieu',
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Adresse ou lien de l\'événement']
+                'attr' => [
+                    'class' => 'form-control'
+                ]
             ])
             ->add('nombrePlaces', IntegerType::class, [
                 'label' => 'Nombre de places',
                 'required' => false,
-                'attr' => ['class' => 'form-control', 'placeholder' => 'Nombre de participants maximum']
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Laissez vide pour illimité',
+                    'min' => 1
+                ]
+            ])
+            ->add('isActif', CheckboxType::class, [
+                'label' => 'Événement actif',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-check-input'
+                ]
             ])
             ->add('image', FileType::class, [
-                'label' => 'Image de l\'événement',
-                'mapped' => false,
+                'label' => 'Image',
                 'required' => false,
+                'mapped' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'accept' => 'image/*'
+                ],
                 'constraints' => [
                     new File([
                         'maxSize' => '5M',
                         'mimeTypes' => [
                             'image/jpeg',
-                            'image/jpg',
                             'image/png',
                             'image/gif',
+                            'image/webp',
                         ],
-                        'mimeTypesMessage' => 'Veuillez uploader une image valide (JPG, PNG, GIF)',
+                        'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPG, PNG, GIF, WEBP)',
                     ])
                 ],
-                'attr' => ['class' => 'form-control']
-            ])
-            ->add('isActif', CheckboxType::class, [
-                'label' => 'Activer l\'événement',
-                'required' => false,
-                'attr' => ['class' => 'form-check-input']
             ])
         ;
     }
