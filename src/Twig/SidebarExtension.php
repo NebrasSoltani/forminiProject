@@ -60,6 +60,12 @@ class SidebarExtension extends AbstractExtension
                     'icon' => 'list',
                     'route' => 'admin_commandes',
                 ],
+                  [
+                    'label' => 'Domaine',     
+                    'icon' => 'layers',   
+                    'route' => 'domaine_index',    
+                ],
+               
             ];
         }
 
