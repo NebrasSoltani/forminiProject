@@ -1,0 +1,18 @@
+{# templates/blog/not_published.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Blog non publié{% endblock %}
+
+{% block body %}
+<div class="container py-5 text-center">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="alert alert-warning">
+                <h1 class="h4 mb-3"><i class="fas fa-lock me-2"></i>Blog non publié</h1>
+                <p class="mb-3">Le blog "{{ blog.titre }}" n'est pas encore publié.</p>
+                <p class="text-muted">Il sera accessible une fois publié par l'administrateur.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
