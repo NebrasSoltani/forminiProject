@@ -221,7 +221,21 @@ class RegistrationFormType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control', 'rows' => 3, 'placeholder' => 'Décrivez vos objectifs...']
             ])
-            
+          ->add('domainesInteret', ChoiceType::class, [
+    'label' => 'Centres d\'intérêt',
+    'choices' => [
+        'Informatique' => 'informatique',
+        'Marketing' => 'marketing',
+        'Design' => 'design',
+        'Finance' => 'finance',
+        'Communication' => 'communication',
+    ],
+    'multiple' => true,     
+    'expanded' => true,     
+    'mapped' => false,
+    'required' => false,
+])
+
             // Champs spécifiques pour Société
             ->add('nomSociete', TextType::class, [
                 'label' => 'Nom de la société',
