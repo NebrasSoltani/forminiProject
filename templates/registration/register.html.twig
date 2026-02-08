@@ -131,6 +131,19 @@
                                 {{ form_widget(registrationForm.objectif) }}
                                 {{ form_errors(registrationForm.objectif) }}
                             </div>
+<div class="mb-3">
+    {{ form_label(registrationForm.domainesInteret) }}
+    {{ form_widget(registrationForm.domainesInteret) }}
+    {{ form_errors(registrationForm.domainesInteret) }}
+</div>
+
+<div class="mb-3">
+    <label for="autreCentreInteret">Autre centre d'intérêt</label>
+    <input type="text" id="autreCentreInteret" class="form-control" placeholder="Ajouter un centre d'intérêt">
+</div>
+ 
+
+
                         </div>
 
                         {# Champs spécifiques pour Société #}
@@ -197,67 +210,76 @@
             </div>
         </div>
     </div>
-</div>
-
-<script>
+</div><script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Trouver le select par son attribut name (Symfony génère automatiquement l'ID)
     const roleSelect = document.querySelector('select[name*="roleUtilisateur"]');
     const formateurFields = document.getElementById('formateur-fields');
     const apprenantFields = document.getElementById('apprenant-fields');
     const societeFields = document.getElementById('societe-fields');
-    
-    if (!roleSelect) {
-        console.error('Le select roleUtilisateur n\'a pas été trouvé');
-        console.log('Tous les selects:', document.querySelectorAll('select'));
-        return;
-    }
-    
-    console.log('Select trouvé:', roleSelect);
-    
+
+    if (!roleSelect) return;
+
     function showRoleFields() {
         const selectedRole = roleSelect.value;
-        console.log('Rôle sélectionné:', selectedRole);
-        
+
         // Cacher tous les champs spécifiques
-        if (formateurFields) {
-            formateurFields.style.display = 'none';
-            console.log('Formateur fields caché');
-        }
-        if (apprenantFields) {
-            apprenantFields.style.display = 'none';
-            console.log('Apprenant fields caché');
-        }
-        if (societeFields) {
-            societeFields.style.display = 'none';
-            console.log('Societe fields caché');
-        }
-        
-        // Afficher les champs correspondants au rôle sélectionné
-        if (selectedRole === 'formateur' && formateurFields) {
-            formateurFields.style.display = 'block';
-            console.log('Affichage des champs formateur');
-        } else if (selectedRole === 'apprenant' && apprenantFields) {
-            apprenantFields.style.display = 'block';
-            console.log('Affichage des champs apprenant');
-        } else if (selectedRole === 'societe' && societeFields) {
-            societeFields.style.display = 'block';
-            console.log('Affichage des champs société');
-        }
+        formateurFields.style.display = 'none';
+        apprenantFields.style.display = 'none';
+        societeFields.style.display = 'none';
+
+        // Afficher selon le rôle
+        if (selectedRole === 'formateur') formateurFields.style.display = 'block';
+        else if (selectedRole === 'apprenant') apprenantFields.style.display = 'block';
+        else if (selectedRole === 'societe') societeFields.style.display = 'block';
     }
-    
-    // Écouter le changement de rôle
-    roleSelect.addEventListener('change', function() {
-        console.log('Changement détecté');
-        showRoleFields();
-    });
-    
-    // Afficher les champs si un rôle est déjà sélectionné (en cas d'erreurs de validation)
-    if (roleSelect.value) {
-        console.log('Rôle déjà sélectionné au chargement:', roleSelect.value);
-        showRoleFields();
+
+    // Changement du rôle
+    roleSelect.addEventListener('change', showRoleFields);
+
+    // Afficher les champs si un rôle est déjà sélectionné (recharge du formulaire)
+    showRoleFields();
+
+    // --- Gestion "autre centre d'intérêt" pour apprenant en checklist ---
+    const checkboxesContainer = document.querySelector('#apprenant-fields div.form-check-group');
+    const autreInput = document.querySelector('input[name*="autreCentreInteret"]');
+
+    if (checkboxesContainer && autreInput) {
+        autreInput.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (!value) return;
+
+            // Vérifie si la checkbox existe déjà
+            const exists = Array.from(checkboxesContainer.querySelectorAll('input[type="checkbox"]'))
+                .some(cb => cb.value === value);
+            if (!exists) {
+                const id = 'domainesInteret_' + value.replace(/\s+/g, '_');
+
+                const div = document.createElement('div');
+                div.classList.add('form-check');
+
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.name = 'registration_form[domainesInteret][]';
+                input.value = value;
+                input.id = id;
+                input.classList.add('form-check-input');
+                input.checked = true;
+
+                const label = document.createElement('label');
+                label.classList.add('form-check-label');
+                label.htmlFor = id;
+                label.textContent = value;
+
+                div.appendChild(input);
+                div.appendChild(label);
+                checkboxesContainer.appendChild(div);
+            }
+            this.value = '';
+        });
     }
 });
 </script>
+
+
 
 {% endblock %}

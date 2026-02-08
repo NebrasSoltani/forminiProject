@@ -118,7 +118,9 @@ class RegistrationController extends AbstractController
                 if ($form->has('objectif') && $form->get('objectif')->getData()) {
                     $apprenant->setObjectif($form->get('objectif')->getData());
                 }
-                
+                if ($form->has('domainesInteret') && $form->get('domainesInteret')->getData()) {
+        $apprenant->setDomainesInteret($form->get('domainesInteret')->getData());
+    }
                 $em->persist($apprenant);
             } elseif ($roleUtilisateur === 'societe') {
                 $societe = new Societe();
