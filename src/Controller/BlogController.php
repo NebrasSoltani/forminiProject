@@ -340,20 +340,27 @@ class BlogController extends AbstractController
     }
 
     #[Route('/new', name: 'admin_blog_new')]
-    public function new(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
-    {   
-        // Vérifier que l'utilisateur est admin
-        $user = $this->getUser();
-        if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
-            $this->addFlash('error', 'Accès réservé aux administrateurs.');
-            return $this->redirectToRoute('accueil');
-        }
+public function new(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+{   
+    // Vérifier que l'utilisateur est admin
+    $user = $this->getUser();
+    if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
+        $this->addFlash('error', 'Accès réservé aux administrateurs.');
+        return $this->redirectToRoute('accueil');
+    }
 
-        $blog = new Blog();
-        $form = $this->createForm(BlogType::class, $blog);
-        $form->handleRequest($request);
+    // Initialisation
+    $blog = new Blog();
+    $form = $this->createForm(BlogType::class, $blog, [
+        'csrf_protection' => true,
+        'csrf_field_name' => '_token_blog',
+        'csrf_token_id'   => 'blog_item',
+    ]);
+    
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted()) {
+        if ($form->isValid()) {
             // Gérer l'upload de l'image
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
@@ -380,27 +387,39 @@ class BlogController extends AbstractController
 
             $this->addFlash('success', 'Blog créé avec succès !');
             return $this->redirectToRoute('admin_blog_index');
+        } else {
+            // Afficher les erreurs de validation
+            $errors = $form->getErrors(true);
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
-
-        return $this->render('admin/blog/new.html.twig', [
-            'form' => $form->createView(),
-        ]);
     }
 
-    #[Route('/{id}/edit', name: 'admin_blog_edit')]
-    public function edit(Request $request, Blog $blog, EntityManagerInterface $em, SluggerInterface $slugger): Response
-    {
-        // Vérifier que l'utilisateur est admin
-        $user = $this->getUser();
-        if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
-            $this->addFlash('error', 'Accès réservé aux administrateurs.');
-            return $this->redirectToRoute('accueil');
-        }
+    return $this->render('admin/blog/new.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
+#[Route('/{id}/edit', name: 'admin_blog_edit')]
+public function edit(Request $request, Blog $blog, EntityManagerInterface $em, SluggerInterface $slugger): Response
+{
+    // Vérifier que l'utilisateur est admin
+    $user = $this->getUser();
+    if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
+        $this->addFlash('error', 'Accès réservé aux administrateurs.');
+        return $this->redirectToRoute('accueil');
+    }
 
-        $form = $this->createForm(BlogType::class, $blog);
-        $form->handleRequest($request);
+    $form = $this->createForm(BlogType::class, $blog, [
+        'csrf_protection' => true,
+        'csrf_field_name' => '_token_blog',
+        'csrf_token_id'   => 'blog_item',
+    ]);
+    
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted()) {
+        if ($form->isValid()) {
             // Gérer l'upload de la nouvelle image
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
@@ -432,13 +451,20 @@ class BlogController extends AbstractController
 
             $this->addFlash('success', 'Blog modifié avec succès !');
             return $this->redirectToRoute('admin_blog_index');
+        } else {
+            // Afficher les erreurs de validation
+            $errors = $form->getErrors(true);
+            foreach ($errors as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
-
-        return $this->render('admin/blog/edit.html.twig', [
-            'form' => $form->createView(),
-            'blog' => $blog,
-        ]);
     }
+
+    return $this->render('admin/blog/edit.html.twig', [
+        'form' => $form->createView(),
+        'blog' => $blog,
+    ]);
+}
 
     #[Route('/{id}/delete', name: 'admin_blog_delete', methods: ['POST'])]
     public function delete(Request $request, Blog $blog, EntityManagerInterface $em): Response
@@ -560,14 +586,37 @@ class BlogController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-        // Générer l'URL complète du blog
-        $blogUrl = $this->generateUrl('blog_show', ['id' => $blog->getId()], \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL);
+        // GÉNÉRER L'URL POUR VISITER LE BLOG
+        $request = $this->container->get('request_stack')->getCurrentRequest();
+        $baseUrl = $request->getSchemeAndHttpHost();
+        
+        // Créer l'URL publique du blog
+        $blogUrl = $baseUrl . '/public/blog/' . $blog->getId();
 
         return $this->render('admin/blog/qrcode.html.twig', [
             'blog' => $blog,
             'blogUrl' => $blogUrl,
         ]);
     }
+    
+    #[Route('/public/blog/{id}', name: 'blog_public_show')]
+    public function publicShow(Blog $blog): Response
+    {
+        // Pas besoin de vérifier si l'utilisateur est admin pour la vue publique
+        // Mais on vérifie si le blog est publié
+        if (!$blog->isPublie()) {
+            // Si non publié, afficher un message
+            return $this->render('blog/not_published.html.twig', [
+                'blog' => $blog,
+            ]);
+        }
+
+        // Créer le template simple pour afficher le blog
+        return $this->render('blog/public_show.html.twig', [
+            'blog' => $blog,
+        ]);
+    }
+    
     #[Route('/blog/{id}', name: 'blog_show')]
     public function show(Blog $blog): Response
     {
