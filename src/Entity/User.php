@@ -45,8 +45,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: 'Le téléphone est obligatoire')]
     private ?string $telephone = null;
 
-    #[ORM\Column(enumType: Gouvernorat::class, nullable: true)]
-    #[Assert\NotBlank(message: 'Le gouvernorat est obligatoire')]
+    #[ORM\Column(type: 'string', length: 255, nullable: true, enumType: Gouvernorat::class)]
     private ?Gouvernorat $gouvernorat = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
@@ -174,17 +173,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getGouvernorat(): ?Gouvernorat
-    {
-        return $this->gouvernorat;
-    }   
-
-    public function setGouvernorat(?Gouvernorat $gouvernorat): static
-    {
-        $this->gouvernorat = $gouvernorat;
-        return $this;
-    }
-
+    
     public function getDateNaissance(): ?\DateTimeInterface
     {
         return $this->dateNaissance;
@@ -383,4 +372,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->societe = $societe;
         return $this;
     }
+
+    public function getGouvernorat(): ?Gouvernorat
+{
+    return $this->gouvernorat;
+}
+
+public function setGouvernorat(?Gouvernorat $gouvernorat): static
+{
+    $this->gouvernorat = $gouvernorat;
+    return $this;
+}
 }
