@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Événement {{ evenement.titre }} - Export PDF</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #333;
+            line-height: 1.4;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #333;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin: 0 0 10px 0;
+        }
+        
+        .header .subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .event-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .event-badge-conference { background-color: #3498db; color: white; }
+        .event-badge-atelier { background-color: #9b59b6; color: white; }
+        .event-badge-webinaire { background-color: #1abc9c; color: white; }
+        .event-badge-formation { background-color: #f39c12; color: white; }
+        .event-badge-networking { background-color: #e74c3c; color: white; }
+        .event-badge-seminaire { background-color: #34495e; color: white; }
+        .event-badge-hackathon { background-color: #d35400; color: white; }
+        .event-badge-autre { background-color: #95a5a6; color: white; }
+        
+        .info-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .info-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 10px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        
+        .status-active {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        
+        .status-inactive {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        
+        .description-section {
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .description-section h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        
+        .description-content {
+            font-size: 12px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .organizer-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 0;
+            padding: 15px;
+            background-color: #e8f4fc;
+            border-radius: 8px;
+            border: 1px solid #b3dcff;
+        }
+        
+        .organizer-info h4 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        
+        .organizer-details {
+            font-size: 11px;
+            color: #555;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 10px;
+            color: #7f8c8d;
+        }
+        
+        .qr-code {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .qr-code img {
+            max-width: 150px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{ evenement.titre }}</h1>
+        <div class="subtitle">
+            Fiche événement - Export généré le {{ dateGeneration|date('d/m/Y H:i') }}
+        </div>
+        <div class="event-badge event-badge-{{ evenement.type|lower }}">
+            {{ evenement.type }}
+        </div>
+    </div>
+    
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-label">Dates</div>
+            <div class="info-value">
+                <strong>Début :</strong> {{ evenement.dateDebut|date('d/m/Y H:i') }}<br>
+                <strong>Fin :</strong> {{ evenement.dateFin|date('d/m/Y H:i') }}
+            </div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-label">Lieu</div>
+            <div class="info-value">{{ evenement.lieu }}</div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-label">Capacité</div>
+            <div class="info-value">
+                {% if evenement.nombrePlaces %}
+                    {{ evenement.nombrePlaces }} places
+                {% else %}
+                    Illimité
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="info-card">
+            <div class="info-label">Statut</div>
+            <div class="info-value">
+                {% if evenement.isActif %}
+                    <span class="status-active">● Actif</span>
+                {% else %}
+                    <span class="status-inactive">● Inactif</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    {% if evenement.description %}
+    <div class="description-section">
+        <h3>Description</h3>
+        <div class="description-content">
+            {{ evenement.description|nl2br }}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if evenement.organisateur %}
+    <div class="organizer-section">
+        <div class="organizer-info">
+            <h4>Organisateur</h4>
+            <div class="organizer-details">
+                <strong>Nom :</strong> {{ evenement.organisateur.nom }}<br>
+                <strong>Email :</strong> {{ evenement.organisateur.email }}<br>
+                <strong>Rôle :</strong> {{ evenement.organisateur.roleUtilisateur }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="qr-code">
+        <!-- Note: Pour générer un vrai QR code, vous aurez besoin d'une bibliothèque supplémentaire -->
+        <div style="background-color: #f0f0f0; padding: 10px; display: inline-block;">
+            [CODE QR - Événement #{{ evenement.id }}]
+        </div>
+        <p style="font-size: 10px; color: #7f8c8d;">
+            Scannez pour plus d'informations
+        </p>
+    </div>
+    
+    <div class="footer">
+        <strong>ID Événement :</strong> {{ evenement.id }}<br>
+        Document généré automatiquement par EventBlogs<br>
+        Confidentialité : Ce document est destiné à un usage interne uniquement
+    </div>
+</body>
+</html>

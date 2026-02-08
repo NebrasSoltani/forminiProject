@@ -1,0 +1,101 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Blog{% endblock %}
+
+{% block body %}
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0">Modifier le Blog</h4>
+                    <div class="page-title-right">
+                        <a href="{{ path('admin_blog_index') }}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                            <div class="mb-3">
+                                {{ form_label(form.titre) }}
+                                {{ form_widget(form.titre) }}
+                                {{ form_errors(form.titre) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.categorie) }}
+                                {{ form_widget(form.categorie) }}
+                                {{ form_errors(form.categorie) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.resume) }}
+                                {{ form_widget(form.resume) }}
+                                {{ form_errors(form.resume) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.contenu) }}
+                                {{ form_widget(form.contenu) }}
+                                {{ form_errors(form.contenu) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {% if blog.image %}
+                                    <div class="mb-2">
+                                        <label class="form-label">Image actuelle:</label><br>
+                                        <img src="{{ asset('uploads/blogs/' ~ blog.image) }}" alt="{{ blog.titre }}" style="max-width: 300px; border-radius: 5px;">
+                                    </div>
+                                {% endif %}
+                                {{ form_label(form.image) }}
+                                {{ form_widget(form.image) }}
+                                {{ form_errors(form.image) }}
+                                <small class="text-muted">Formats acceptés: JPG, PNG, GIF (Max 5MB). Laissez vide pour conserver l'image actuelle.</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form_widget(form.isPublie) }}
+                                    {{ form_label(form.isPublie) }}
+                                </div>
+                            </div>
+
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="mdi mdi-content-save"></i> Enregistrer les Modifications
+                                </button>
+                            </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Informations</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><strong>Auteur:</strong> {{ blog.auteur.prenom }} {{ blog.auteur.nom }}</li>
+                            <li class="mb-2"><strong>Date de publication:</strong> {{ blog.datePublication|date('d/m/Y H:i') }}</li>
+                            <li class="mb-2"><strong>Statut:</strong> 
+                                {% if blog.isPublie %}
+                                    <span class="badge badge-success">Publié</span>
+                                {% else %}
+                                    <span class="badge badge-warning">Brouillon</span>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

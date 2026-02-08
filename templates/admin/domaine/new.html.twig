@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Ajouter domaine</h1>
+
+{{ form_start(form) }}
+{{ form_widget(form) }}
+<button>Enregistrer</button>
+{{ form_end(form) }}
+
+<a href="{{ path('domaine_index') }}">⬅️ Retour</a>
+{% endblock %}
