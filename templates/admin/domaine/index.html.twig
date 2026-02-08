@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Liste des domaines</h1>
+
+<a href="{{ path('domaine_new') }}">➕ Ajouter domaine</a>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Nom</th>
+        <th>Actions</th>
+    </tr>
+    {% for domaine in domaines %}
+        <tr>
+            <td>{{ domaine.id }}</td>
+            <td>{{ domaine.nom }}</td>
+            <td>
+                <a href="{{ path('domaine_edit', {id: domaine.id}) }}">✏️</a>
+                <a href="{{ path('domaine_delete', {id: domaine.id}) }}"
+                   onclick="return confirm('Supprimer ?')">🗑️</a>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}
