@@ -25,4 +25,5 @@ enum Gouvernorat: string
     case MAHDIA = 'Mahdia';
     case MONASTIR = 'Monastir';
     case ZAGHOUAN = 'Zaghouan';
+  
 }
