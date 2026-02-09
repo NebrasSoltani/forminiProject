@@ -20,7 +20,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class SocieteController extends AbstractController
 {
     #[Route('/', name: 'societe_offres_index', methods: ['GET'])]
-    public function index(OffreStageRepository $offreStageRepository): Response
+    public function index(Request $request, OffreStageRepository $offreStageRepository): Response
     {
         /** @var User $user */
         $user = $this->getUser();
@@ -30,10 +30,35 @@ class SocieteController extends AbstractController
             throw $this->createAccessDeniedException('Accès réservé aux sociétés');
         }
 
-        $offres = $offreStageRepository->findBySociete($user);
+        $page = max(1, (int) $request->query->get('page', 1));
+        $limit = (int) $request->query->get('limit', 10);
+        if ($limit <= 0) {
+            $limit = 2;
+        }
+
+        $filters = [
+            'titre' => (string) $request->query->get('titre', ''),
+            'typeStage' => (string) $request->query->get('typeStage', ''),
+            'statut' => (string) $request->query->get('statut', ''),
+            'domaine' => (string) $request->query->get('domaine', ''),
+            'lieu' => (string) $request->query->get('lieu', ''),
+        ];
+
+        $result = $offreStageRepository->searchBySocietePaginated($user, $filters, $page, $limit);
+        $offres = $result['items'];
+        $total = $result['total'];
+        $pages = (int) max(1, (int) ceil($total / $limit));
+        if ($page > $pages) {
+            $page = $pages;
+        }
 
         return $this->render('societe/offres/index.html.twig', [
             'offres' => $offres,
+            'filters' => $filters,
+            'page' => $page,
+            'pages' => $pages,
+            'limit' => $limit,
+            'total' => $total,
         ]);
     }
 
