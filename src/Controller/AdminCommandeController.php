@@ -16,14 +16,34 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AdminCommandeController extends AbstractController
 {
     #[Route('/', name: 'admin_commandes', methods: ['GET'])]
-    public function index(CommandeRepository $commandeRepository): Response
+    public function index(CommandeRepository $commandeRepository, Request $request): Response
     {
-        $commandes = $commandeRepository->findBy([], ['dateCommande' => 'DESC']);
+        // ===== Pagination =====
+        $page = max(1, $request->query->getInt('page', 1));
+        $limit = 8; // nombre commandes par page
+        $offset = ($page - 1) * $limit;
+
+        // total commandes
+        $total = $commandeRepository->count([]);
+
+        // commandes paginées
+        $commandes = $commandeRepository->createQueryBuilder('c')
+            ->orderBy('c.dateCommande', 'DESC')
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        $pages = (int) ceil($total / $limit);
 
         return $this->render('admin/commandes/index.html.twig', [
             'commandes' => $commandes,
+            'currentPage' => $page,
+            'pages' => $pages,
+            'total' => $total,
         ]);
     }
+
 
     #[Route('/{id}', name: 'admin_commande_detail', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function show(Commande $commande): Response
@@ -33,23 +53,24 @@ class AdminCommandeController extends AbstractController
         ]);
     }
 
+
     #[Route('/{id}/statut', name: 'admin_commande_update_statut', methods: ['POST'], requirements: ['id' => '\d+'])]
     public function updateStatut(Commande $commande, Request $request, EntityManagerInterface $em): Response
     {
         $token = $request->request->get('_token');
-        
+
         if (!$this->isCsrfTokenValid('update_statut' . $commande->getId(), $token)) {
             $this->addFlash('error', 'Token CSRF invalide');
             return $this->redirectToRoute('admin_commande_detail', ['id' => $commande->getId()]);
         }
-        
+
         $newStatut = $request->request->get('statut');
-        
+
         if (in_array($newStatut, ['en_attente', 'confirmee', 'en_cours', 'livree', 'annulee'])) {
             $commande->setStatut($newStatut);
             $em->flush();
-            
-            $this->addFlash('success', 'Statut de la commande mis à jour avec succès');
+
+            $this->addFlash('success', 'Statut mis à jour avec succès');
         } else {
             $this->addFlash('error', 'Statut invalide');
         }
