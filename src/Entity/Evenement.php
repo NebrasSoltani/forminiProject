@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\EvenementRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EvenementRepository::class)]
 class Evenement
@@ -15,18 +16,43 @@ class Evenement
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le titre est requis")]
+    #[Assert\Length(
+        min: 5,
+        max: 255,
+        minMessage: "Le titre doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le titre ne peut pas dépasser {{ limit }} caractères"
+    )]
     private ?string $titre = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Assert\NotBlank(message: "La description est requise")]
+    #[Assert\Length(
+        min: 10,
+        minMessage: "La description doit contenir au moins {{ limit }} caractères"
+    )]
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotBlank(message: "La date de début est requise")] // ← CHANGÉ DE NotNull À NotBlank
     private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Assert\NotBlank(message: "La date de fin est requise")] // ← CHANGÉ DE NotNull À NotBlank
+    #[Assert\Expression(
+        "this.getDateDebut() == null or this.getDateFin() == null or this.getDateDebut() < this.getDateFin()",
+        message: "La date de fin doit être après la date de début"
+    )]
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank(message: "Le lieu est requis")]
+    #[Assert\Length(
+        min: 3,
+        max: 255,
+        minMessage: "Le lieu doit contenir au moins {{ limit }} caractères",
+        maxMessage: "Le lieu ne peut pas dépasser {{ limit }} caractères"
+    )]
     private ?string $lieu = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -34,15 +60,27 @@ class Evenement
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull(message: "L'organisateur est requis")]
     private ?User $organisateur = null;
 
     #[ORM\Column(type: Types::INTEGER, nullable: true)]
+    #[Assert\Positive(message: "Le nombre de places doit être positif")]
+    #[Assert\Range(
+        min: 1,
+        max: 10000,
+        notInRangeMessage: "Le nombre de places doit être entre {{ min }} et {{ max }}"
+    )]
     private ?int $nombrePlaces = null;
 
     #[ORM\Column]
     private ?bool $isActif = true;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: "Le type est requis")]
+    #[Assert\Choice(
+        choices: ['Conférence', 'Atelier', 'Webinaire', 'Formation', 'Networking', 'Séminaire', 'Hackathon', 'Autre'],
+        message: "Le type '{{ value }}' n'est pas valide"
+    )]
     private ?string $type = null;
 
     public function getId(): ?int
@@ -58,7 +96,6 @@ class Evenement
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
 
@@ -70,7 +107,6 @@ class Evenement
     public function setDescription(string $description): static
     {
         $this->description = $description;
-
         return $this;
     }
 
@@ -79,10 +115,9 @@ class Evenement
         return $this->dateDebut;
     }
 
-    public function setDateDebut(\DateTimeInterface $dateDebut): static
+    public function setDateDebut(?\DateTimeInterface $dateDebut): static
     {
         $this->dateDebut = $dateDebut;
-
         return $this;
     }
 
@@ -91,10 +126,9 @@ class Evenement
         return $this->dateFin;
     }
 
-    public function setDateFin(\DateTimeInterface $dateFin): static
+    public function setDateFin(?\DateTimeInterface $dateFin): static
     {
         $this->dateFin = $dateFin;
-
         return $this;
     }
 
@@ -106,7 +140,6 @@ class Evenement
     public function setLieu(string $lieu): static
     {
         $this->lieu = $lieu;
-
         return $this;
     }
 
@@ -118,7 +151,6 @@ class Evenement
     public function setImage(?string $image): static
     {
         $this->image = $image;
-
         return $this;
     }
 
@@ -130,7 +162,6 @@ class Evenement
     public function setOrganisateur(?User $organisateur): static
     {
         $this->organisateur = $organisateur;
-
         return $this;
     }
 
@@ -142,7 +173,6 @@ class Evenement
     public function setNombrePlaces(?int $nombrePlaces): static
     {
         $this->nombrePlaces = $nombrePlaces;
-
         return $this;
     }
 
@@ -154,7 +184,6 @@ class Evenement
     public function setActif(bool $isActif): static
     {
         $this->isActif = $isActif;
-
         return $this;
     }
 
@@ -166,7 +195,6 @@ class Evenement
     public function setType(string $type): static
     {
         $this->type = $type;
-
         return $this;
     }
 }

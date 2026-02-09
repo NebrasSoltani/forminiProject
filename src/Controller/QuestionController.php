@@ -30,7 +30,7 @@ class QuestionController extends AbstractController
     ): Response {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
-        
+
         if (!$formation || !$quiz) {
             throw $this->createNotFoundException();
         }
@@ -59,7 +59,7 @@ class QuestionController extends AbstractController
     ): Response {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
-        
+
         if (!$formation || !$quiz) {
             throw $this->createNotFoundException();
         }
@@ -70,7 +70,7 @@ class QuestionController extends AbstractController
 
         $question = new Question();
         $question->setQuiz($quiz);
-        
+
         // Définir l'ordre automatiquement
         $dernierOrdre = $em->getRepository(Question::class)
             ->createQueryBuilder('q')
@@ -79,7 +79,7 @@ class QuestionController extends AbstractController
             ->setParameter('quiz', $quiz)
             ->getQuery()
             ->getSingleScalarResult();
-        
+
         $question->setOrdre(($dernierOrdre ?? 0) + 1);
 
         $form = $this->createForm(QuestionType::class, $question);
@@ -117,13 +117,13 @@ class QuestionController extends AbstractController
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
         $question = $questionRepository->find($id);
-        
+
         if (!$formation || !$quiz || !$question) {
             throw $this->createNotFoundException();
         }
 
-        if ($formation->getFormateur() !== $this->getUser() || 
-            $quiz->getFormation() !== $formation || 
+        if ($formation->getFormateur() !== $this->getUser() ||
+            $quiz->getFormation() !== $formation ||
             $question->getQuiz() !== $quiz) {
             throw $this->createAccessDeniedException();
         }
@@ -149,13 +149,13 @@ class QuestionController extends AbstractController
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
         $question = $questionRepository->find($id);
-        
+
         if (!$formation || !$quiz || !$question) {
             throw $this->createNotFoundException();
         }
 
-        if ($formation->getFormateur() !== $this->getUser() || 
-            $quiz->getFormation() !== $formation || 
+        if ($formation->getFormateur() !== $this->getUser() ||
+            $quiz->getFormation() !== $formation ||
             $question->getQuiz() !== $quiz) {
             throw $this->createAccessDeniedException();
         }
@@ -194,13 +194,13 @@ class QuestionController extends AbstractController
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
         $question = $questionRepository->find($id);
-        
+
         if (!$formation || !$quiz || !$question) {
             throw $this->createNotFoundException();
         }
 
-        if ($formation->getFormateur() !== $this->getUser() || 
-            $quiz->getFormation() !== $formation || 
+        if ($formation->getFormateur() !== $this->getUser() ||
+            $quiz->getFormation() !== $formation ||
             $question->getQuiz() !== $quiz) {
             throw $this->createAccessDeniedException();
         }
@@ -231,13 +231,13 @@ class QuestionController extends AbstractController
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
         $question = $questionRepository->find($id);
-        
+
         if (!$formation || !$quiz || !$question) {
             throw $this->createNotFoundException();
         }
 
-        if ($formation->getFormateur() !== $this->getUser() || 
-            $quiz->getFormation() !== $formation || 
+        if ($formation->getFormateur() !== $this->getUser() ||
+            $quiz->getFormation() !== $formation ||
             $question->getQuiz() !== $quiz) {
             throw $this->createAccessDeniedException();
         }
@@ -274,7 +274,7 @@ class QuestionController extends AbstractController
         EntityManagerInterface $em
     ): Response {
         $reponse = $em->getRepository(Reponse::class)->find($reponseId);
-        
+
         if (!$reponse || $reponse->getQuestion()->getId() !== $questionId) {
             throw $this->createNotFoundException();
         }
@@ -291,4 +291,5 @@ class QuestionController extends AbstractController
             'id' => $questionId
         ]);
     }
+    
 }
