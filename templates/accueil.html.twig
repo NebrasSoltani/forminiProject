@@ -22,6 +22,14 @@
     <link rel="stylesheet" href="asset/css/animated.css">
     <link rel="stylesheet" href="asset/css/owl.css">
     <link rel="icon" href="asset/images/favicon.png" type="image/png">
+    <style>
+      html { scroll-behavior: smooth; }
+      .event-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+        border-color: #667eea !important;
+      }
+    </style>
 <!--
 
 TemplateMo 565 Onix Digital
@@ -61,6 +69,7 @@ https://templatemo.com/tm-565-onix-digital
             <ul class="nav">
               <li class="scroll-to-section"><a href="#top" class="active">Accueil</a></li>
               <li class="scroll-to-section"><a href="#services">Formations</a></li>
+              <li class="scroll-to-section"><a href="#evenements">&#201;v&#233;nements</a></li>
               <li class="scroll-to-section"><a href="#about">À Propos</a></li>
               <li class="scroll-to-section"><a href="#portfolio">Réussites</a></li>
               <li class="scroll-to-section"><a href="#video">Nos Programmes</a></li> 
@@ -244,6 +253,69 @@ https://templatemo.com/tm-565-onix-digital
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="evenements" class="our-services section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 offset-lg-3">
+          <div class="section-heading">
+            <h2>Nos <em>&#201;v&#233;nements</em> &#224; <span>venir</span></h2>
+            <span>&#201;v&#233;nements</span>
+          </div>
+        </div>
+      </div>
+      <div class="row mt-4">
+        {% if evenements is defined and evenements|length > 0 %}
+          {% for evenement in evenements %}
+            <div class="col-lg-4 col-md-6 mb-4">
+              <div class="item border rounded p-4 h-100 event-card" style="background: #fff; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.3s ease; border: 1px solid #f0f0f0;">
+                {% if evenement.image %}
+                  <img src="{{ asset('uploads/evenements/' ~ evenement.image) }}" alt="{{ evenement.titre }}" class="rounded mb-3 w-100" style="height: 160px; object-fit: cover;">
+                {% else %}
+                  <div class="rounded mb-3 d-flex align-items-center justify-content-center bg-light" style="height: 160px;">
+                    <i class="fa fa-calendar-check-o" style="font-size: 48px; color: #6974e8;"></i>
+                  </div>
+                {% endif %}
+                <div class="icon mb-2"><span class="badge bg-primary">{{ evenement.type }}</span></div>
+                <h4 class="mb-2">{{ evenement.titre }}</h4>
+                <p class="small text-muted mb-2">{{ evenement.description|length > 100 ? evenement.description|slice(0, 100) ~ '...' : evenement.description }}</p>
+                <p class="small mb-2"><i class="fa fa-map-marker text-primary me-1"></i>{{ evenement.lieu }}</p>
+                <p class="small mb-3">
+                    <i class="fa fa-calendar text-primary me-1"></i>{{ evenement.dateDebut|date('d/m/Y H:i') }} &#8211; {{ evenement.dateFin|date('d/m/Y H:i') }}
+                    {% if evenement.nombrePlaces is not null %}
+                        <br>
+                        <i class="fa fa-users text-primary me-1"></i>
+                        {{ evenement.nombrePlaces }} place(s) restante(s)
+                    {% endif %}
+                </p>
+                {% if app.user %}
+                  {% if ids_participation[evenement.id] is defined %}
+                    <span class="badge bg-success">Vous participez</span>
+                  {% else %}
+                    <button type="button" 
+                            class="main-button" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#confirmationModal"
+                            data-event-id="{{ evenement.id }}"
+                            data-event-title="{{ evenement.titre }}"
+                            data-csrf="{{ csrf_token('participer_evenement_' ~ evenement.id) }}">
+                      Participer
+                    </button>
+                  {% endif %}
+                {% else %}
+                  <div class="main-blue-button-hover"><a href="{{ path('app_login') }}">Connectez-vous pour participer</a></div>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <div class="col-12 text-center py-4">
+            <p class="text-muted">Aucun &#233;v&#233;nement disponible pour le moment.</p>
+          </div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -743,6 +815,61 @@ https://templatemo.com/tm-565-onix-digital
       function() { $(this).css("background-color", "#f8f9fa"); },
       function() { $(this).css("background-color", "#fff"); }
     );
+  </script>
+  <!-- Modal de Confirmation (Ajouté) -->
+  <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="confirmationModalLabel">Confirmer votre participation</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Vous êtes sur le point de vous inscrire à l'événement : <strong id="modalEventTitle"></strong></p>
+          <hr>
+          <h6 class="mb-3">Vos informations (pré-remplies) :</h6>
+          <div class="mb-3">
+              <label class="form-label text-muted">Nom complet</label>
+              <input type="text" class="form-control" value="{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : '' }}" readonly>
+          </div>
+          <div class="mb-3">
+              <label class="form-label text-muted">Numéro de téléphone</label>
+              <input type="text" class="form-control" value="{{ app.user ? app.user.telephone : '' }}" readonly>
+          </div>
+          <p class="small text-muted"><i class="fa fa-info-circle me-1"></i>Ces informations seront utilisées pour votre inscription.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <form id="confirmationForm" action="" method="post">
+              <input type="hidden" name="_token" id="modalCsrfToken">
+              <button type="submit" class="btn btn-primary">Confirmer l'inscription</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var confirmationModal = document.getElementById('confirmationModal');
+        if (confirmationModal) {
+            confirmationModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var eventId = button.getAttribute('data-event-id');
+                var eventTitle = button.getAttribute('data-event-title');
+                var csrfToken = button.getAttribute('data-csrf');
+                var actionUrl = "{{ path('apprenant_evenement_participer', { id: '0' }) }}".replace('0', eventId);
+    
+                var modalTitle = confirmationModal.querySelector('#modalEventTitle');
+                var modalForm = confirmationModal.querySelector('#confirmationForm');
+                var modalCsrf = confirmationModal.querySelector('#modalCsrfToken');
+    
+                modalTitle.textContent = eventTitle;
+                modalForm.action = actionUrl;
+                modalCsrf.value = csrfToken;
+            });
+        }
+    });
   </script>
 </body>
 </html>
