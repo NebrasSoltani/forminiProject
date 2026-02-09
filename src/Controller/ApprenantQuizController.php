@@ -26,7 +26,7 @@ class ApprenantQuizController extends AbstractController
 {
     #[Route('/', name: 'apprenant_quiz_index', methods: ['GET'])]
     public function index(
-        int $formationId, 
+        int $formationId,
         FormationRepository $formationRepository,
         InscriptionRepository $inscriptionRepository,
         QuizRepository $quizRepository,
@@ -34,7 +34,7 @@ class ApprenantQuizController extends AbstractController
         LeconRepository $leconRepository
     ): Response {
         $formation = $formationRepository->find($formationId);
-        
+
         if (!$formation) {
             throw $this->createNotFoundException('Formation non trouvée');
         }
@@ -76,7 +76,7 @@ class ApprenantQuizController extends AbstractController
     ): Response {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
-        
+
         if (!$formation || !$quiz || $quiz->getFormation() !== $formation) {
             throw $this->createNotFoundException('Quiz non trouvé');
         }
@@ -122,7 +122,7 @@ class ApprenantQuizController extends AbstractController
     ): Response {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
-        
+
         if (!$formation || !$quiz || $quiz->getFormation() !== $formation) {
             throw $this->createNotFoundException('Quiz non trouvé');
         }
@@ -135,7 +135,7 @@ class ApprenantQuizController extends AbstractController
 
         // Récupérer les réponses
         $reponses = $request->request->all('reponses');
-        
+
         // Calculer le score
         $nombreBonnesReponses = 0;
         $detailsReponses = [];
@@ -144,7 +144,7 @@ class ApprenantQuizController extends AbstractController
         foreach ($questions as $question) {
             $questionId = $question->getId();
             $reponseUtilisateur = $reponses[$questionId] ?? null;
-            
+
             // Trouver la bonne réponse
             $bonneReponse = null;
             foreach ($question->getReponses() as $reponse) {
@@ -204,7 +204,7 @@ class ApprenantQuizController extends AbstractController
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
         $resultat = $resultatQuizRepository->find($resultatId);
-        
+
         if (!$formation || !$quiz || !$resultat || $resultat->getApprenant() !== $this->getUser()) {
             throw $this->createNotFoundException();
         }
