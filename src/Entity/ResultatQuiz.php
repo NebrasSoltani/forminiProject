@@ -15,12 +15,12 @@ class ResultatQuiz
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\ManyToOne(targetEntity: User::class)]//un résultat de quiz appartient à un apprenant, et un apprenant peut avoir plusieurs résultats de quiz
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?User $apprenant = null;
 
-    #[ORM\ManyToOne(targetEntity: Quiz::class)]
+    #[ORM\ManyToOne(targetEntity: Quiz::class)]//un résultat de quiz appartient à un quiz, et un quiz peut avoir plusieurs résultats de quiz
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?Quiz $quiz = null;
