@@ -80,10 +80,6 @@
             Aucun produit trouvé
         </div>
     {% else %}
-        <div class="text-center mb-3 text-muted">
-            {{ total is defined ? total : produits|length }} produit(s)
-        </div>
-
         <div class="row g-4">
             {% for produit in produits %}
                 <div class="col-lg-3 col-md-4 col-sm-6">
@@ -117,34 +113,6 @@
                 </div>
             {% endfor %}
         </div>
-
-        {% if pages is defined and pages > 1 %}
-            {% set paginationParams = {} %}
-            {% if app.request.get('q') %}
-                {% set paginationParams = paginationParams|merge({'q': app.request.get('q')}) %}
-            {% endif %}
-            {% if categorieFilter is not null %}
-                {% set paginationParams = paginationParams|merge({'categorie': categorieFilter}) %}
-            {% endif %}
-
-            <nav class="mt-5" aria-label="Pagination boutique">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item {{ page <= 1 ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ path('boutique_index', paginationParams|merge({'page': page - 1})) }}" tabindex="-1" aria-disabled="{{ page <= 1 ? 'true' : 'false' }}">Précédent</a>
-                    </li>
-
-                    {% for p in 1..pages %}
-                        <li class="page-item {{ p == page ? 'active' : '' }}">
-                            <a class="page-link" href="{{ path('boutique_index', paginationParams|merge({'page': p})) }}">{{ p }}</a>
-                        </li>
-                    {% endfor %}
-
-                    <li class="page-item {{ page >= pages ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ path('boutique_index', paginationParams|merge({'page': page + 1})) }}" aria-disabled="{{ page >= pages ? 'true' : 'false' }}">Suivant</a>
-                    </li>
-                </ul>
-            </nav>
-        {% endif %}
     {% endif %}
 
 

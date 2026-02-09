@@ -40,7 +40,7 @@ class ProduitType extends AbstractType
                 'label' => 'Catégorie',
                 'choices' => [
                     'Informatique' => 'Informatique',
-                    'Outils intelligents' => 'Supports',
+                    'Outils intelligents' => 'Outils intelligents',
                     'Scientifique' => 'Scientifique',
                     'Accessoires' => 'Accessoires',
                     
