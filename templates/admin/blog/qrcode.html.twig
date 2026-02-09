@@ -147,17 +147,16 @@
 
 {% block javascripts %}
 {{ parent() }}
-<!-- QRCode.js depuis CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-// Générer le QR Code
 document.addEventListener('DOMContentLoaded', function() {
-    // Vider le conteneur au cas où
     document.getElementById("qrcode").innerHTML = "";
     
-    // Créer le QR Code
+    // Utiliser l'URL passée depuis le contrôleur
+    const blogUrl = "{{ blogUrl|raw }}";
+    
     const qrcode = new QRCode(document.getElementById("qrcode"), {
-        text: "{{ blogUrl|raw }}",
+        text: blogUrl,
         width: 256,
         height: 256,
         colorDark: "#000000",
@@ -165,24 +164,23 @@ document.addEventListener('DOMContentLoaded', function() {
         correctLevel: QRCode.CorrectLevel.H
     });
     
-    // Ajouter un événement de clic direct sur le canvas/image
+    // Rendre le QR Code cliquable
     const qrcodeElement = document.getElementById("qrcode");
-    qrcodeElement.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.open("{{ blogUrl }}", "_blank");
+    qrcodeElement.style.cursor = "pointer";
+    qrcodeElement.title = "Cliquez pour visiter le blog";
+    
+    qrcodeElement.addEventListener('click', function() {
+        window.open(blogUrl, '_blank');
     });
 });
 
-// Fonction pour télécharger le QR Code
 function downloadQRCode() {
     const canvas = document.querySelector('#qrcode canvas');
     if (!canvas) {
-        // Si c'est une image au lieu d'un canvas
         const img = document.querySelector('#qrcode img');
         if (img) {
             const link = document.createElement('a');
-            // Utiliser l'ID du blog seulement
-            link.download = 'qrcode-blog-{{ blog.id }}.png';
+            link.download = 'qrcode-blog-{{ blog.id }}-{{ blog.titre|replace({" ":"-"})|lower }}.png';
             link.href = img.src;
             link.click();
         } else {
@@ -193,18 +191,15 @@ function downloadQRCode() {
     
     const url = canvas.toDataURL('image/png');
     const link = document.createElement('a');
-    // Utiliser l'ID du blog seulement
-    link.download = 'qrcode-blog-{{ blog.id }}.png';
+    link.download = 'qrcode-blog-{{ blog.id }}-{{ blog.titre|replace({" ":"-"})|lower }}.png';
     link.href = url;
     link.click();
 }
 
-// Fonction pour copier l'URL dans le presse-papier
 function copyUrl() {
     const url = "{{ blogUrl }}";
     navigator.clipboard.writeText(url)
         .then(() => {
-            // Afficher une notification temporaire
             const btn = event.target.closest('button');
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check me-2"></i>Copié!';
