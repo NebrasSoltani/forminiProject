@@ -246,7 +246,28 @@
                         {% endfor %}
 
                         <li class="list-divider"></li>
-                        <li class="nav-small-cap"><span class="hide-menu">Extra</span></li>
+<li class="nav-small-cap"><span class="hide-menu">CONTENU</span></li>
+
+<li class="sidebar-item">
+    <a class="sidebar-link sidebar-link" 
+       href="/admin/blog/" 
+       aria-expanded="false">
+        <i data-feather="file-text" class="feather-icon"></i>
+        <span class="hide-menu">Gestion des blogs</span>
+    </a>
+</li>
+
+<li class="sidebar-item">
+    <a class="sidebar-link sidebar-link" 
+       href="/admin/evenement/" 
+       aria-expanded="false">
+        <i data-feather="calendar" class="feather-icon"></i>
+        <span class="hide-menu">Gestion des événements</span>
+    </a>
+</li>
+
+<li class="list-divider"></li>
+<li class="nav-small-cap"><span class="hide-menu">Extra</span></li>
                         <li class="sidebar-item"> 
                             <a class="sidebar-link sidebar-link" href="{{ path('app_logout') }}" aria-expanded="false">
                                 <i data-feather="log-out" class="feather-icon"></i>

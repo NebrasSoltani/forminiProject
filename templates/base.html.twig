@@ -15,6 +15,8 @@
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    {% block stylesheets %}{% endblock %}
 </head>
 
 <body>
@@ -28,18 +30,31 @@
 <div id="main-wrapper" data-theme="light" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
      data-sidebar-position="fixed" data-header-position="fixed" data-boxed-layout="full">
 
-    {# ✅ Topbar + Sidebar #}
+    {# Topbar + Sidebar #}
     {% include 'sidebar.html.twig' %}
 
-    {# ✅ هنا المهم: المحتوى لازم يكون داخل page-wrapper #}
+    {# Page Wrapper #}
     <div class="page-wrapper">
         <div class="container-fluid">
+            
+            {# ✅ FLASH MESSAGES - Ajouté ici #}
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label == 'error' ? 'danger' : (label == 'info' ? 'info' : (label == 'success' ? 'success' : 'warning')) }} alert-dismissible fade show" role="alert">
+                        <i class="mdi mdi-{{ label == 'error' ? 'alert-circle' : (label == 'success' ? 'check-circle' : 'information') }}"></i>
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {# Contenu de la page #}
             {% block body %}{% endblock %}
         </div>
 
-        {# (اختياري) Footer #}
+        {# Footer #}
         <footer class="footer text-center text-muted">
-            © {{ "now"|date("Y") }} - Adminmart
+            © {{ "now"|date("Y") }} - EventBlogs
         </footer>
     </div>
 
@@ -58,4 +73,22 @@
 <script src="{{ asset('dist/js/sidebarmenu.js') }}"></script>
 <script src="{{ asset('dist/js/custom.min.js') }}"></script>
 
-</bo
+{# ✅ Auto-hide flash messages après 5 secondes #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                var closeBtn = alert.querySelector('.btn-close');
+                if (closeBtn) {
+                    closeBtn.click();
+                }
+            });
+        }, 5000); // 5 secondes
+    });
+</script>
+
+{% block javascripts %}{% endblock %}
+
+</body>
+</html>
