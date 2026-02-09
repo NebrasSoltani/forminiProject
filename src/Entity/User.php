@@ -75,6 +75,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'apprenant', targetEntity: Favori::class, cascade: ['remove'], orphanRemoval: true)]
     private Collection $favoris;
 
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: ParticipationEvenement::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $participationEvenements;
+
     #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
     private ?Formateur $formateur = null;
 
@@ -89,6 +92,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->formations = new ArrayCollection();
         $this->inscriptions = new ArrayCollection();
         $this->favoris = new ArrayCollection();
+        $this->participationEvenements = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -278,6 +282,33 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if ($this->inscriptions->removeElement($inscription)) {
             if ($inscription->getApprenant() === $this) {
                 $inscription->setApprenant(null);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, \App\Entity\ParticipationEvenement>
+     */
+    public function getParticipationEvenements(): Collection
+    {
+        return $this->participationEvenements;
+    }
+
+    public function addParticipationEvenement(\App\Entity\ParticipationEvenement $participationEvenement): static
+    {
+        if (!$this->participationEvenements->contains($participationEvenement)) {
+            $this->participationEvenements->add($participationEvenement);
+            $participationEvenement->setUser($this);
+        }
+        return $this;
+    }
+
+    public function removeParticipationEvenement(\App\Entity\ParticipationEvenement $participationEvenement): static
+    {
+        if ($this->participationEvenements->removeElement($participationEvenement)) {
+            if ($participationEvenement->getUser() === $this) {
+                $participationEvenement->setUser(null);
             }
         }
         return $this;
