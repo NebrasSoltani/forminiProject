@@ -4,488 +4,217 @@
 
 {% block body %}
 <div class="container mt-4">
-    <!-- En-tête moderne avec gradient -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="text-center py-4">
-                <h1 class="display-4 fw-bold text-dark mb-3">
-                    <i class="bi bi-shop me-3" style="color: #667eea;"></i>Boutique Pédagogique
-                </h1>
-                <p class="lead text-muted mb-4">Découvrez nos produits éducatifs et outils d'apprentissage</p>
-                
-                <!-- Boutons Panier et Commandes -->
-                <div class="d-flex justify-content-center gap-3 flex-wrap">
-                    <a href="{{ path('boutique_panier') }}" class="btn btn-primary btn-lg rounded-pill px-4 position-relative">
-                        <i class="bi bi-cart3 me-2"></i>Mon Panier
-                        {% if panier|length > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                {{ panier|length }}
-                                <span class="visually-hidden">articles</span>
-                            </span>
-                        {% endif %}
-                    </a>
-                    <a href="{{ path('boutique_mes_commandes') }}" class="btn btn-outline-secondary btn-lg rounded-pill px-4">
-                        <i class="bi bi-box-seam me-2"></i>Mes Commandes
-                    </a>
-                </div>
-            </div>
+
+    {# ================= HEADER ================= #}
+    <div class="text-center py-5">
+        <h1 class="fw-bold display-5 mb-3">
+            <i class="bi bi-shop me-2 text-primary"></i>Boutique Pédagogique
+        </h1>
+        <p class="text-muted">Découvrez nos produits universitaires et matériels d'étude</p>
+
+        <div class="d-flex justify-content-center gap-3 mt-3">
+            <a href="{{ path('boutique_panier') }}" class="btn btn-primary rounded-pill px-4 position-relative">
+                🛒 Panier
+                {% if panier|length > 0 %}
+                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                        {{ panier|length }}
+                    </span>
+                {% endif %}
+            </a>
+
+            <a href="{{ path('boutique_mes_commandes') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                📦 Commandes
+            </a>
         </div>
     </div>
 
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="alert alert-{{ label }} alert-dismissible fade show rounded-4 border-0 shadow-sm" role="alert">
-                <i class="bi bi-{{ label == 'success' ? 'check-circle-fill' : (label == 'error' ? 'x-circle-fill' : 'info-circle-fill') }} me-2"></i>{{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        {% endfor %}
-    {% endfor %}
 
-    <div class="row">
-        <!-- Section Filtres -->
-        <div class="col-12 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0 text-muted">
-                    <span class="badge rounded-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">{{ produits|length }}</span>
-                    produit(s) disponible(s)
-                </h5>
-            </div>
-
-            <!-- Filtres Pills modernes -->
-            <div class="tera-boutique-filters">
-                <a href="{{ path('boutique_index') }}" 
-                   class="tera-filter-pill {{ categorieFilter is null ? 'active' : '' }}">
-                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Tous
-                </a>
-                <a href="{{ path('boutique_index', {categorie: 'livre'}) }}" 
-                   class="tera-filter-pill {{ categorieFilter == 'livre' ? 'active' : '' }}">
-                    <i class="bi bi-book-fill me-2"></i>Livres
-                </a>
-                <a href="{{ path('boutique_index', {categorie: 'cahier'}) }}" 
-                   class="tera-filter-pill {{ categorieFilter == 'cahier' ? 'active' : '' }}">
-                    <i class="bi bi-journal-text me-2"></i>Cahiers
-                </a>
-                <a href="{{ path('boutique_index', {categorie: 'stylo'}) }}" 
-                   class="tera-filter-pill {{ categorieFilter == 'stylo' ? 'active' : '' }}">
-                    <i class="bi bi-pen-fill me-2"></i>Stylos
-                </a>
-                <a href="{{ path('boutique_index', {categorie: 'materiel'}) }}" 
-                   class="tera-filter-pill {{ categorieFilter == 'materiel' ? 'active' : '' }}">
-                    <i class="bi bi-briefcase-fill me-2"></i>Matériel
-                </a>
-                <a href="{{ path('boutique_index', {categorie: 'autre'}) }}" 
-                   class="tera-filter-pill {{ categorieFilter == 'autre' ? 'active' : '' }}">
-                    <i class="bi bi-three-dots me-2"></i>Autre
-                </a>
-            </div>
-        </div>
-
-        <!-- Liste des produits -->
-        <div class="col-12">
-            {% if produits is empty %}
-                <div class="text-center py-5">
-                    <div class="tera-empty-state">
-                        <i class="bi bi-bag-x display-1 mb-4"></i>
-                        <h4 class="mb-3">Aucun produit disponible</h4>
-                        <p class="text-muted mb-0">Revenez plus tard pour découvrir nos nouveaux produits</p>
-                    </div>
-                </div>
-            {% else %}
-                <div class="row g-4">
-                    {% for produit in produits %}
-                        <div class="col-lg-3 col-md-4 col-sm-6">
-                            <div class="card tera-product-card h-100 border-0 overflow-hidden">
-                                <!-- HEADER IMAGE -->
-                                <div class="tera-product-cover position-relative">
-                                    {% if produit.image %}
-                                        <img
-                                            src="{{ asset('uploads/produits/' ~ produit.image) }}"
-                                            class="tera-product-cover-img"
-                                            alt="{{ produit.nom }}"
-                                        >
-                                    {% else %}
-                                        <div class="tera-product-cover-img d-flex align-items-center justify-content-center"
-                                             style="background:#f2f4f7;">
-                                            <i class="bi bi-box-seam" style="font-size:4rem;opacity:.15;"></i>
-                                        </div>
-                                    {% endif %}
-
-                                    <!-- Category Badge -->
-                                    <div class="tera-category-badge">
-                                        <i class="bi bi-tag-fill me-1"></i>{{ produit.categorie }}
-                                    </div>
-
-                                    <!-- Stock Badge -->
-                                    {% if produit.stock <= 0 %}
-                                        <div class="tera-stock-badge tera-stock-out">RUPTURE</div>
-                                    {% elseif produit.stock < 5 %}
-                                        <div class="tera-stock-badge tera-stock-low">{{ produit.stock }} restants</div>
-                                    {% endif %}
-                                </div>
-
-                                <!-- BODY -->
-                                <div class="p-4">
-                                    <h5 class="tera-product-title mb-4">
-                                        {{ produit.nom }}
-                                    </h5>
-
-                                    <!-- FOOTER -->
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="tera-product-price">
-                                            <span>{{ produit.prix|number_format(2, ',', ' ') }}</span> <small>€</small>
-                                        </div>
-
-                                        <a href="{{ path('boutique_produit_show', {id: produit.id}) }}"
-                                           class="btn tera-product-btn">
-                                            Voir <i class="bi bi-arrow-right ms-1"></i>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        </div>
+    {# ================= RECHERCHE ================= #}
+    <div class="text-center mb-4">
+        <form method="get" action="{{ path('boutique_index') }}" class="d-flex justify-content-center gap-2">
+            <input
+                type="text"
+                name="q"
+                value="{{ app.request.get('q') }}"
+                placeholder="Rechercher un produit..."
+                class="form-control w-50"
+            >
+            <button class="btn btn-primary">Rechercher</button>
+        </form>
     </div>
 
-    {% if panier|length > 0 %}
-    <!-- Floating Checkout Button -->
-    <div class="tera-floating-checkout">
-        <a href="{{ path('boutique_panier') }}" class="btn tera-floating-btn shadow-lg">
-            <i class="bi bi-cart3"></i> 
-            Voir le panier ({{ panier|length }}) 
-            <i class="bi bi-arrow-right ms-2"></i>
+
+    {# ================= FILTRES ================= #}
+    <div class="tera-boutique-filters mb-4">
+
+        <a href="{{ path('boutique_index') }}"
+           class="tera-filter-pill {{ categorieFilter is null ? 'active' : '' }}">
+            Tous
+        </a>
+
+        <a href="{{ path('boutique_index', {categorie: 'Informatique'}) }}"
+           class="tera-filter-pill {{ categorieFilter == 'Informatique' ? 'active' : '' }}">
+            💻 Informatique
+        </a>
+
+        <a href="{{ path('boutique_index', {categorie: 'Scientifique'}) }}"
+           class="tera-filter-pill {{ categorieFilter == 'Scientifique' ? 'active' : '' }}">
+            📐 Scientifique
+        </a>
+
+        <a href="{{ path('boutique_index', {categorie: 'Accessoires'}) }}"
+           class="tera-filter-pill {{ categorieFilter == 'Accessoires' ? 'active' : '' }}">
+            🎒 Accessoires
+        </a>
+
+        <a href="{{ path('boutique_index', {categorie: 'Support'}) }}"
+           class="tera-filter-pill {{ categorieFilter == 'Support' ? 'active' : '' }}">
+            📚 Outils intelligentes
         </a>
     </div>
+
+
+    {# ================= PRODUITS ================= #}
+    {% if produits is empty %}
+        <div class="text-center py-5 text-muted">
+            Aucun produit trouvé
+        </div>
+    {% else %}
+        <div class="text-center mb-3 text-muted">
+            {{ total is defined ? total : produits|length }} produit(s)
+        </div>
+
+        <div class="row g-4">
+            {% for produit in produits %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+
+                    <div class="card tera-product-card h-100">
+
+                        {% if produit.image %}
+                            <img src="{{ asset('uploads/produits/' ~ produit.image) }}"
+                                 class="tera-product-cover-img"
+                                 alt="{{ produit.nom }}">
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="fw-bold">{{ produit.nom }}</h6>
+                            <small class="text-muted mb-2">{{ produit.categorie }}</small>
+
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <strong class="text-primary">
+                                    {{ produit.prix|number_format(2, ',', ' ') }} DT
+                                </strong>
+
+                                <a href="{{ path('boutique_produit_show', {id: produit.id}) }}"
+                                   class="btn btn-sm btn-primary rounded-pill">
+                                    Voir
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if pages is defined and pages > 1 %}
+            {% set paginationParams = {} %}
+            {% if app.request.get('q') %}
+                {% set paginationParams = paginationParams|merge({'q': app.request.get('q')}) %}
+            {% endif %}
+            {% if categorieFilter is not null %}
+                {% set paginationParams = paginationParams|merge({'categorie': categorieFilter}) %}
+            {% endif %}
+
+            <nav class="mt-5" aria-label="Pagination boutique">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item {{ page <= 1 ? 'disabled' : '' }}">
+                        <a class="page-link" href="{{ path('boutique_index', paginationParams|merge({'page': page - 1})) }}" tabindex="-1" aria-disabled="{{ page <= 1 ? 'true' : 'false' }}">Précédent</a>
+                    </li>
+
+                    {% for p in 1..pages %}
+                        <li class="page-item {{ p == page ? 'active' : '' }}">
+                            <a class="page-link" href="{{ path('boutique_index', paginationParams|merge({'page': p})) }}">{{ p }}</a>
+                        </li>
+                    {% endfor %}
+
+                    <li class="page-item {{ page >= pages ? 'disabled' : '' }}">
+                        <a class="page-link" href="{{ path('boutique_index', paginationParams|merge({'page': page + 1})) }}" aria-disabled="{{ page >= pages ? 'true' : 'false' }}">Suivant</a>
+                    </li>
+                </ul>
+            </nav>
+        {% endif %}
     {% endif %}
+
+
+    {# ================= FLOATING PANIER ================= #}
+    {% if panier|length > 0 %}
+        <div class="tera-floating-checkout">
+            <a href="{{ path('boutique_panier') }}" class="tera-floating-btn">
+                🛒 Voir panier ({{ panier|length }})
+            </a>
+        </div>
+    {% endif %}
+
 </div>
 
+
+{# ================= STYLE ================= #}
 <style>
-/* FILTRES PILLS */
-.tera-boutique-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 20px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+.tera-boutique-filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
 }
 
-.tera-filter-pill {
-    padding: 12px 24px;
-    border-radius: 999px;
-    font-weight: 700;
-    font-size: 14px;
-    color: #64748b;
-    background: #f8fafc;
-    border: 2px solid transparent;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
+.tera-filter-pill{
+    padding:8px 18px;
+    border-radius:999px;
+    background:#f1f5f9;
+    text-decoration:none;
+    color:#475569;
+    font-weight:600;
 }
 
-.tera-filter-pill:hover {
-    color: #667eea;
-    background: #f1f5f9;
-    transform: translateY(-2px);
+.tera-filter-pill.active{
+    background:#667eea;
+    color:#fff;
 }
 
-.tera-filter-pill.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+.tera-product-card{
+    border-radius:16px;
+    transition:.3s;
+    box-shadow:0 6px 20px rgba(0,0,0,.08);
 }
 
-.tera-filter-pill.active:hover {
-    color: #fff;
-    transform: translateY(-2px);
+.tera-product-card:hover{
+    transform:translateY(-5px);
 }
 
-/* PRODUCT CARD */
-.tera-product-card {
-    border-radius: 18px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, .08);
-    background: #fff;
-    transition: all 0.3s ease;
+.tera-product-cover-img{
+    height:180px;
+    object-fit:cover;
+    width:100%;
+    border-top-left-radius:16px;
+    border-top-right-radius:16px;
 }
 
-.tera-product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 20px 40px rgba(15, 23, 42, .12);
+.tera-floating-checkout{
+    position:fixed;
+    bottom:20px;
+    right:20px;
 }
 
-/* IMAGE HEADER */
-.tera-product-cover {
-    height: 220px;
-    overflow: hidden;
-    background: #eef2f6;
-    position: relative;
-}
-
-.tera-product-cover-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s ease;
-}
-
-.tera-product-card:hover .tera-product-cover-img {
-    transform: scale(1.05);
-}20px;
-    box-shadow: 0 10px 30px rgba(15, 23, 42, .08);
-    background: #fff;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overfl6px;
-    left: 16px;
-    background: rgba(102, 126, 234, 0.95);
-    backdrop-filter: blur(10px);
-    color: white;
-    padding: 8px 16px;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    z-index: 2;
-    transition: all 0.3s ease;
-}
-
-.tera-product-card:hover .tera-category-badge {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
-}
-
-/* Stock Badge */
-.tera-stock-badge {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    padding: 8px 16px;
-    border-radius: 999px;
-    font-weight: 800;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-    z-index: 2;
-    transition: all 0.3s ease;
-}
-
-.tera-product-card:hover .tera-stock-badge {
-    transform: translateY(-3px);
-}
-
-.tera-stock-out {
-    background: #ef4444;
-    color: white;
-}
-
-.tera-stock-low {
-    background: #f59e0b;
-    color: white;
-}
-
-/* Text styles */
-.tera-product-title {
-    font-weight: 800;
-    color: #0f172a;
-    line-height: 1.3;
-    font-size: 19px;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    min-height: 72px;
-    transition: color 0.3s ease;
-}
-
-.tera-product-card:hover .tera-product-title {
-    color: #667eea;
-}
-
-/* Price */
-.tera-product-price {
-    font-weight: 900;
-    color: #0f172a;
-    font-size: 36px;
-    line-height: 1;
-}
-
-.tera-product-price small {
-    font-size: 16px;
-    font-weight: 800;
-    color: #0f172a;
-}
-
-/* Button */
-.tera-product-btn {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    border-radius: 999px;
-    padding: 12px 24px;
-    font-weight: 800;
-    font-size: 14px;
-    border: 0;
-    box-shadow: 0 8px 20px rgba(102, 126, 234, .3);
-    transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-}
-
-.tera-product-btn::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.tera-product-btn:hover::before {
-    opacity: 1;
-}
-
-.tera-product-btn span,
-.tera-product-btn i {
-    position: relative;
-    z-index: 1;
-}
-
-.tera-product-btn:hover {
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 30px rgba(102, 126, 234, .45);
-}
-
-.tera-product-btn i {
-    transition: transform 0.3s ease;
-}
-
-.tera-product-btn:hover i {
-    transform: translateX(4px);
-    padding: 10px 20px;
-    font-weight: 700;
-    font-size: 13px;
-    transition: all .15s ease;
-}
-
-.tera-product-btn-details:hover {
-    background: #17a2b8;
-    color: white;
-    transform: translateY(-1px);
-}
-
-.tera-product-btn-disabled {
-    background: #e2e8f0;
-    color: #94a3b8;
-    border-radius: 12px;
-    padding: 12px 20px;
-    font-weight: 700;
-    font-size: 14px;
-    border: 0;
-    cursor: not-allowed;
-}
-
-/* Empty State */
-.tera-empty-state {
-    padding: 60px 20px;
-    background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
-}
-
-.tera-empty-state i {
-    color: #cbd5e1;
-}
-
-.tera-empty-state h4 {
-    color: #0f172a;
-    font-weight: 800;
-}
-
-.tera-empty-state p {
-    color: #64748b;
-}
-
-/* Floating Checkout */
-.tera-floating-checkout {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 1000;
-    animation: tera-pulse 2s infinite;
-}
-
-.tera-floating-btn {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    color: white;
-    padding: 16px 32px;
-    border-radius: 50px;
-    font-weight: 800;
-    font-size: 16px;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 12px 35px rgba(16, 185, 129, 0.4);
-    transition: all 0.3s ease;
-}
-
-.tera-floating-btn:hover {
-    color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 16px 45px rgba(16, 185, 129, 0.5);
-}
-
-@keyframes tera-pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.05);
-    }
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .tera-boutique-filters {
-        padding: 16px;
-    }
-    
-    .tera-filter-pill {
-        padding: 10px 18px;
-        font-size: 13px;
-    }
-    
-    .tera-product-cover {
-        height: 200px;
-    }
-    
-    .tera-product20px;
-    }
-    
-    .tera-product-title {
-        font-size: 17px;
-        min-height: 60px;
-    }
-    
-    .tera-product-price {
-        font-size: 30eckout {
-        bottom: 15px;
-        right: 15px;
-    }
-    
-    .tera-floating-btn {
-        padding: 12px 24px;
-        font-size: 14px;
-    }
+.tera-floating-btn{
+    background:#10b981;
+    color:white;
+    padding:12px 22px;
+    border-radius:40px;
+    font-weight:700;
+    text-decoration:none;
 }
 </style>
+
 {% endblock %}
