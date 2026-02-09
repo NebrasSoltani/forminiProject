@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Repository\UserRepository;
 use App\Repository\FormationRepository;
 use App\Repository\InscriptionRepository;
-use App\Repository\PaiementRepository;
 use App\Repository\CommandeRepository;
 use App\Repository\EvenementRepository;  // ← AJOUTEZ CETTE LIGNE
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,7 +21,6 @@ class AdminDashboardController extends AbstractController
         UserRepository $userRepository,
         FormationRepository $formationRepository,
         InscriptionRepository $inscriptionRepository,
-        PaiementRepository $paiementRepository,
         CommandeRepository $commandeRepository,
         EvenementRepository $evenementRepository  // ← AJOUTEZ CETTE LIGNE
     ): Response {
@@ -40,18 +38,8 @@ class AdminDashboardController extends AbstractController
         $inscriptionsEnCours = $inscriptionRepository->count(['statut' => 'en_cours']);
         $inscriptionsTerminees = $inscriptionRepository->count(['statut' => 'terminee']);
 
-        // Statistiques de paiement
-        $allPaiements = $paiementRepository->findAll();
-        $totalPaiements = count($allPaiements);
-        $paiementsValides = count(array_filter($allPaiements, fn($p) => $p->getStatut() === 'valide'));
-        $paiementsEnAttente = count(array_filter($allPaiements, fn($p) => $p->getStatut() === 'en_attente'));
-        
-        $montantTotal = 0;
-        foreach ($allPaiements as $paiement) {
-            if ($paiement->getStatut() === 'valide') {
-                $montantTotal += (float) $paiement->getMontant();
-            }
-        }
+       
+       
 
         // Statistiques boutique
         $allCommandes = $commandeRepository->findAll();
@@ -97,10 +85,6 @@ class AdminDashboardController extends AbstractController
                 'total_inscriptions' => $totalInscriptions,
                 'inscriptions_en_cours' => $inscriptionsEnCours,
                 'inscriptions_terminees' => $inscriptionsTerminees,
-                'total_paiements' => $totalPaiements,
-                'paiements_valides' => $paiementsValides,
-                'paiements_en_attente' => $paiementsEnAttente,
-                'montant_total' => $montantTotal,
                 'total_commandes' => $totalCommandes,
                 'commandes_en_attente' => $commandesEnAttente,
                 'commandes_livrees' => $commandesLivrees,
