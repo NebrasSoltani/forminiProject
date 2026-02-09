@@ -25,6 +25,56 @@
                             {% endfor %}
                         {% endfor %}
 
+                        <form method="get" action="{{ path('societe_offres_index') }}" class="mb-3">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-3">
+                                    <label class="form-label">Titre</label>
+                                    <input type="text" name="titre" value="{{ filters.titre|default('') }}" class="form-control" placeholder="Rechercher...">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Type</label>
+                                    <select name="typeStage" class="form-select">
+                                        <option value="" {% if filters.typeStage|default('') == '' %}selected{% endif %}>Tous</option>
+                                        <option value="stage_observation" {% if filters.typeStage|default('') == 'stage_observation' %}selected{% endif %}>Stage observation</option>
+                                        <option value="stage_application" {% if filters.typeStage|default('') == 'stage_application' %}selected{% endif %}>Stage application</option>
+                                        <option value="stage_perfectionnement" {% if filters.typeStage|default('') == 'stage_perfectionnement' %}selected{% endif %}>Stage perfectionnement</option>
+                                        <option value="pfe" {% if filters.typeStage|default('') == 'pfe' %}selected{% endif %}>PFE</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Statut</label>
+                                    <select name="statut" class="form-select">
+                                        <option value="" {% if filters.statut|default('') == '' %}selected{% endif %}>Tous</option>
+                                        <option value="publiee" {% if filters.statut|default('') == 'publiee' %}selected{% endif %}>Publiée</option>
+                                        <option value="fermee" {% if filters.statut|default('') == 'fermee' %}selected{% endif %}>Fermée</option>
+                                        <option value="expiree" {% if filters.statut|default('') == 'expiree' %}selected{% endif %}>Expirée</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Domaine</label>
+                                    <input type="text" name="domaine" value="{{ filters.domaine|default('') }}" class="form-control" placeholder="Ex: IT">
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label">Lieu</label>
+                                    <input type="text" name="lieu" value="{{ filters.lieu|default('') }}" class="form-control" placeholder="Ex: Tunis">
+                                </div>
+                                <div class="col-md-1">
+                                    <label class="form-label">/page</label>
+                                    <select name="limit" class="form-select">
+                                        <option value="5" {% if limit|default(10) == 5 %}selected{% endif %}>5</option>
+                                        <option value="10" {% if limit|default(10) == 10 %}selected{% endif %}>10</option>
+                                        <option value="20" {% if limit|default(10) == 20 %}selected{% endif %}>20</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 d-flex gap-2">
+                                    <button type="submit" class="btn btn-outline-primary">
+                                        <i class="fas fa-filter"></i> Filtrer
+                                    </button>
+                                    <a href="{{ path('societe_offres_index') }}" class="btn btn-outline-secondary">Réinitialiser</a>
+                                </div>
+                            </div>
+                        </form>
+
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
@@ -76,7 +126,7 @@
                                     </tr>
                                     {% else %}
                                     <tr>
-                                        <td colspan="7" class="text-center py-4">
+                                        <td colspan="8" class="text-center py-4">
                                             <i class="fas fa-briefcase fa-3x text-muted mb-3"></i>
                                             <p class="text-muted">Aucune offre de stage pour le moment</p>
                                             <a href="{{ path('societe_offre_new') }}" class="btn btn-primary">Publier une offre</a>
@@ -86,6 +136,30 @@
                                 </tbody>
                             </table>
                         </div>
+
+                        {% if pages|default(1) > 1 %}
+                            {% set baseParams = {
+                                titre: filters.titre|default(''),
+                                typeStage: filters.typeStage|default(''),
+                                statut: filters.statut|default(''),
+                                domaine: filters.domaine|default(''),
+                                lieu: filters.lieu|default(''),
+                                limit: limit|default(3)
+                            } %}
+                            <nav aria-label="Pagination" class="mt-3">
+                                <ul class="pagination justify-content-center mb-0">
+                                    <li class="page-item {% if page|default(1) <= 1 %}disabled{% endif %}">
+                                        <a class="page-link" href="{{ path('societe_offres_index', baseParams|merge({page: (page|default(1) - 1)})) }}" tabindex="-1">Previous</a>
+                                    </li>
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Page {{ page|default(1) }} / {{ pages|default(1) }}</span>
+                                    </li>
+                                    <li class="page-item {% if page|default(1) >= pages|default(1) %}disabled{% endif %}">
+                                        <a class="page-link" href="{{ path('societe_offres_index', baseParams|merge({page: (page|default(1) + 1)})) }}">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        {% endif %}
                     </div>
                 </div>
             </div>
