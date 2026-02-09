@@ -19,12 +19,39 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 class ProduitController extends AbstractController
 {
     #[Route('/', name: 'produit_index', methods: ['GET'])]
-    public function index(ProduitRepository $produitRepository): Response
+    public function index(Request $request, ProduitRepository $produitRepository): Response
     {
-        $produits = $produitRepository->findBy([], ['dateCreation' => 'DESC']);
+        $limit = 2;
+        $page = max(1, (int) $request->query->get('page', 1));
+        $offset = ($page - 1) * $limit;
+
+        $qb = $produitRepository->createQueryBuilder('p')
+            ->orderBy('p.dateCreation', 'DESC');
+
+        $countQb = clone $qb;
+        $countQb->resetDQLPart('orderBy');
+
+        $total = (int) $countQb
+            ->select('COUNT(p.id)')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        $pages = max(1, (int) ceil($total / $limit));
+        $page = min($page, $pages);
+        $offset = ($page - 1) * $limit;
+
+        $produits = $qb
+            ->setFirstResult($offset)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
 
         return $this->render('produit/index.html.twig', [
             'produits' => $produits,
+            'page' => $page,
+            'pages' => $pages,
+            'limit' => $limit,
+            'total' => $total,
         ]);
     }
 
