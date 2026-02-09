@@ -138,16 +138,16 @@
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ item.prixUnitaire|number_format(2, ',', ' ') }} €</td>
+                                        <td>{{ item.prixUnitaire|number_format(2, ',', ' ') }} dt</td>
                                         <td>{{ item.quantite }}</td>
-                                        <td><strong>{{ item.getSousTotal()|number_format(2, ',', ' ') }} €</strong></td>
+                                        <td><strong>{{ item.getSousTotal()|number_format(2, ',', ' ') }} dt</strong></td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
                                 <tfoot>
                                     <tr class="table-active">
                                         <td colspan="3" class="text-end"><strong>Total :</strong></td>
-                                        <td><strong class="text-primary fs-5">{{ commande.calculerTotal()|number_format(2, ',', ' ') }} €</strong></td>
+                                        <td><strong class="text-primary fs-5">{{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt</strong></td>
                                     </tr>
                                 </tfoot>
                             </table>

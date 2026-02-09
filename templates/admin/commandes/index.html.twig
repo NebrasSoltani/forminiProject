@@ -71,7 +71,7 @@
                                             <small class="text-muted">{{ commande.utilisateur.email }}</small>
                                         </td>
                                         <td>{{ commande.items|length }} article(s)</td>
-                                        <td><strong class="text-primary">{{ commande.calculerTotal()|number_format(2, ',', ' ') }} €</strong></td>
+                                        <td><strong class="text-primary">{{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt</strong></td>
                                         <td>
                                             {% if commande.statut == 'en_attente' %}
                                                 <span class="badge bg-warning">En attente</span>
