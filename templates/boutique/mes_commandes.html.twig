@@ -44,7 +44,7 @@
                                             <td><strong>{{ commande.reference }}</strong></td>
                                             <td>{{ commande.dateCommande|date('d/m/Y H:i') }}</td>
                                             <td>{{ commande.items|length }} article(s)</td>
-                                            <td><strong>{{ commande.calculerTotal()|number_format(2, ',', ' ') }} €</strong></td>
+                                            <td><strong>{{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt</strong></td>
                                             <td>
                                                 {% if commande.statut == 'en_attente' %}
                                                     <span class="badge bg-warning">En attente</span>
