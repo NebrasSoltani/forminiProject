@@ -18,17 +18,22 @@
             </div>
         </div>
 
+       
+
         <div class="row">
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-body">
-                        {{ form_start(form) }}
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                            
+                            {# Titre #}
                             <div class="mb-3">
                                 {{ form_label(form.titre) }}
                                 {{ form_widget(form.titre) }}
                                 {{ form_errors(form.titre) }}
                             </div>
 
+                            {# Type et Nombre de places #}
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     {{ form_label(form.type) }}
@@ -42,38 +47,69 @@
                                 </div>
                             </div>
 
+                            {# Description #}
                             <div class="mb-3">
                                 {{ form_label(form.description) }}
                                 {{ form_widget(form.description) }}
                                 {{ form_errors(form.description) }}
                             </div>
 
+                            {# Dates - Utiliser TextType au lieu de DateTimeType #}
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    {{ form_label(form.dateDebut) }}
-                                    {{ form_widget(form.dateDebut) }}
-                                    {{ form_errors(form.dateDebut) }}
+                                    <label for="date_debut" class="form-label">Date de début</label>
+                                    <input type="datetime-local" 
+                                           id="date_debut" 
+                                           name="date_debut" 
+                                           class="form-control"
+                                           value="{{ app.request.request.get('date_debut')|default('') }}"
+                                           required>
+                                    {% if form.dateDebut.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.dateDebut.vars.errors %}
+                                                {{ error.message }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    {{ form_label(form.dateFin) }}
-                                    {{ form_widget(form.dateFin) }}
-                                    {{ form_errors(form.dateFin) }}
+                                    <label for="date_fin" class="form-label">Date de fin</label>
+                                    <input type="datetime-local" 
+                                           id="date_fin" 
+                                           name="date_fin" 
+                                           class="form-control"
+                                           value="{{ app.request.request.get('date_fin')|default('') }}"
+                                           required>
+                                    {% if form.dateFin.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.dateFin.vars.errors %}
+                                                {{ error.message }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
                                 </div>
                             </div>
 
+                            {# Champs cachés pour les dates (pour Symfony) #}
+                            <input type="hidden" id="hidden_date_debut" name="evenement[dateDebut]" value="">
+                            <input type="hidden" id="hidden_date_fin" name="evenement[dateFin]" value="">
+
+                            {# Lieu #}
                             <div class="mb-3">
                                 {{ form_label(form.lieu) }}
                                 {{ form_widget(form.lieu) }}
                                 {{ form_errors(form.lieu) }}
                             </div>
 
+                            {# Image #}
                             <div class="mb-3">
                                 {{ form_label(form.image) }}
                                 {{ form_widget(form.image) }}
                                 {{ form_errors(form.image) }}
-                                <small class="text-muted">Formats acceptés: JPG, PNG, GIF (Max 5MB)</small>
+                                <small class="text-muted">Formats acceptés: JPG, PNG, GIF, WEBP (Max 5MB)</small>
                             </div>
 
+                            {# Statut #}
                             <div class="mb-3">
                                 <div class="form-check">
                                     {{ form_widget(form.isActif) }}
@@ -81,6 +117,7 @@
                                 </div>
                             </div>
 
+                            {# Bouton #}
                             <div class="text-end">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="mdi mdi-content-save"></i> Créer l'Événement

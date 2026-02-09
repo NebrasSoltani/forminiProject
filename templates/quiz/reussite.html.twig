@@ -1,0 +1,201 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultats du Quiz - {{ quiz.titre }}{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+
+    <!-- En-tête -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
+        <div>
+            <h1 class="h3 fw-semibold mb-1">Résultats des apprenants</h1>
+            <div class="text-muted fs-5">{{ quiz.titre }}</div>
+        </div>
+
+        <a href="{{ path('quiz_statistiques', {formationId: formation.id, id: quiz.id}) }}"
+           class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 px-4 py-2">
+            <i class="bi bi-arrow-left"></i>
+            Retour
+        </a>
+    </div>
+
+    <!-- Filtres + Recherche -->
+    <div class="mb-5">
+        <div class="row g-3 align-items-center">
+            <!-- Filtres -->
+            <div class="col-12 col-md-auto">
+                <div class="btn-group flex-wrap" role="group">
+                    <a href="{{ path('quiz_reussite', {formationId: formation.id, id: quiz.id, filtre: 'all'}) }}"
+                       class="btn btn-outline-primary {{ filtre == 'all' ? 'active' : '' }}">
+                        <i class="bi bi-list-ul me-1"></i> Tous
+                    </a>
+                    <a href="{{ path('quiz_reussite', {formationId: formation.id, id: quiz.id, filtre: 'reussi'}) }}"
+                       class="btn btn-outline-success {{ filtre == 'reussi' ? 'active' : '' }}">
+                        <i class="bi bi-check-circle-fill me-1"></i> Réussis
+                    </a>
+                    <a href="{{ path('quiz_reussite', {formationId: formation.id, id: quiz.id, filtre: 'non-reussi'}) }}"
+                       class="btn btn-outline-danger {{ filtre == 'non-reussi' ? 'active' : '' }}">
+                        <i class="bi bi-x-circle-fill me-1"></i> Non réussis
+                    </a>
+                </div>
+            </div>
+
+            <!-- Barre de recherche -->
+            <div class="col-12 col-md">
+                <form method="get" class="position-relative">
+                    <input type="hidden" name="filtre" value="{{ filtre }}">
+
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-end-0 ps-4">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text"
+                               name="search"
+                               class="form-control border-start-0 border-end-0 shadow-none"
+                               placeholder="Rechercher un apprenant (nom, prénom, email)..."
+                               value="{{ search }}"
+                               aria-label="Rechercher un apprenant"
+                               autofocus>
+
+                        <button class="btn btn-outline-secondary border-start-0 px-4" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+
+                        {% if search is not empty %}
+                            <button class="btn btn-outline-secondary position-absolute top-50 end-0 translate-middle-y me-5 pe-2"
+                                    type="button"
+                                    title="Effacer la recherche"
+                                    onclick="window.location.href='{{ path('quiz_reussite', {formationId: formation.id, id: quiz.id, filtre: filtre}) }}'">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Résultats -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3 px-4">
+            <div class="d-flex align-items-center gap-3">
+                <i class="bi bi-people-fill text-primary fs-4"></i>
+                <h5 class="mb-0 fw-medium">
+                    {% if filtre == 'reussi' %}Réussis
+                    {% elseif filtre == 'non-reussi' %}Non réussis
+                    {% else %}Tous les participants{% endif %}
+                </h5>
+            </div>
+
+            <span class="badge bg-secondary-subtle text-secondary-emphasis px-3 py-2">
+                {{ apprenants|length }} résultat{{ apprenants|length != 1 ? 's' : '' }}
+            </span>
+        </div>
+
+        <div class="card-body p-0">
+            {% if apprenants is empty %}
+                <div class="p-5 text-center">
+                    <div class="mb-4">
+                        {% if search is not empty %}
+                            <i class="bi bi-search fs-1 text-muted opacity-50"></i>
+                            <h5 class="text-muted mt-3 mb-2">Aucun résultat pour « {{ search }} »</h5>
+                        {% else %}
+                            <i class="bi bi-inbox-fill fs-1 text-muted opacity-50"></i>
+                            <h5 class="text-muted mt-3 mb-2">Aucun résultat pour ce filtre</h5>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted mb-0 small">
+                        {% if search is not empty %}
+                            Essayez d’autres termes ou <a href="{{ path('quiz_reussite', {formationId: formation.id, id: quiz.id, filtre: filtre}) }}" class="text-primary">effacez la recherche</a>.
+                        {% elseif filtre == 'reussi' %}
+                            Aucun apprenant n’a validé ce quiz pour le moment.
+                        {% elseif filtre == 'non-reussi' %}
+                            Tous les participants ont réussi ou aucun résultat n’est disponible.
+                        {% else %}
+                            Aucun apprenant n’a encore tenté ce quiz.
+                        {% endif %}
+                    </p>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Apprenant</th>
+                                <th>Email</th>
+                                <th class="text-end">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in apprenants %}
+                                {% set user = item.user %}
+                                <tr>
+                                    <td class="py-3">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="bg-light rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                                 style="width: 48px; height: 48px;">
+                                                <i class="bi bi-person text-secondary fs-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold text-dark">
+                                                    {{ user.nom|upper }} {{ user.prenom }}
+                                                </div>
+                                                <div class="text-muted small mt-1">
+                                                    {{ user.email }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted py-3 align-middle">
+                                        {{ user.email }}
+                                    </td>
+                                    <td class="text-end py-3 align-middle">
+                                        <span class="badge rounded-pill px-4 py-2 fs-6 fw-medium
+                                            {{ item.reussi
+                                                ? 'bg-success-subtle text-success border border-success-subtle'
+                                                : 'bg-danger-subtle text-danger border border-danger-subtle' }}">
+                                            <i class="{{ item.reussi ? 'bi bi-check2' : 'bi bi-x' }} me-1"></i>
+                                            {{ item.reussi ? 'Réussi' : 'Non réussi' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Bouton retour en bas -->
+    {% if apprenants|length > 10 %}
+    <div class="text-center mt-5 pt-3">
+        <a href="{{ path('quiz_statistiques', {formationId: formation.id, id: quiz.id}) }}"
+           class="btn btn-outline-secondary px-5 py-2">
+            ← Retour aux statistiques
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+
+<style>
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 123, 255, 0.05);
+    }
+    .btn-group .btn {
+        min-width: 130px;
+    }
+    .input-group-lg .form-control {
+        font-size: 1.1rem;
+        padding: 0.75rem 1rem;
+    }
+    .input-group-lg .input-group-text,
+    .input-group-lg .btn {
+        font-size: 1.1rem;
+    }
+    .input-group:focus-within {
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
+    }
+</style>
+{% endblock %}

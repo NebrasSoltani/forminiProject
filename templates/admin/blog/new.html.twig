@@ -22,7 +22,9 @@
             <div class="col-lg-8">
                 <div class="card">
                     <div class="card-body">
-                        {{ form_start(form) }}
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    {# Le reste du formulaire #}
+
                             <div class="mb-3">
                                 {{ form_label(form.titre) }}
                                 {{ form_widget(form.titre) }}
@@ -88,4 +90,5 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
