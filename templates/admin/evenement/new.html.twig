@@ -18,8 +18,6 @@
             </div>
         </div>
 
-       
-
         <div class="row">
             <div class="col-lg-8">
                 <div class="card">
@@ -28,83 +26,57 @@
                             
                             {# Titre #}
                             <div class="mb-3">
-                                {{ form_label(form.titre) }}
-                                {{ form_widget(form.titre) }}
+                                {{ form_label(form.titre, 'Titre de l\'événement') }}
+                                {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
                                 {{ form_errors(form.titre) }}
                             </div>
 
                             {# Type et Nombre de places #}
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    {{ form_label(form.type) }}
-                                    {{ form_widget(form.type) }}
+                                    {{ form_label(form.type, 'Type d\'événement') }}
+                                    {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
                                     {{ form_errors(form.type) }}
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    {{ form_label(form.nombrePlaces) }}
-                                    {{ form_widget(form.nombrePlaces) }}
+                                    {{ form_label(form.nombrePlaces, 'Nombre de places') }}
+                                    {{ form_widget(form.nombrePlaces, {'attr': {'class': 'form-control'}}) }}
                                     {{ form_errors(form.nombrePlaces) }}
                                 </div>
                             </div>
 
                             {# Description #}
                             <div class="mb-3">
-                                {{ form_label(form.description) }}
-                                {{ form_widget(form.description) }}
+                                {{ form_label(form.description, 'Description') }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
                                 {{ form_errors(form.description) }}
                             </div>
 
-                            {# Dates - Utiliser TextType au lieu de DateTimeType #}
+                            {# Dates #}
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label for="date_debut" class="form-label">Date de début</label>
-                                    <input type="datetime-local" 
-                                           id="date_debut" 
-                                           name="date_debut" 
-                                           class="form-control"
-                                           value="{{ app.request.request.get('date_debut')|default('') }}"
-                                           required>
-                                    {% if form.dateDebut.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.dateDebut.vars.errors %}
-                                                {{ error.message }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                    {{ form_label(form.dateDebut, 'Date de début') }}
+                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.dateDebut) }}
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="date_fin" class="form-label">Date de fin</label>
-                                    <input type="datetime-local" 
-                                           id="date_fin" 
-                                           name="date_fin" 
-                                           class="form-control"
-                                           value="{{ app.request.request.get('date_fin')|default('') }}"
-                                           required>
-                                    {% if form.dateFin.vars.errors|length > 0 %}
-                                        <div class="invalid-feedback d-block">
-                                            {% for error in form.dateFin.vars.errors %}
-                                                {{ error.message }}
-                                            {% endfor %}
-                                        </div>
-                                    {% endif %}
+                                    {{ form_label(form.dateFin, 'Date de fin') }}
+                                    {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.dateFin) }}
                                 </div>
                             </div>
 
-                            {# Champs cachés pour les dates (pour Symfony) #}
-                            <input type="hidden" id="hidden_date_debut" name="evenement[dateDebut]" value="">
-                            <input type="hidden" id="hidden_date_fin" name="evenement[dateFin]" value="">
-
                             {# Lieu #}
                             <div class="mb-3">
-                                {{ form_label(form.lieu) }}
-                                {{ form_widget(form.lieu) }}
+                                {{ form_label(form.lieu, 'Lieu') }}
+                                {{ form_widget(form.lieu, {'attr': {'class': 'form-control'}}) }}
                                 {{ form_errors(form.lieu) }}
                             </div>
 
                             {# Image #}
                             <div class="mb-3">
-                                {{ form_label(form.image) }}
-                                {{ form_widget(form.image) }}
+                                {{ form_label(form.image, 'Image de l\'événement') }}
+                                {{ form_widget(form.image, {'attr': {'class': 'form-control'}}) }}
                                 {{ form_errors(form.image) }}
                                 <small class="text-muted">Formats acceptés: JPG, PNG, GIF, WEBP (Max 5MB)</small>
                             </div>
@@ -112,8 +84,8 @@
                             {# Statut #}
                             <div class="mb-3">
                                 <div class="form-check">
-                                    {{ form_widget(form.isActif) }}
-                                    {{ form_label(form.isActif) }}
+                                    {{ form_widget(form.isActif, {'attr': {'class': 'form-check-input'}}) }}
+                                    {{ form_label(form.isActif, 'Événement actif', {'label_attr': {'class': 'form-check-label'}}) }}
                                 </div>
                             </div>
 

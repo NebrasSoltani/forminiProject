@@ -1,0 +1,171 @@
+{% extends 'public_base.html.twig' %}
+
+{% block title %}Événements - Formini.tn{% endblock %}
+
+{% block body %}
+<div class="container px-3 px-md-4">
+    <section class="events-hero text-center py-4 py-md-5 mb-4 mb-md-5">
+        <h1 class="mb-3" style="font-size: 2rem; font-weight: 700; color: #2a2a2a;">
+            <i class="bi bi-calendar-event me-2" style="color: #667eea;"></i>&#201;v&#233;nements
+        </h1>
+        <p class="mb-0" style="font-size: 1.1rem; color: #6c757d;">Découvrez les événements et participez en un clic</p>
+    </section>
+
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="mb-0 text-muted">
+                <span class="badge rounded-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">{{ evenements|length }}</span>
+                événement(s) disponible(s)
+            </h5>
+        </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+    {% for message in app.flashes('info') %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <i class="bi bi-info-circle-fill me-2"></i>{{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+    {% if evenements is empty %}
+        <div class="text-center py-5">
+            <i class="bi bi-calendar-x display-1 text-muted mb-4"></i>
+            <h4 class="mb-3">Aucun événement disponible</h4>
+            <p class="text-muted mb-0">Les événements actifs apparaîtront ici.</p>
+        </div>
+    {% else %}
+        <div class="row g-4">
+            {% for evenement in evenements %}
+                <div class="col-lg-4 col-md-6">
+                    {% set colorClass = 'primary' %}
+                    {% if evenement.type == 'Atelier' %}{% set colorClass = 'success' %}
+                    {% elseif evenement.type == 'Webinaire' %}{% set colorClass = 'info' %}
+                    {% elseif evenement.type == 'Formation' %}{% set colorClass = 'warning' %}
+                    {% elseif evenement.type == 'Networking' %}{% set colorClass = 'danger' %}
+                    {% elseif evenement.type == 'Séminaire' %}{% set colorClass = 'secondary' %}
+                    {% elseif evenement.type == 'Hackathon' %}{% set colorClass = 'dark' %}
+                    {% endif %}
+                    
+                    <div class="card h-100 shadow-sm rounded-4 overflow-hidden border-{{ colorClass }} border-2">
+                        {% if evenement.image %}
+                            <img src="{{ asset('uploads/evenements/' ~ evenement.image) }}" class="card-img-top" alt="{{ evenement.titre }}" style="height: 180px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 180px;">
+                                <i class="bi bi-calendar-event display-4 text-muted"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <span class="badge bg-{{ colorClass }} mb-2">{{ evenement.type }}</span>
+                            <h5 class="card-title mb-2">{{ evenement.titre }}</h5>
+                            <p class="card-text text-muted small mb-3">
+                                {{ evenement.description|length > 120 ? evenement.description|slice(0, 120) ~ '...' : evenement.description }}
+                            </p>
+                            <ul class="list-unstyled small text-muted mb-3">
+                                <li class="mb-1"><i class="bi bi-geo-alt me-2 text-{{ colorClass }}"></i>{{ evenement.lieu }}</li>
+                                <li class="mb-1"><i class="bi bi-calendar3 me-2 text-{{ colorClass }}"></i>{{ evenement.dateDebut|date('d/m/Y H:i') }} – {{ evenement.dateFin|date('d/m/Y H:i') }}</li>
+                                {% if evenement.nombrePlaces is not null %}
+                                    <li>
+                                        <i class="bi bi-people me-2 text-{{ colorClass }}"></i>
+                                        {{ evenement.nombrePlaces }} place(s) restante(s)
+                                    </li>
+                                {% endif %}
+                            </ul>
+                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                {% if app.user %}
+                                    {% if ids_participation[evenement.id] is defined %}
+                                        <span class="badge bg-success rounded-pill px-3 py-2">
+                                            <i class="bi bi-check-circle me-1"></i>Vous participez
+                                        </span>
+                                    {% else %}
+                                        <button type="button" 
+                                                class="btn btn-{{ colorClass }} rounded-pill px-4" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#confirmationModal"
+                                                data-event-id="{{ evenement.id }}"
+                                                data-event-title="{{ evenement.titre }}"
+                                                data-csrf="{{ csrf_token('participer_evenement_' ~ evenement.id) }}">
+                                            <i class="bi bi-person-plus-fill me-1"></i>Participer
+                                        </button>
+                                    {% endif %}
+                                {% else %}
+                                    <a href="{{ path('app_login') }}" class="btn btn-outline-primary rounded-pill px-4">
+                                        <i class="bi bi-box-arrow-in-right me-1"></i>Connectez-vous pour participer
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+</div>
+
+<!-- Modal de Confirmation -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="confirmationModalLabel">Confirmer votre participation</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Vous êtes sur le point de vous inscrire à l'événement : <strong id="modalEventTitle"></strong></p>
+        <hr>
+        <h6 class="mb-3">Vos informations (pré-remplies) :</h6>
+        <div class="mb-3">
+            <label class="form-label text-muted">Nom complet</label>
+            <input type="text" class="form-control" value="{{ app.user ? app.user.prenom ~ ' ' ~ app.user.nom : '' }}" readonly>
+        </div>
+        <div class="mb-3">
+            <label class="form-label text-muted">Numéro de téléphone</label>
+            <input type="text" class="form-control" value="{{ app.user ? app.user.telephone : '' }}" readonly>
+        </div>
+        <p class="small text-muted"><i class="bi bi-info-circle me-1"></i>Ces informations seront utilisées pour votre inscription.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <form id="confirmationForm" action="" method="post">
+            <input type="hidden" name="_token" id="modalCsrfToken">
+            <button type="submit" class="btn btn-primary">Confirmer l'inscription</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var confirmationModal = document.getElementById('confirmationModal');
+    confirmationModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var eventId = button.getAttribute('data-event-id');
+        var eventTitle = button.getAttribute('data-event-title');
+        var csrfToken = button.getAttribute('data-csrf');
+        var actionUrl = "{{ path('apprenant_evenement_participer', { id: '0' }) }}".replace('0', eventId);
+
+        var modalTitle = confirmationModal.querySelector('#modalEventTitle');
+        var modalForm = confirmationModal.querySelector('#confirmationForm');
+        var modalCsrf = confirmationModal.querySelector('#modalCsrfToken');
+
+        modalTitle.textContent = eventTitle;
+        modalForm.action = actionUrl;
+        modalCsrf.value = csrfToken;
+    });
+});
+</script>
+
+{% endblock %}

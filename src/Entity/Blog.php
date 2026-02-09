@@ -82,7 +82,6 @@ class Blog
     public function setTitre(string $titre): static
     {
         $this->titre = $titre;
-
         return $this;
     }
 
@@ -94,7 +93,6 @@ class Blog
     public function setContenu(string $contenu): static
     {
         $this->contenu = $contenu;
-
         return $this;
     }
 
@@ -106,7 +104,6 @@ class Blog
     public function setImage(?string $image): static
     {
         $this->image = $image;
-
         return $this;
     }
 
@@ -118,7 +115,6 @@ class Blog
     public function setDatePublication(\DateTimeInterface $datePublication): static
     {
         $this->datePublication = $datePublication;
-
         return $this;
     }
 
@@ -130,7 +126,6 @@ class Blog
     public function setAuteur(?User $auteur): static
     {
         $this->auteur = $auteur;
-
         return $this;
     }
 
@@ -142,8 +137,12 @@ class Blog
     public function setCategorie(string $categorie): static
     {
         $this->categorie = $categorie;
-
         return $this;
+    }
+
+    public function getIsPublie(): ?bool
+    {
+        return $this->isPublie;
     }
 
     public function isPublie(): ?bool
@@ -151,10 +150,9 @@ class Blog
         return $this->isPublie;
     }
 
-    public function setPublie(bool $isPublie): static
+    public function setIsPublie(bool $isPublie): static
     {
         $this->isPublie = $isPublie;
-
         return $this;
     }
 
@@ -166,7 +164,6 @@ class Blog
     public function setResume(?string $resume): static
     {
         $this->resume = $resume;
-
         return $this;
     }
 
