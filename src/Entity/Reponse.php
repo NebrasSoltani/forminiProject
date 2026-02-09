@@ -24,9 +24,8 @@ class Reponse
     private ?string $texte = null;
 
     #[ORM\Column]
-    private bool $estCorrecte = false;
-
-    #[ORM\ManyToOne(targetEntity: Question::class, inversedBy: 'reponses')]
+    private bool $estCorrecte = false;//indique si la réponse est correcte ou non, utilisé pour les questions de type QCM et Vrai/Faux
+    #[ORM\ManyToOne(targetEntity: Question::class, inversedBy: 'reponses')]//une réponse appartient à une question, et une question peut avoir plusieurs réponses
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?Question $question = null;
