@@ -39,16 +39,40 @@ class ProfileEditType extends AbstractType
             ])
             ->add('telephone', TelType::class, [
                 'label' => 'Téléphone',
-                'required' => false,
+                'required' => true,
             ])
-            ->add('governorat', TextType::class, [
+            ->add('governorat', ChoiceType::class, [
                 'label' => 'Gouvernorat',
                 'required' => false,
+                'choices' => [
+                    'Tunis' => 'Tunis',
+                    'Ariana' => 'Ariana',
+                    'Ben Arous' => 'Ben Arous',
+                    'Manouba' => 'Manouba',
+                    'Nabeul' => 'Nabeul',
+                    'Sousse' => 'Sousse',
+                    'Sfax' => 'Sfax',
+                    'Kairouan' => 'Kairouan',
+                    'Bizerte' => 'Bizerte',
+                    'Gabès' => 'Gabès',
+                    'Médenine' => 'Médenine',
+                    'Tataouine' => 'Tataouine',
+                    'Tozeur' => 'Tozeur',
+                    'Kébili' => 'Kébili',
+                    'Béja' => 'Béja',
+                    'Jendouba' => 'Jendouba',
+                    'Le Kef' => 'Le Kef',
+                    'Siliana' => 'Siliana',
+                    'Mahdia' => 'Mahdia',
+                    'Monastir' => 'Monastir',
+                    'Zaghouan' => 'Zaghouan',
+                ],
+                'placeholder' => 'Choisissez un gouvernorat...',
             ])
             ->add('dateNaissance', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
-                'required' => false,
+                'required' => true,
             ])
             ->add('profession', TextType::class, [
                 'label' => 'Profession',
