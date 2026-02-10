@@ -15,7 +15,6 @@
     <tr><th>Adresse</th><td>{{ societe.adresse }}</td></tr>
     <tr><th>Site web</th><td>{{ societe.siteWeb }}</td></tr>
     <tr><th>Logo</th><td>{{ societe.logo }}</td></tr>
-    <tr><th>Vérifiée</th><td>{{ societe.isVerifie ? 'Oui' : 'Non' }}</td></tr>
 </table>
 
 <a href="{{ path('admin_societe_edit', {id: societe.id}) }}">✏️ Modifier</a>
