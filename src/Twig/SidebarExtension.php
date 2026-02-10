@@ -171,6 +171,15 @@ class SidebarExtension extends AbstractExtension
                 ],
                 [
                     'type' => 'divider',
+                    'label' => 'Événements'
+                ],
+                [
+                    'label' => 'Événements',
+                    'icon' => 'calendar',
+                    'route' => 'apprenant_evenements_index',
+                ],
+                [
+                    'type' => 'divider',
                     'label' => 'Stages'
                 ],
                 [

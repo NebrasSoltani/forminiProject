@@ -44,12 +44,12 @@ class Question
     #[Assert\PositiveOrZero]
     private ?int $ordre = 1;
 
-    #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: 'questions')]
+    #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: 'questions')]//une question appartient à un quiz, et un quiz peut avoir plusieurs questions
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?Quiz $quiz = null;
 
-    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Reponse::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Reponse::class, cascade: ['persist', 'remove'], orphanRemoval: true)]//une question peut avoir plusieurs réponses, et si on supprime la question, les réponses associées sont aussi supprimées
     private Collection $reponses;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]

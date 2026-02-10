@@ -39,11 +39,11 @@ class ProduitType extends AbstractType
             ->add('categorie', ChoiceType::class, [
                 'label' => 'Catégorie',
                 'choices' => [
-                    'Livre' => 'livre',
-                    'Cahier' => 'cahier',
-                    'Stylo' => 'stylo',
-                    'Matériel' => 'materiel',
-                    'Autre' => 'autre',
+                    'Informatique' => 'Informatique',
+                    'Outils intelligents' => 'Outils intelligents',
+                    'Scientifique' => 'Scientifique',
+                    'Accessoires' => 'Accessoires',
+                    
                 ],
                 'placeholder' => 'Choisir une catégorie',
                 'constraints' => [
@@ -63,7 +63,7 @@ class ProduitType extends AbstractType
             ])
             ->add('prix', MoneyType::class, [
                 'label' => 'Prix',
-                'currency' => 'EUR',
+                'currency' => 'dt',
                 'constraints' => [
                     new NotBlank(['message' => 'Le prix est obligatoire']),
                     new Positive(['message' => 'Le prix doit être positif']),
@@ -76,13 +76,9 @@ class ProduitType extends AbstractType
             ])
             ->add('stock', NumberType::class, [
                 'label' => 'Stock disponible',
-                'constraints' => [
-                    new NotBlank(['message' => 'Le stock est obligatoire']),
-                    new GreaterThanOrEqual([
-                        'value' => 0,
-                        'message' => 'Le stock ne peut pas être négatif'
-                    ])
-                ]
+                
+                    
+                
             ])
             ->add('statut', ChoiceType::class, [
                 'label' => 'Statut',

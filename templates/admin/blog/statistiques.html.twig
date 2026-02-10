@@ -2,304 +2,396 @@
 
 {% block title %}Statistiques des Blogs{% endblock %}
 
-{% block stylesheets %}
-{{ parent() }}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-    .stat-card {
-        border-radius: 10px;
-        padding: 20px;
-        color: white;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .stat-card h3 {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-    .stat-card p {
-        font-size: 0.9rem;
-        opacity: 0.9;
-    }
-    .chart-container {
-        position: relative;
-        height: 300px;
-        margin-bottom: 30px;
-    }
-</style>
-{% endblock %}
-
 {% block body %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-header d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h3 mb-0">
-                    <i class="fas fa-chart-bar me-2"></i>Statistiques des Blogs
-                </h1>
-                <a href="{{ path('admin_blog_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i> Retour à la liste
-                </a>
-            </div>
-        </div>
-    </div>
-
-    {# Cartes de statistiques #}
-    <div class="row">
-        <div class="col-md-3">
-            <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <h3>{{ totalBlogs }}</h3>
-                <p><i class="fas fa-blog me-1"></i> Total de blogs</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <h3>{{ blogsPublies }}</h3>
-                <p><i class="fas fa-check-circle me-1"></i> Blogs publiés</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <h3>{{ blogsBrouillons }}</h3>
-                <p><i class="fas fa-clock me-1"></i> Brouillons</p>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                <h3>{{ moyenneParMois }}</h3>
-                <p><i class="fas fa-calendar-alt me-1"></i> Blogs/mois (moyenne)</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-tags me-2"></i>Blogs par catégorie
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="categoryChart"></canvas>
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0"><i class="mdi mdi-chart-bar"></i> Statistiques des Blogs</h4>
+                    <div class="page-title-right">
+                        <a href="{{ path('admin_blog_index') }}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Retour
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-users me-2"></i>Top 10 des auteurs
-                    </h5>
+        {# Cartes statistiques principales #}
+        <div class="row">
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                    Total Blogs
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ totalBlogs }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-post text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="authorChart"></canvas>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Blogs Publiés
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ blogsPublies }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-check-circle text-success" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                    Brouillons
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ blogsBrouillons }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-clock-outline text-warning" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                    Blogs/Mois (Moyenne)
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ moyenneParMois }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-calendar-month text-info" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="row mt-4">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-chart-line me-2"></i>Évolution (6 derniers mois)
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="monthChart"></canvas>
+        {# Statistiques supplémentaires #}
+        <div class="row">
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card border-left-dark shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-dark text-uppercase mb-1">
+                                    Blogs avec Événements
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ blogsAvecEvenements }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-link-variant text-dark" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-clock me-2"></i>Blogs récents
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        {% for blog in blogsRecents %}
-                            <div class="list-group-item px-0">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div>
-                                        <h6 class="mb-1">{{ blog.titre|length > 30 ? blog.titre|slice(0, 30) ~ '...' : blog.titre }}</h6>
-                                        <small class="text-muted">
-                                            <i class="fas fa-calendar me-1"></i>{{ blog.datePublication|date('d/m/Y') }}
-                                        </small>
-                                    </div>
-                                    <span class="badge bg-{{ blog.isPublie ? 'success' : 'warning' }}">
-                                        {{ blog.isPublie ? 'Publié' : 'Brouillon' }}
-                                    </span>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card border-left-secondary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                    Taux de Publication
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                    {% if totalBlogs > 0 %}
+                                        {{ ((blogsPublies / totalBlogs) * 100)|round(1) }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
                                 </div>
                             </div>
-                        {% else %}
-                            <p class="text-muted text-center py-3">Aucun blog récent</p>
-                        {% endfor %}
+                            <div class="col-auto">
+                                <i class="mdi mdi-percent text-secondary" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card mt-3">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Informations
-                    </h5>
+            <div class="col-xl-4 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                    Catégories Différentes
+                                </div>
+                                <div class="h5 mb-0 font-weight-bold text-gray-800">{{ blogsByCategory|length }}</div>
+                            </div>
+                            <div class="col-auto">
+                                <i class="mdi mdi-tag-multiple text-success" style="font-size: 2rem;"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-2">
-                            <strong>Blogs avec événements :</strong><br>
-                            <span class="text-muted">{{ blogsAvecEvenements }} / {{ totalBlogs }}</span>
-                        </li>
-                        <li class="mb-2">
-                            <strong>Taux de publication :</strong><br>
-                            <span class="text-muted">
-                                {% if totalBlogs > 0 %}
-                                    {{ ((blogsPublies / totalBlogs) * 100)|round(1) }}%
-                                {% else %}
-                                    0%
-                                {% endif %}
-                            </span>
-                        </li>
-                        <li>
-                            <strong>Catégories différentes :</strong><br>
-                            <span class="text-muted">{{ blogsByCategory|length }}</span>
-                        </li>
-                    </ul>
+            </div>
+        </div>
+
+        {# Graphiques #}
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="mdi mdi-chart-pie"></i> Répartition par Catégorie</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if blogsByCategory|length > 0 %}
+                            <canvas id="categoryChart" width="400" height="300"></canvas>
+                            
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Catégorie</th>
+                                            <th class="text-end">Nombre</th>
+                                            <th class="text-end">%</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in blogsByCategory %}
+                                            <tr>
+                                                <td><span class="badge badge-info">{{ item.categorie }}</span></td>
+                                                <td class="text-end"><strong>{{ item.total }}</strong></td>
+                                                <td class="text-end">
+                                                    {{ ((item.total / totalBlogs) * 100)|number_format(1) }}%
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">Aucune donnée disponible</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="mdi mdi-account-multiple"></i> Top 10 des Auteurs</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if blogsByAuthor|length > 0 %}
+                            <canvas id="authorChart" width="400" height="300"></canvas>
+                            
+                            <div class="table-responsive mt-3">
+                                <table class="table table-sm">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Auteur</th>
+                                            <th class="text-end">Nombre de blogs</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in blogsByAuthor %}
+                                            <tr>
+                                                <td>{{ item.auteur }}</td>
+                                                <td class="text-end"><strong>{{ item.total }}</strong></td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">Aucune donnée disponible</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Graphique d'évolution #}
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="mdi mdi-chart-line"></i> Évolution (6 derniers mois)</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if blogsByMonth|length > 0 %}
+                            <canvas id="monthChart" width="400" height="200"></canvas>
+                        {% else %}
+                            <p class="text-muted text-center">Aucune donnée disponible</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="mb-0"><i class="mdi mdi-clock-outline"></i> Blogs Récents</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if blogsRecents|length > 0 %}
+                            <div class="list-group">
+                                {% for blog in blogsRecents %}
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1">{{ blog.titre|length > 30 ? blog.titre|slice(0, 30) ~ '...' : blog.titre }}</h6>
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-calendar"></i> {{ blog.datePublication|date('d/m/Y') }}
+                                                </small>
+                                            </div>
+                                            <span class="badge bg-{{ blog.isPublie ? 'success' : 'warning' }}">
+                                                {{ blog.isPublie ? 'Publié' : 'Brouillon' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p class="text-muted text-center">Aucun blog récent</p>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block javascripts %}
-{{ parent() }}
+{# Chart.js #}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Graphique par catégorie
-const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-new Chart(categoryCtx, {
-    type: 'doughnut',
-    data: {
-        labels: [
-            {% for item in blogsByCategory %}
-                '{{ item.categorie }}'{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ],
-        datasets: [{
-            data: [
-                {% for item in blogsByCategory %}
-                    {{ item.total }}{% if not loop.last %},{% endif %}
-                {% endfor %}
-            ],
-            backgroundColor: [
-                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
-                '#FF9F40', '#FF6384', '#C9CBCF', '#4BC0C0', '#FF6384'
-            ]
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom'
-            }
-        }
-    }
-});
-
-// Graphique par auteur
-const authorCtx = document.getElementById('authorChart').getContext('2d');
-new Chart(authorCtx, {
-    type: 'bar',
-    data: {
-        labels: [
-            {% for item in blogsByAuthor %}
-                '{{ item.auteur }}'{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ],
-        datasets: [{
-            label: 'Nombre de blogs',
-            data: [
-                {% for item in blogsByAuthor %}
-                    {{ item.total }}{% if not loop.last %},{% endif %}
-                {% endfor %}
-            ],
-            backgroundColor: '#667eea'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
+    // Graphique par catégorie (Pie Chart)
+    {% if blogsByCategory|length > 0 %}
+    const ctxCategory = document.getElementById('categoryChart').getContext('2d');
+    new Chart(ctxCategory, {
+        type: 'pie',
+        data: {
+            labels: [{% for item in blogsByCategory %}'{{ item.categorie }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                data: [{% for item in blogsByCategory %}{{ item.total }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                    '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                ]
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
                 }
             }
         }
-    }
-});
+    });
+    {% endif %}
 
-// Graphique par mois
-const monthCtx = document.getElementById('monthChart').getContext('2d');
-new Chart(monthCtx, {
-    type: 'line',
-    data: {
-        labels: [
-            {% for item in blogsByMonth %}
-                '{{ item.mois }}'{% if not loop.last %},{% endif %}
-            {% endfor %}
-        ],
-        datasets: [{
-            label: 'Nombre de blogs',
-            data: [
-                {% for item in blogsByMonth %}
-                    {{ item.total }}{% if not loop.last %},{% endif %}
-                {% endfor %}
-            ],
-            borderColor: '#4facfe',
-            backgroundColor: 'rgba(79, 172, 254, 0.1)',
-            tension: 0.4,
-            fill: true
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            }
+    // Graphique par auteur (Bar Chart)
+    {% if blogsByAuthor|length > 0 %}
+    const ctxAuthor = document.getElementById('authorChart').getContext('2d');
+    new Chart(ctxAuthor, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in blogsByAuthor %}'{{ item.auteur }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Nombre de blogs',
+                data: [{% for item in blogsByAuthor %}{{ item.total }}{% if not loop.last %},{% endif %}{% endfor %}],
+                backgroundColor: 'rgba(40, 167, 69, 0.8)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1
+            }]
         },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    stepSize: 1
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
                 }
             }
         }
-    }
-});
+    });
+    {% endif %}
+
+    // Graphique d'évolution par mois (Line Chart)
+    {% if blogsByMonth|length > 0 %}
+    const ctxMonth = document.getElementById('monthChart').getContext('2d');
+    new Chart(ctxMonth, {
+        type: 'line',
+        data: {
+            labels: [{% for item in blogsByMonth %}'{{ item.mois }}'{% if not loop.last %},{% endif %}{% endfor %}],
+            datasets: [{
+                label: 'Nombre de blogs',
+                data: [{% for item in blogsByMonth %}{{ item.total }}{% if not loop.last %},{% endif %}{% endfor %}],
+                borderColor: 'rgba(23, 162, 184, 1)',
+                backgroundColor: 'rgba(23, 162, 184, 0.2)',
+                borderWidth: 2,
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    {% endif %}
 </script>
+
+<style>
+.border-left-primary { border-left: 4px solid #4e73df !important; }
+.border-left-success { border-left: 4px solid #1cc88a !important; }
+.border-left-info { border-left: 4px solid #36b9cc !important; }
+.border-left-warning { border-left: 4px solid #f6c23e !important; }
+.border-left-secondary { border-left: 4px solid #858796 !important; }
+.border-left-dark { border-left: 4px solid #5a5c69 !important; }
+.text-xs { font-size: .7rem; }
+</style>
 {% endblock %}

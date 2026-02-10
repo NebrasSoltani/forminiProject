@@ -26,108 +26,62 @@
                 {% endif %}
             </h2>
         </div>
-        <div class="card-body">
-            <div class="row text-center">
-                <div class="col-md-3">
-                    <div class="p-3">
-                        <h3 class="display-4 {% if resultat.reussi %}text-success{% else %}text-danger{% endif %}">
-                            {{ resultat.note }}%
-                        </h3>
-                        <p class="text-muted">Note obtenue</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3">
-                        <h3 class="display-4">{{ resultat.nombreBonnesReponses }}</h3>
-                        <p class="text-muted">Bonnes réponses</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3">
-                        <h3 class="display-4">{{ resultat.nombreTotalQuestions }}</h3>
-                        <p class="text-muted">Total questions</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="p-3">
-                        <h3 class="display-4">{{ quiz.noteMinimale }}%</h3>
-                        <p class="text-muted">Note minimale</p>
-                    </div>
-                </div>
-            </div>
-
+        <div class="card-body text-center">
+            <h3 class="display-4 {% if resultat.reussi %}text-success{% else %}text-danger{% endif %}">
+                {{ resultat.note }}%
+            </h3>
+            <p class="text-muted">Note obtenue</p>
             <hr>
-
-            <div class="text-center">
-                <p class="lead">
-                    {% if resultat.reussi %}
-                        Vous avez obtenu {{ resultat.note }}% au quiz "{{ quiz.titre }}". 
-                        C'est un excellent résultat ! Continuez comme ça ! 🎓
-                    {% else %}
-                        Vous avez obtenu {{ resultat.note }}%, mais la note minimale requise est {{ quiz.noteMinimale }}%. 
-                        Ne vous découragez pas, révisez les leçons et réessayez ! 💪
-                    {% endif %}
-                </p>
-                <p class="text-muted">
-                    <small>Quiz passé le {{ resultat.dateTentative|date('d/m/Y à H:i') }}</small>
-                </p>
-            </div>
+            <p class="lead">
+                {% if resultat.reussi %}
+                    Vous avez obtenu {{ resultat.note }}% au quiz "{{ quiz.titre }}". 🎓
+                {% else %}
+                    Vous avez obtenu {{ resultat.note }}%, la note minimale est {{ quiz.noteMinimale }}%. Réessayez ! 💪
+                {% endif %}
+            </p>
+            <p class="text-muted"><small>Quiz passé le {{ resultat.dateTentative|date('d/m/Y à H:i') }}</small></p>
         </div>
     </div>
 
-    <!-- Détail des réponses (si affichage de correction activé) -->
+    <!-- Détail des réponses si correction activée -->
     {% if quiz.afficherCorrection and detailsReponses %}
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4 class="mb-0">📝 Détail de vos réponses</h4>
-        </div>
-        <div class="card-body">
-            {% for detail in detailsReponses %}
-                {% set question = quiz.questions[loop.index0] %}
-                {% if question %}
-                <div class="mb-4 pb-3 {% if not loop.last %}border-bottom{% endif %}">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
+        <div class="card mb-4">
+            <div class="card-header"><h4>📝 Détail de vos réponses</h4></div>
+            <div class="card-body">
+                {% for detail in detailsReponses %}
+                    {% set question = quiz.questions[loop.index0] %}
+                    {% if question %}
+                    <div class="mb-4 pb-3 {% if not loop.last %}border-bottom{% endif %}">
                         <h6>Question {{ loop.index }} :</h6>
                         {% if detail.correct %}
                             <span class="badge bg-success">✓ Correct</span>
                         {% else %}
                             <span class="badge bg-danger">✗ Incorrect</span>
                         {% endif %}
-                    </div>
-                    <p class="mb-2">{{ question.enonce }}</p>
-                    
-                    <div class="ms-3">
-                        {% for reponse in question.reponses %}
-                            <div class="mb-1">
-                                {% if reponse.id == detail.reponse_utilisateur and reponse.id == detail.reponse_correcte %}
-                                    <span class="text-success">
-                                        <strong>✓ {{ reponse.texte }}</strong> (Votre réponse - Correcte)
-                                    </span>
-                                {% elseif reponse.id == detail.reponse_utilisateur %}
-                                    <span class="text-danger">
-                                        <strong>✗ {{ reponse.texte }}</strong> (Votre réponse - Incorrecte)
-                                    </span>
-                                {% elseif reponse.estCorrecte %}
-                                    <span class="text-success">
-                                        ✓ {{ reponse.texte }} (Bonne réponse)
-                                    </span>
-                                {% else %}
-                                    <span class="text-muted">{{ reponse.texte }}</span>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
-                    </div>
-
-                    {% if question.explication %}
-                        <div class="alert alert-info mt-2 mb-0">
-                            <small><strong>💡 Explication :</strong> {{ question.explication }}</small>
+                        <p>{{ question.enonce }}</p>
+                        <div class="ms-3">
+                            {% for reponse in question.reponses %}
+                                <div class="mb-1">
+                                    {% if reponse.id == detail.reponse_utilisateur and reponse.id == detail.reponse_correcte %}
+                                        <span class="text-success"><strong>✓ {{ reponse.texte }}</strong> (Votre réponse - Correcte)</span>
+                                    {% elseif reponse.id == detail.reponse_utilisateur %}
+                                        <span class="text-danger"><strong>✗ {{ reponse.texte }}</strong> (Votre réponse - Incorrecte)</span>
+                                    {% elseif reponse.estCorrecte %}
+                                        <span class="text-success">✓ {{ reponse.texte }} (Bonne réponse)</span>
+                                    {% else %}
+                                        <span class="text-muted">{{ reponse.texte }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
                         </div>
+                        {% if question.explication %}
+                            <div class="alert alert-info mt-2 mb-0"><small>💡 {{ question.explication }}</small></div>
+                        {% endif %}
+                    </div>
                     {% endif %}
-                </div>
-                {% endif %}
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-    </div>
     {% endif %}
 
     <!-- Actions -->
