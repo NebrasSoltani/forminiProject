@@ -3,132 +3,235 @@
 {% block title %}Gestion des Commandes{% endblock %}
 
 {% block body %}
-<div class="page-wrapper">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4 class="card-title"><i class="fas fa-shopping-cart"></i> Gestion des Commandes</h4>
-                            <div>
-                                <a href="{{ path('produit_index') }}" class="btn btn-primary">
-                                    <i class="fas fa-box"></i> Gérer les Produits
-                                </a>
-                            </div>
-                        </div>
 
-                        {% for label, messages in app.flashes %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endfor %}
+<div class="container-fluid py-4">
 
-                        <!-- Filtres rapides -->
-                        <div class="mb-4">
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-outline-primary active" onclick="filterCommandes('all')">
-                                    Toutes ({{ commandes|length }})
-                                </button>
-                                <button type="button" class="btn btn-outline-warning" onclick="filterCommandes('en_attente')">
-                                    En attente ({{ commandes|filter(c => c.statut == 'en_attente')|length }})
-                                </button>
-                                <button type="button" class="btn btn-outline-info" onclick="filterCommandes('confirmee')">
-                                    Confirmées ({{ commandes|filter(c => c.statut == 'confirmee')|length }})
-                                </button>
-                                <button type="button" class="btn btn-outline-primary" onclick="filterCommandes('en_cours')">
-                                    En cours ({{ commandes|filter(c => c.statut == 'en_cours')|length }})
-                                </button>
-                                <button type="button" class="btn btn-outline-success" onclick="filterCommandes('livree')">
-                                    Livrées ({{ commandes|filter(c => c.statut == 'livree')|length }})
-                                </button>
-                            </div>
-                        </div>
+    <div class="card shadow-lg border-0 rounded-4">
 
-                        <div class="table-responsive">
-                            <table class="table table-hover" id="commandesTable">
-                                <thead>
-                                    <tr>
-                                        <th>Référence</th>
-                                        <th>Date</th>
-                                        <th>Client</th>
-                                        <th>Articles</th>
-                                        <th>Total</th>
-                                        <th>Statut</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for commande in commandes %}
-                                    <tr data-statut="{{ commande.statut }}">
-                                        <td><strong>{{ commande.reference }}</strong></td>
-                                        <td>{{ commande.dateCommande|date('d/m/Y H:i') }}</td>
-                                        <td>
-                                            {{ commande.utilisateur.nom }} {{ commande.utilisateur.prenom }}<br>
-                                            <small class="text-muted">{{ commande.utilisateur.email }}</small>
-                                        </td>
-                                        <td>{{ commande.items|length }} article(s)</td>
-                                        <td><strong class="text-primary">{{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt</strong></td>
-                                        <td>
-                                            {% if commande.statut == 'en_attente' %}
-                                                <span class="badge bg-warning">En attente</span>
-                                            {% elseif commande.statut == 'confirmee' %}
-                                                <span class="badge bg-info">Confirmée</span>
-                                            {% elseif commande.statut == 'en_cours' %}
-                                                <span class="badge bg-primary">En cours</span>
-                                            {% elseif commande.statut == 'livree' %}
-                                                <span class="badge bg-success">Livrée</span>
-                                            {% else %}
-                                                <span class="badge bg-danger">Annulée</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <a href="{{ path('admin_commande_detail', {id: commande.id}) }}" 
-                                               class="btn btn-sm btn-info" 
-                                               title="Voir détails">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% else %}
-                                    <tr>
-                                        <td colspan="7" class="text-center text-muted py-4">
-                                            <i class="fas fa-inbox fa-3x mb-3"></i>
-                                            <p>Aucune commande pour le moment</p>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+        <div class="card-body p-4">
+
+            {# ================= HEADER ================= #}
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h3 class="fw-bold mb-0">
+                    <i class="fas fa-shopping-cart text-primary me-2"></i>
+                    Gestion des Commandes
+                </h3>
+
+                <a href="{{ path('produit_index') }}" class="btn btn-primary rounded-pill px-4">
+                    <i class="fas fa-box me-2"></i> Produits
+                </a>
+            </div>
+
+
+            {# ================= FLASH ================= #}
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} shadow-sm alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                {% endfor %}
+            {% endfor %}
+
+
+            {# ================= FILTRES ================= #}
+            <div class="mb-4 text-center">
+
+                <div class="btn-group rounded-pill shadow-sm overflow-hidden" role="group">
+
+                    <button class="btn btn-outline-dark active filter-btn" data-filter="all">
+                        Toutes ({{ total }})
+                    </button>
+
+                    <button class="btn btn-outline-warning filter-btn" data-filter="en_attente">
+                        En attente
+                    </button>
+
+                    <button class="btn btn-outline-info filter-btn" data-filter="confirmee">
+                        Confirmées
+                    </button>
+
+                    <button class="btn btn-outline-primary filter-btn" data-filter="en_cours">
+                        En cours
+                    </button>
+
+                    <button class="btn btn-outline-success filter-btn" data-filter="livree">
+                        Livrées
+                    </button>
+
                 </div>
             </div>
+
+
+            {# ================= SEARCH ================= #}
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control rounded-pill shadow-sm"
+                       placeholder="🔍 Rechercher une commande...">
+            </div>
+
+
+            {# ================= TABLE ================= #}
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle text-center" id="commandesTable">
+
+                    <thead class="table-light">
+                    <tr>
+                        <th>Référence</th>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>Articles</th>
+                        <th>Total</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {% for commande in commandes %}
+                        <tr data-statut="{{ commande.statut }}" class="commande-row">
+
+                            <td class="fw-bold text-primary">
+                                {{ commande.reference }}
+                            </td>
+
+                            <td>
+                                {{ commande.dateCommande|date('d/m/Y H:i') }}
+                            </td>
+
+                            <td>
+                                <div class="fw-semibold">
+                                    {{ commande.utilisateur.nom }} {{ commande.utilisateur.prenom }}
+                                </div>
+                                <small class="text-muted">{{ commande.utilisateur.email }}</small>
+                            </td>
+
+                            <td>
+                               <span class="badge bg-info-subtle text-info rounded-pill px-3">
+                                    {{ commande.items|length }}
+                                </span>
+                            </td>
+
+                            <td class="fw-bold text-success">
+                                {{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt
+                            </td>
+
+                            <td>
+                                {% set colors = {
+                                    'en_attente':'warning',
+                                    'confirmee':'info',
+                                    'en_cours':'primary',
+                                    'livree':'success',
+                                    'annulee':'danger'
+                                } %}
+                                <span class="badge bg-{{ colors[commande.statut]|default('dark') }} rounded-pill px-3">
+                                    {{ commande.statut|capitalize }}
+                                </span>
+                            </td>
+
+                            <td>
+                                <a href="{{ path('admin_commande_detail', {id: commande.id}) }}"
+                                   class="btn btn-sm btn-outline-primary rounded-circle shadow-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                Aucune commande
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+
+            </div>
+
+
+            {# ================= PAGINATION ================= #}
+            {% if pages > 1 %}
+            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+
+                <small class="text-muted">
+                    {{ total }} commandes au total
+                </small>
+
+                <ul class="pagination mb-0">
+
+                    <li class="page-item {{ currentPage == 1 ? 'disabled' }}">
+                        <a class="page-link" href="?page={{ currentPage - 1 }}">←</a>
+                    </li>
+
+                    {% for i in 1..pages %}
+                        <li class="page-item {{ currentPage == i ? 'active' }}">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+
+                    <li class="page-item {{ currentPage == pages ? 'disabled' }}">
+                        <a class="page-link" href="?page={{ currentPage + 1 }}">→</a>
+                    </li>
+
+                </ul>
+
+            </div>
+            {% endif %}
+
         </div>
     </div>
 </div>
 
-<script>
-function filterCommandes(statut) {
-    const rows = document.querySelectorAll('#commandesTable tbody tr[data-statut]');
-    const buttons = document.querySelectorAll('.btn-group button');
-    
-    // Remove active class from all buttons
-    buttons.forEach(btn => btn.classList.remove('active'));
-    
-    // Add active class to clicked button
-    event.target.classList.add('active');
-    
-    rows.forEach(row => {
-        if (statut === 'all' || row.dataset.statut === statut) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
+
+{# ================= STYLE ================= #}
+<style>
+.pagination .page-link {
+    border-radius: 10px;
+    margin: 0 3px;
+    padding: 6px 12px;
 }
+.pagination .active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+</style>
+
+
+{# ================= JS ================= #}
+<script>
+
+const buttons = document.querySelectorAll('.filter-btn');
+const rows = document.querySelectorAll('.commande-row');
+const searchInput = document.getElementById('searchInput');
+
+buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const statut = btn.dataset.filter;
+
+        rows.forEach(row => {
+            row.style.display =
+                (statut === 'all' || row.dataset.statut === statut) ? '' : 'none';
+        });
+    });
+});
+
+searchInput.addEventListener('keyup', () => {
+    const value = searchInput.value.toLowerCase();
+
+    rows.forEach(row => {
+        row.style.display =
+            row.innerText.toLowerCase().includes(value) ? '' : 'none';
+    });
+});
+
 </script>
+
 {% endblock %}
