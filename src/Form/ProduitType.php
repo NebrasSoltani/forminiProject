@@ -19,15 +19,18 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Positive;
 use Symfony\Component\Validator\Constraints\Range;
 
+// Classe qui définit le formulaire pour créer/modifier un Produit
 class ProduitType extends AbstractType
 {
+    // ===== CONSTRUCTION DU FORMULAIRE =====
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            // NOM DU PRODUIT
             ->add('nom', TextType::class, [
                 'label' => 'Nom du produit',
                 'constraints' => [
-                    new NotBlank(['message' => 'Le nom du produit est obligatoire']),
+                    new NotBlank(['message' => 'Le nom du produit est obligatoire']), // champ obligatoire
                     new Length([
                         'min' => 3,
                         'max' => 255,
@@ -36,6 +39,8 @@ class ProduitType extends AbstractType
                     ])
                 ]
             ])
+            
+            // CATÉGORIE
             ->add('categorie', ChoiceType::class, [
                 'label' => 'Catégorie',
                 'choices' => [
@@ -43,17 +48,18 @@ class ProduitType extends AbstractType
                     'Outils intelligents' => 'Outils intelligents',
                     'Scientifique' => 'Scientifique',
                     'Accessoires' => 'Accessoires',
-                    
                 ],
                 'placeholder' => 'Choisir une catégorie',
                 'constraints' => [
-                    new NotBlank(['message' => 'La catégorie est obligatoire'])
+                    new NotBlank(['message' => 'La catégorie est obligatoire']) // champ obligatoire
                 ]
             ])
+            
+            // DESCRIPTION
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-                'required' => false,
-                'attr' => ['rows' => 5],
+                'required' => false, // optionnel
+                'attr' => ['rows' => 5], // hauteur du textarea
                 'constraints' => [
                     new Length([
                         'max' => 1000,
@@ -61,12 +67,14 @@ class ProduitType extends AbstractType
                     ])
                 ]
             ])
+            
+            // PRIX
             ->add('prix', MoneyType::class, [
                 'label' => 'Prix',
-                'currency' => 'dt',
+                'currency' => 'dt', // devise Dinar tunisien
                 'constraints' => [
                     new NotBlank(['message' => 'Le prix est obligatoire']),
-                    new Positive(['message' => 'Le prix doit être positif']),
+                    new Positive(['message' => 'Le prix doit être positif']), // prix > 0
                     new Range([
                         'min' => 0.01,
                         'max' => 999999.99,
@@ -74,12 +82,14 @@ class ProduitType extends AbstractType
                     ])
                 ]
             ])
+            
+            // STOCK
             ->add('stock', NumberType::class, [
                 'label' => 'Stock disponible',
-                
-                    
-                
+                // ici tu pourrais ajouter des contraintes si tu veux (ex: >= 0)
             ])
+            
+            // STATUT
             ->add('statut', ChoiceType::class, [
                 'label' => 'Statut',
                 'choices' => [
@@ -90,13 +100,15 @@ class ProduitType extends AbstractType
                     new NotBlank(['message' => 'Le statut est obligatoire'])
                 ]
             ])
+            
+            // IMAGE DU PRODUIT
             ->add('imageFile', FileType::class, [
                 'label' => 'Image du produit',
-                'mapped' => false,
-                'required' => false,
+                'mapped' => false, // pas directement liée à la propriété image de l'entité
+                'required' => false, // optionnel
                 'constraints' => [
                     new File([
-                        'maxSize' => '2M',
+                        'maxSize' => '2M', // taille maximale 2 Mo
                         'mimeTypes' => [
                             'image/jpeg',
                             'image/png',
@@ -109,10 +121,11 @@ class ProduitType extends AbstractType
             ]);
     }
 
+    // ===== CONFIGURATION DES OPTIONS DU FORMULAIRE =====
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Produit::class,
+            'data_class' => Produit::class, // le formulaire travaille sur l'entité Produit
         ]);
     }
 }
