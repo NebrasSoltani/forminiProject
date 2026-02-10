@@ -1,14 +1,20 @@
 {% extends 'base.html.twig' %}
+{# Hérite du layout principal (header, footer, CSS/JS globaux) #}
 
 {% block title %}Mes Commandes{% endblock %}
+{# Titre de la page affiché dans l'onglet du navigateur #}
 
 {% block body %}
 <div class="page-wrapper">
     <div class="container-fluid">
+
         <div class="row">
             <div class="col-12">
+
                 <div class="card">
                     <div class="card-body">
+
+                        {# ================= HEADER ================= #}
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h4 class="card-title">Mes Commandes</h4>
                             <a href="{{ path('boutique_index') }}" class="btn btn-primary">
@@ -16,6 +22,7 @@
                             </a>
                         </div>
 
+                        {# ================= FLASH MESSAGES ================= #}
                         {% for label, messages in app.flashes %}
                             {% for message in messages %}
                                 <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
@@ -25,6 +32,7 @@
                             {% endfor %}
                         {% endfor %}
 
+                        {# ================= TABLE DES COMMANDES ================= #}
                         {% if commandes|length > 0 %}
                             <div class="table-responsive">
                                 <table class="table table-hover">
@@ -46,6 +54,7 @@
                                             <td>{{ commande.items|length }} article(s)</td>
                                             <td><strong>{{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt</strong></td>
                                             <td>
+                                                {# Badge couleur selon le statut de la commande #}
                                                 {% if commande.statut == 'en_attente' %}
                                                     <span class="badge bg-warning">En attente</span>
                                                 {% elseif commande.statut == 'confirmee' %}
@@ -69,7 +78,9 @@
                                     </tbody>
                                 </table>
                             </div>
+
                         {% else %}
+                            {# Message affiché si aucune commande #}
                             <div class="text-center py-5">
                                 <i class="fas fa-box-open fa-5x text-muted mb-3"></i>
                                 <h5 class="text-muted mb-4">Vous n'avez pas encore de commande</h5>
@@ -78,8 +89,10 @@
                                 </a>
                             </div>
                         {% endif %}
+
                     </div>
                 </div>
+
             </div>
         </div>
     </div>

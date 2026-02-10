@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
+{# Hérite du layout principal contenant header, footer et styles globaux #}
 
 {% block title %}Commande {{ commande.reference }}{% endblock %}
+{# Définit le titre de la page avec la référence de la commande #}
 
 {% block body %}
 <div class="page-wrapper">
@@ -13,12 +15,13 @@
                         {# ================= HEADER BUTTONS ================= #}
                         <div class="mb-4 d-flex justify-content-between align-items-center">
 
+                            {# Bouton pour revenir à la liste des commandes de l'utilisateur #}
                             <a href="{{ path('boutique_mes_commandes') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i>
                                 Retour à mes commandes
                             </a>
 
-                            {# 🔥 BOUTON PDF #}
+                            {# Bouton pour générer la facture PDF de la commande #}
                             <a href="{{ path('commande_pdf', {id: commande.id}) }}"
                                class="btn btn-success"
                                target="_blank">
@@ -28,7 +31,7 @@
 
                         </div>
 
-                        {# ================= TITRE ================= #}
+                        {# ================= TITRE DE LA COMMANDE ================= #}
                         <div class="d-flex justify-content-between align-items-start mb-4">
                             <div>
                                 <h4 class="card-title mb-1">
@@ -39,6 +42,7 @@
                                 </p>
                             </div>
 
+                            {# Badge indiquant le statut de la commande #}
                             <div>
                                 {% if commande.statut == 'en_attente' %}
                                     <span class="badge bg-warning fs-6">En attente</span>
@@ -56,7 +60,7 @@
 
                         <hr>
 
-                        {# ================= TABLE PRODUITS ================= #}
+                        {# ================= TABLEAU DES PRODUITS ================= #}
                         <h5 class="mb-3">Détails de la commande</h5>
 
                         <div class="table-responsive">
@@ -75,14 +79,13 @@
                                     <tr>
                                         <td>
                                             <div class="d-flex align-items-center">
-
+                                                {# Image du produit si disponible #}
                                                 {% if item.produit.image %}
                                                     <img src="{{ asset('uploads/produits/' ~ item.produit.image) }}"
                                                          alt="{{ item.produit.nom }}"
                                                          class="img-thumbnail me-3"
                                                          style="width:60px;height:60px;object-fit:cover;">
                                                 {% endif %}
-
                                                 <div>
                                                     <strong>{{ item.nomProduit }}</strong><br>
                                                     <small class="text-muted">{{ item.produit.categorie }}</small>
@@ -90,16 +93,10 @@
                                             </div>
                                         </td>
 
-                                        <td>
-                                            {{ item.prixUnitaire|number_format(2, ',', ' ') }} dt
-                                        </td>
-
+                                        <td>{{ item.prixUnitaire|number_format(2, ',', ' ') }} dt</td>
                                         <td>{{ item.quantite }}</td>
-
                                         <td>
-                                            <strong>
-                                                {{ item.getSousTotal()|number_format(2, ',', ' ') }} dt
-                                            </strong>
+                                            <strong>{{ item.getSousTotal()|number_format(2, ',', ' ') }} dt</strong>
                                         </td>
                                     </tr>
                                 {% endfor %}
@@ -107,9 +104,7 @@
 
                                 <tfoot>
                                     <tr class="table-active">
-                                        <td colspan="3" class="text-end">
-                                            <strong>Total :</strong>
-                                        </td>
+                                        <td colspan="3" class="text-end"><strong>Total :</strong></td>
                                         <td>
                                             <strong class="text-primary fs-5">
                                                 {{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt
@@ -122,7 +117,7 @@
 
                         <hr>
 
-                        {# ================= INFOS CLIENT ================= #}
+                        {# ================= INFORMATIONS CLIENT ================= #}
                         <div class="row">
                             <div class="col-md-6">
                                 <h6>Informations de livraison</h6>
@@ -137,12 +132,11 @@
 
                             <div class="col-md-6">
                                 <h6>Suivi de commande</h6>
-                                <p class="mb-1 text-success">
-                                    ✓ Commande passée
-                                </p>
+                                <p class="mb-1 text-success">✓ Commande passée</p>
                             </div>
                         </div>
 
+                        {# Message d'information si la commande est en attente #}
                         {% if commande.statut == 'en_attente' %}
                             <div class="alert alert-info mt-4">
                                 Votre commande sera traitée sous 24-48h.

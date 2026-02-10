@@ -1,13 +1,14 @@
 {% extends 'base.html.twig' %}
+{# Hérite du layout principal (header, footer, CSS/JS communs) #}
 
 {% block title %}Commande {{ commande.reference }}{% endblock %}
+{# Titre de la page dans l’onglet du navigateur #}
 
 {% block body %}
 <div class="container-fluid py-4">
-
     <div class="col-lg-10 col-12 mx-auto">
 
-        {# ===== Retour ===== #}
+        {# ===== Bouton Retour ===== #}
         <div class="mb-4">
             <a href="{{ path('admin_commandes') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left me-1"></i> Retour aux commandes
@@ -25,16 +26,18 @@
         {% endfor %}
 
         <div class="card shadow-sm rounded-4">
-
             <div class="card-body">
 
-                {# ===== Header commande ===== #}
+                {# ===== Header de la commande ===== #}
                 <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
                     <div>
                         <h4 class="card-title mb-1">Commande {{ commande.reference }}</h4>
-                        <p class="text-muted mb-0">Passée le {{ commande.dateCommande|date('d/m/Y à H:i') }}</p>
+                        <p class="text-muted mb-0">
+                            Passée le {{ commande.dateCommande|date('d/m/Y à H:i') }}
+                        </p>
                     </div>
                     <div>
+                        {# Couleur du badge selon le statut #}
                         {% set colors = {
                             'en_attente':'warning',
                             'confirmee':'info',
@@ -50,11 +53,12 @@
 
                 <hr>
 
-                {# ===== Modifier statut ===== #}
+                {# ===== Formulaire pour modifier le statut ===== #}
                 <div class="card mb-4 bg-light shadow-sm">
                     <div class="card-body">
                         <h6 class="mb-3"><i class="fas fa-edit me-2"></i> Modifier le statut</h6>
                         <form method="post" action="{{ path('admin_commande_update_statut', {id: commande.id}) }}" class="d-flex gap-2 flex-wrap align-items-center">
+                            {# CSRF token pour sécurité du formulaire #}
                             <input type="hidden" name="_token" value="{{ csrf_token('update_statut' ~ commande.id) }}">
                             <select name="statut" class="form-select" style="max-width: 250px;">
                                 <option value="en_attente" {% if commande.statut == 'en_attente' %}selected{% endif %}>En attente</option>
@@ -70,9 +74,9 @@
                     </div>
                 </div>
 
-                {# ===== Infos client & adresse ===== #}
+                {# ===== Informations Client & Adresse ===== #}
                 <div class="row mb-4 g-3">
-
+                    {# Carte informations client #}
                     <div class="col-md-6">
                         <div class="card shadow-sm">
                             <div class="card-header bg-primary text-white">
@@ -92,6 +96,7 @@
                         </div>
                     </div>
 
+                    {# Carte adresse livraison #}
                     <div class="col-md-6">
                         <div class="card shadow-sm">
                             <div class="card-header bg-info text-white">
@@ -106,10 +111,9 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
 
-                {# ===== Détails de la commande ===== #}
+                {# ===== Détails de la commande (tableau) ===== #}
                 <h5 class="mb-3">Détails de la commande</h5>
                 <div class="table-responsive mb-4">
                     <table class="table table-bordered table-hover align-middle text-center">
@@ -158,7 +162,7 @@
                     </table>
                 </div>
 
-                {# ===== Timeline ===== #}
+                {# ===== Timeline / Suivi de commande ===== #}
                 <div class="mt-4">
                     <h6>Suivi de commande</h6>
                     <div class="timeline ps-2">
@@ -195,5 +199,4 @@
 
     </div>
 </div>
-
 {% endblock %}
