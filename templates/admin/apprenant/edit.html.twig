@@ -1,12 +1,473 @@
 {% extends 'base.html.twig' %}
 
+{% block title %}Modifier Apprenant - Administration{% endblock %}
+
 {% block body %}
-<h1>Modifier apprenant</h1>
+<style>
+:root {
+    --primary: #6974e8;
+    --secondary: #6974e8;
+    --success: #4cc9f0;
+    --warning: #f6ad55;
+    --danger: #fc8181;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+}
 
-{{ form_start(form) }}
-{{ form_widget(form) }}
-<button>Modifier</button>
-{{ form_end(form) }}
+.form-container {
+    animation: fadeIn 0.6s ease-out;
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-top: 2rem;
+}
 
-<a href="{{ path('admin_apprenant_index') }}">⬅️ Retour</a>
+.card-header {
+    background: linear-gradient(120deg, var(--primary), #6974e8);
+    padding: 1.8rem;
+    text-align: center;
+    position: relative;
+}
+
+.card-header h2 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.card-header small {
+    opacity: 0.9;
+    font-size: 1.1rem;
+    display: block;
+    margin-top: 0.3rem;
+    color: #ffffff;
+}
+
+.form-section {
+    padding: 1.8rem;
+    background: white;
+}
+
+.form-row {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.3rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.form-control, .form-select {
+    border: 1.5px solid #e2e8f0;
+    padding: 0.75rem 1.1rem;
+    border-radius: 10px;
+    transition: var(--transition);
+    font-size: 1rem;
+    height: calc(2.6rem + 2px);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+}
+
+/* Checkbox grid */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.form-check {
+    margin: 0;
+    padding-left: 1.8rem;
+}
+
+.form-check-input {
+    width: 1.3rem;
+    height: 1.3rem;
+    margin-top: 0.2rem;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 4px;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.form-check-label {
+    font-weight: 500;
+    padding: 0.25rem 0;
+    display: block;
+    cursor: pointer;
+}
+
+/* Password fields */
+.input-group {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.input-group .form-control {
+    border-radius: 0;
+    border-right: none;
+    box-shadow: none;
+}
+
+.input-group .btn {
+    border-radius: 0;
+    border-left: none;
+    background: white;
+    color: #718096;
+    padding: 0 15px;
+    transition: var(--transition);
+}
+
+.input-group .btn:hover {
+    background: #edf2f7;
+    color: var(--primary);
+}
+
+/* Form errors */
+.form-error {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.4rem;
+    display: block;
+    font-weight: 500;
+    padding-left: 0.25rem;
+}
+
+.is-invalid {
+    border-color: #e53e3e !important;
+    background-color: #fff5f5;
+}
+
+/* Submit button */
+.btn-submit {
+    background: linear-gradient(120deg, var(--primary), var(--secondary));
+    border: none;
+    padding: 0.95rem 2.5rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+    transition: var(--transition);
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.45);
+    background: linear-gradient(120deg, var(--secondary), #323c9e);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Helper text */
+.form-text {
+    font-size: 0.85rem;
+    color: #718096;
+    margin-top: 0.35rem;
+    padding-left: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-header h2 {
+        font-size: 1.6rem;
+    }
+    
+    .form-section {
+        padding: 1.5rem;
+    }
+    
+    .checkbox-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+</style>
+
+<br><br><br>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11">
+            <div class="card form-container">
+                <div class="card-header">
+                    <h2>✏️ Modifier l'apprenant</h2>
+                    <small>Mettez à jour les informations de l'apprenant</small>
+                </div>
+                
+                <div class="card-body form-section">
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.nom, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Ex: Dupont'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.nom) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.prenom, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.prenom, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Ex: Marie'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.prenom) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.email, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'votre@email.com',
+                                            'autocomplete': 'email'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.email) }}
+                                    <small class="form-text">Adresse email de l'apprenant</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.telephone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.telephone, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Ex: +216 20 123 456'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.telephone) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.gouvernorat, 'Gouvernorat', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.gouvernorat, {
+                                        'attr': {
+                                            'class': 'form-select'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.gouvernorat) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.dateNaissance, 'Date de naissance', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.dateNaissance, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'JJ/MM/AAAA'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.dateNaissance) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.niveauEtude, 'Niveau d\'études', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.niveauEtude, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Ex: Bac+3, Master, Doctorat'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.niveauEtude) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.genre, 'Genre', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.genre, {
+                                        'attr': {
+                                            'class': 'form-select'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.genre) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.etatCivil, 'État civil', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.etatCivil, {
+                                        'attr': {
+                                            'class': 'form-select'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.etatCivil) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.objectif, 'Objectif de formation', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(form.objectif, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'rows': 2,
+                                            'placeholder': 'Quels sont les objectifs d\'apprentissage ?'
+                                        }
+                                    }) }}
+                                    {{ form_errors(form.objectif) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            {{ form_label(form.domainesInteret, 'Centres d\'intérêt', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="checkbox-grid">
+                                {{ form_widget(form.domainesInteret) }}
+                            </div>
+                            {{ form_errors(form.domainesInteret) }}
+                            <small class="form-text">Sélectionnez tous les domaines d'intérêt</small>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(form.plainPassword, 'Nouveau mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                                    <div class="input-group">
+                                        {{ form_widget(form.plainPassword, {
+                                            'attr': {
+                                                'class': 'form-control password-field',
+                                                'placeholder': 'Laissez vide pour ne pas changer',
+                                                'autocomplete': 'new-password'
+                                            }
+                                        }) }}
+                                        <button class="btn toggle-password" type="button" aria-label="Afficher le mot de passe">👁️</button>
+                                    </div>
+                                    {{ form_errors(form.plainPassword) }}
+                                    <small class="form-text">Laissez vide pour conserver le mot de passe actuel</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-submit">
+                                <span class="d-flex align-items-center justify-content-center">
+                                    <span>💾 Enregistrer les modifications</span>
+                                </span>
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <a href="{{ path('admin_apprenant_show', {id: apprenant.id}) }}" class="btn btn-outline-secondary me-2">
+                                <i class="bi bi-eye me-1"></i>Voir les détails
+                            </a>
+                            <a href="{{ path('admin_apprenant_index') }}" class="btn btn-outline-primary">
+                                <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+                            </a>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const passwordField = this.previousElementSibling;
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '👁️‍🗨️';
+        });
+    });
+
+    // Form validation enhancement
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        
+        // Check required fields
+        document.querySelectorAll('[required]').forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll to first error
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+
+    // Remove invalid class on input
+    document.querySelectorAll('.form-control, .form-select').forEach(field => {
+        field.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+    });
+});
+</script>
 {% endblock %}
