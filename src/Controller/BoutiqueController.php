@@ -86,7 +86,6 @@ class BoutiqueController extends AbstractController
         ]);
     }
 
-
     /* ======================================================
        DETAIL PRODUIT
     ====================================================== */
@@ -98,23 +97,32 @@ class BoutiqueController extends AbstractController
         ]);
     }
 
-
     /* ======================================================
-       AJOUT PANIER
+       AJOUT PANIER AVEC DECRÉMENTATION DU STOCK
     ====================================================== */
     #[Route('/panier/ajouter/{id}', name: 'boutique_panier_ajouter', methods: ['GET', 'POST'])]
     public function ajouterAuPanier(
         Produit $produit,
         Request $request,
-        SessionInterface $session
+        SessionInterface $session,
+        EntityManagerInterface $em
     ): Response {
 
         $quantite = (int)$request->request->get('quantite', 1);
 
-        if ($quantite <= 0 || $quantite > $produit->getStock()) {
+        if ($quantite <= 0) {
             $this->addFlash('error', 'Quantité invalide');
             return $this->redirectToRoute('boutique_produit_show', ['id' => $produit->getId()]);
         }
+
+        if ($produit->getStock() < $quantite) {
+            $this->addFlash('error', 'Stock insuffisant');
+            return $this->redirectToRoute('boutique_produit_show', ['id' => $produit->getId()]);
+        }
+
+        // Décrémenter le stock immédiatement
+        $produit->setStock($produit->getStock() - $quantite);
+        $em->flush();
 
         $panier = $session->get('panier', []);
         $id = $produit->getId();
@@ -132,11 +140,10 @@ class BoutiqueController extends AbstractController
 
         $session->set('panier', $panier);
 
-        $this->addFlash('success', 'Produit ajouté au panier !');
+        $this->addFlash('success', 'Produit ajouté au panier et stock mis à jour !');
 
         return $this->redirectToRoute('boutique_panier');
     }
-
 
     /* ======================================================
        PAGE PANIER
@@ -175,22 +182,36 @@ class BoutiqueController extends AbstractController
         ]);
     }
 
-
     /* ======================================================
-       RETIRER PANIER
+       RETIRER DU PANIER AVEC RESTITUTION DU STOCK
     ====================================================== */
     #[Route('/panier/retirer/{id}', name: 'boutique_panier_retirer')]
-    public function retirerDuPanier(int $id, SessionInterface $session): Response
-    {
+    public function retirerDuPanier(
+        int $id,
+        SessionInterface $session,
+        ProduitRepository $produitRepository,
+        EntityManagerInterface $em
+    ): Response {
+
         $panier = $session->get('panier', []);
 
-        unset($panier[$id]);
+        if (isset($panier[$id])) {
+            $quantite = $panier[$id]['quantite'];
+            $produit = $produitRepository->find($id);
+
+            if ($produit) {
+                // Restaurer le stock
+                $produit->setStock($produit->getStock() + $quantite);
+                $em->flush();
+            }
+
+            unset($panier[$id]);
+        }
 
         $session->set('panier', $panier);
 
         return $this->redirectToRoute('boutique_panier');
     }
-
 
     /* ======================================================
        COMMANDER
@@ -218,7 +239,7 @@ class BoutiqueController extends AbstractController
 
             $produit = $produitRepository->find($id);
 
-            if ($produit && $produit->getStock() >= $item['quantite']) {
+            if ($produit && $produit->getStock() >= 0) { // stock déjà décrémenté
 
                 $commandeItem = new CommandeItem();
                 $commandeItem->setProduit($produit);
@@ -227,8 +248,6 @@ class BoutiqueController extends AbstractController
                 $commandeItem->setPrixUnitaire($produit->getPrix());
 
                 $commande->addItem($commandeItem);
-
-                $produit->setStock($produit->getStock() - $item['quantite']);
             }
         }
 
@@ -242,7 +261,6 @@ class BoutiqueController extends AbstractController
         return $this->redirectToRoute('boutique_mes_commandes');
     }
 
-
     /* ======================================================
        MES COMMANDES
     ====================================================== */
@@ -255,7 +273,6 @@ class BoutiqueController extends AbstractController
             'commandes' => $commandes,
         ]);
     }
-
 
     /* ======================================================
        DETAIL COMMANDE
