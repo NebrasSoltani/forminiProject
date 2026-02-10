@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Détails société</h1>
+
+<table border="1">
+    <tr><th>ID</th><td>{{ societe.id }}</td></tr>
+    <tr><th>Nom société</th><td>{{ societe.nomSociete }}</td></tr>
+    <tr><th>Secteur</th><td>{{ societe.secteur }}</td></tr>
+    <tr><th>Email</th><td>{{ societe.user.email }}</td></tr>
+    <tr><th>Téléphone</th><td>{{ societe.user.telephone }}</td></tr>
+    <tr><th>Gouvernorat</th><td>{{ societe.user.gouvernorat ? societe.user.gouvernorat.value : '' }}</td></tr>
+    <tr><th>Date naissance</th><td>{{ societe.user.dateNaissance ? societe.user.dateNaissance|date('Y-m-d') : '' }}</td></tr>
+    <tr><th>Description</th><td>{{ societe.description }}</td></tr>
+    <tr><th>Adresse</th><td>{{ societe.adresse }}</td></tr>
+    <tr><th>Site web</th><td>{{ societe.siteWeb }}</td></tr>
+    <tr><th>Logo</th><td>{{ societe.logo }}</td></tr>
+    <tr><th>Vérifiée</th><td>{{ societe.isVerifie ? 'Oui' : 'Non' }}</td></tr>
+</table>
+
+<a href="{{ path('admin_societe_edit', {id: societe.id}) }}">✏️ Modifier</a>
+<a href="{{ path('admin_societe_index') }}">⬅️ Retour</a>
+{% endblock %}
