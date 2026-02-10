@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Détails formateur</h1>
+
+<table border="1">
+    <tr><th>ID</th><td>{{ formateur.id }}</td></tr>
+    <tr><th>Email</th><td>{{ formateur.user.email }}</td></tr>
+    <tr><th>Nom</th><td>{{ formateur.user.nom }}</td></tr>
+    <tr><th>Prénom</th><td>{{ formateur.user.prenom }}</td></tr>
+    <tr><th>Téléphone</th><td>{{ formateur.user.telephone }}</td></tr>
+    <tr><th>Gouvernorat</th><td>{{ formateur.user.gouvernorat ? formateur.user.gouvernorat.value : '' }}</td></tr>
+    <tr><th>Date naissance</th><td>{{ formateur.user.dateNaissance ? formateur.user.dateNaissance|date('Y-m-d') : '' }}</td></tr>
+    <tr><th>Profession</th><td>{{ formateur.user.profession }}</td></tr>
+    <tr><th>Spécialité</th><td>{{ formateur.specialite }}</td></tr>
+    <tr><th>Bio</th><td>{{ formateur.bio }}</td></tr>
+    <tr><th>Expérience (années)</th><td>{{ formateur.experienceAnnees }}</td></tr>
+    <tr><th>LinkedIn</th><td>{{ formateur.linkedin }}</td></tr>
+    <tr><th>Portfolio</th><td>{{ formateur.portfolio }}</td></tr>
+    <tr><th>CV</th><td>{{ formateur.cv }}</td></tr>
+    <tr><th>Note moyenne</th><td>{{ formateur.noteMoyenne }}</td></tr>
+    <tr><th>Vérifié</th><td>{{ formateur.isVerifie ? 'Oui' : 'Non' }}</td></tr>
+</table>
+
+<a href="{{ path('admin_formateur_edit', {id: formateur.id}) }}">✏️ Modifier</a>
+<a href="{{ path('admin_formateur_index') }}">⬅️ Retour</a>
+{% endblock %}

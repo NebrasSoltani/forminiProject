@@ -7,6 +7,7 @@ use App\Entity\Formateur;
 use App\Entity\Apprenant;
 use App\Entity\Societe;
 use App\Form\RegistrationFormType;
+use App\Service\SendGridEmailSender;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -14,12 +15,14 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Twig\Environment;
 
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, SluggerInterface $slugger): Response
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, SluggerInterface $slugger, Environment $twig, UrlGeneratorInterface $urlGenerator, SendGridEmailSender $sendGridEmailSender): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
@@ -37,6 +40,11 @@ class RegistrationController extends AbstractController
             if ($user->getRoleUtilisateur() === 'admin') {
                 $user->setRoles(['ROLE_ADMIN']);
             }
+
+            $token = bin2hex(random_bytes(32));
+            $user->setIsEmailVerified(false);
+            $user->setEmailVerificationToken($token);
+            $user->setEmailVerificationTokenExpiresAt((new \DateTime())->modify('+24 hours'));
 
             // Gérer l'upload de la photo de profil
             $photoFile = $form->get('photo')->getData();
@@ -171,7 +179,26 @@ class RegistrationController extends AbstractController
             $em->persist($user);
             $em->flush();
 
-            $this->addFlash('success', 'Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.');
+            try {
+                $verificationUrl = $urlGenerator->generate('app_verify_email', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
+                $html = $twig->render('emails/verify_email.html.twig', [
+                    'user' => $user,
+                    'verificationUrl' => $verificationUrl,
+                ]);
+
+                $email = $sendGridEmailSender->createEmail(
+                    (string) $user->getEmail(),
+                    trim((string) $user->getPrenom() . ' ' . (string) $user->getNom()),
+                    'Vérification de votre adresse email',
+                    $html
+                );
+
+                $sendGridEmailSender->send($email);
+            } catch (\Throwable $e) {
+                $this->addFlash('error', 'Votre compte a été créé, mais l\'email de vérification n\'a pas pu être envoyé. Veuillez réessayer plus tard.');
+            }
+
+            $this->addFlash('success', 'Votre compte a été créé avec succès. Veuillez vérifier votre email avant de vous connecter.');
 
             return $this->redirectToRoute('app_login');
         }
