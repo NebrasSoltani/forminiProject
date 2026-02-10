@@ -1,0 +1,70 @@
+                       {% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Liste des sociétés</h1>
+
+<a href="{{ path('admin_societe_new') }}">➕ Ajouter société</a>
+
+<form method="get" action="{{ path('admin_societe_index') }}" style="margin: 10px 0;">
+    <input type="text" name="q" value="{{ q|default('') }}" placeholder="Recherche (nom société/email/secteur)">
+    <select name="limit">
+        {% set currentLimit = limit|default(10) %}
+        <option value="10" {% if currentLimit == 10 %}selected{% endif %}>10</option>
+        <option value="25" {% if currentLimit == 25 %}selected{% endif %}>25</option>
+        <option value="50" {% if currentLimit == 50 %}selected{% endif %}>50</option>
+        <option value="100" {% if currentLimit == 100 %}selected{% endif %}>100</option>
+    </select>
+    <button type="submit">Filtrer</button>
+    <a href="{{ path('admin_societe_index') }}">Réinitialiser</a>
+</form>
+
+<div style="margin: 10px 0;">
+    Total: {{ total|default(societes|length) }}
+</div>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Nom société</th>
+        <th>Email</th>
+        <th>Vérifiée</th>
+        <th>Actions</th>
+    </tr>
+    {% for societe in societes %}
+        <tr>
+            <td>{{ societe.id }}</td>
+            <td>{{ societe.nomSociete }}</td>
+            <td>{{ societe.user.email }}</td>
+            <td>{{ societe.isVerifie ? 'Oui' : 'Non' }}</td>
+            <td>
+                <a href="{{ path('admin_societe_show', {id: societe.id}) }}">👁️</a>
+                <a href="{{ path('admin_societe_edit', {id: societe.id}) }}">✏️</a>
+                <form method="post" action="{{ path('admin_societe_delete', {id: societe.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ?')">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ societe.id) }}">
+                    <button type="submit">🗑️</button>
+                </form>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+<div style="margin-top: 10px;">
+    {% set currentPage = page|default(1) %}
+    {% set pages = totalPages|default(1) %}
+    {% set params = { q: q|default(''), limit: limit|default(10) } %}
+
+    {% if currentPage > 1 %}
+        <a href="{{ path('admin_societe_index', params|merge({page: (currentPage - 1) })) }}">← Précédent</a>
+    {% else %}
+        <span style="color:#999;">← Précédent</span>
+    {% endif %}
+
+    Page {{ currentPage }} / {{ pages }}
+
+    {% if currentPage < pages %}
+        <a href="{{ path('admin_societe_index', params|merge({page: (currentPage + 1) })) }}">Suivant →</a>
+    {% else %}
+        <span style="color:#999;">Suivant →</span>
+    {% endif %}
+</div>
+{% endblock %}

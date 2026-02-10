@@ -2,134 +2,220 @@
 
 namespace App\Controller;
 
-use App\Entity\Paiement;
-use App\Entity\Inscription;
-use App\Repository\InscriptionRepository;
-use App\Repository\PaiementRepository;
+use App\Entity\Commande;
+use App\Entity\CommandeItem;
+use App\Entity\Produit;
 use Doctrine\ORM\EntityManagerInterface;
+use Stripe\Webhook;
+use Stripe\Stripe;
+use Stripe\Checkout\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-#[Route('/paiement')]
-#[IsGranted('ROLE_USER')]
 class PaiementController extends AbstractController
 {
-    #[Route('/inscription/{id}', name: 'paiement_inscription', methods: ['GET'])]
-    public function choixPaiement(
-        int $id,
-        InscriptionRepository $inscriptionRepository
-    ): Response {
-        $inscription = $inscriptionRepository->find($id);
-        
-        if (!$inscription || $inscription->getApprenant() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
-        }
+    #[Route('/produit/{id}/acheter', name: 'acheter_produit')]
+    public function acheter(Produit $produit, EntityManagerInterface $em)
+    {
+        $commande = new Commande();
+        $commande->setStatut('en_attente');
+        $commande->setTotal($produit->getPrix());
+        $commande->setUtilisateur($this->getUser());
 
-        // Vérifier que le paiement n'est pas déjà validé
-        if ($inscription->getModePaiement() !== 'en_attente') {
-            $this->addFlash('info', 'Le paiement pour cette formation a déjà été effectué.');
-            return $this->redirectToRoute('apprenant_mes_formations');
-        }
+        $item = new CommandeItem();
+        $item->setProduit($produit);
+        $item->setNomProduit($produit->getNom());
+        $item->setQuantite(1);
+        $item->setPrixUnitaire($produit->getPrix());
+        $commande->addItem($item);
 
-        return $this->render('paiement/choix.html.twig', [
-            'inscription' => $inscription,
-        ]);
-    }
-
-    #[Route('/traiter/{id}', name: 'paiement_traiter', methods: ['POST'])]
-    public function traiterPaiement(
-        int $id,
-        Request $request,
-        InscriptionRepository $inscriptionRepository,
-        EntityManagerInterface $em
-    ): Response {
-        $inscription = $inscriptionRepository->find($id);
-        
-        if (!$inscription || $inscription->getApprenant() !== $this->getUser()) {
-            throw $this->createAccessDeniedException();
-        }
-
-        $methodePaiement = $request->request->get('methode_paiement');
-        $nomTitulaire = $request->request->get('nom_titulaire');
-        $numeroTelephone = $request->request->get('numero_telephone');
-        
-        $montant = (float) $inscription->getMontantPaye();
-
-        // Créer l'enregistrement de paiement
-        $paiement = new Paiement();
-        $paiement->setInscription($inscription);
-        $paiement->setMontant($inscription->getMontantPaye());
-        $paiement->setMethodePaiement($methodePaiement);
-        $paiement->setNomTitulaire($nomTitulaire);
-        $paiement->setNumeroTelephone($numeroTelephone);
-
-        // Traiter selon la méthode de paiement
-        if ($methodePaiement === 'especes') {
-            $paiement->setStatut('en_attente');
-            $inscription->setModePaiement('especes');
-            $message = 'Votre demande de paiement en espèces a été enregistrée.';
-        } elseif ($methodePaiement === 'virement') {
-            $paiement->setStatut('en_attente');
-            $inscription->setModePaiement('virement');
-            $message = 'Votre demande de paiement par virement a été enregistrée.';
-        } elseif ($methodePaiement === 'mobile_money') {
-            $paiement->setStatut('valide');
-            $paiement->setDateValidation(new \DateTime());
-            $inscription->setModePaiement('mobile_money');
-            $message = 'Paiement par Mobile Money validé avec succès !';
-        } else {
-            $this->addFlash('error', 'Méthode de paiement invalide.');
-            return $this->redirectToRoute('paiement_inscription', ['id' => $id]);
-        }
-
-        $em->persist($paiement);
+        $em->persist($commande);
         $em->flush();
 
-        $this->addFlash('success', $message);
-        
-        return $this->redirectToRoute('paiement_confirmation', [
-            'reference' => $paiement->getReferenceTransaction(),
+        return $this->redirectToRoute('checkout', [
+            'id' => $commande->getId()
         ]);
     }
 
-    #[Route('/confirmation/{reference}', name: 'paiement_confirmation', methods: ['GET'])]
-    public function confirmation(
-        string $reference,
-        PaiementRepository $paiementRepository
-    ): Response {
-        $paiement = $paiementRepository->findByReference($reference);
-        
-        if (!$paiement || $paiement->getInscription()->getApprenant() !== $this->getUser()) {
-            throw $this->createNotFoundException();
-        }
+    #[Route('/checkout/{id}', name: 'checkout')]
+    public function checkout(Commande $commande, EntityManagerInterface $em)
+    {
+        Stripe::setApiKey((string) $_ENV['STRIPE_SECRET_KEY']);
 
-        return $this->render('paiement/confirmation.html.twig', [
-            'paiement' => $paiement,
+        $session = Session::create([
+            'payment_method_types' => ['card'],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => 'tnd', // Devise en dinar tunisien
+                    'product_data' => [
+                        'name' => 'Achat de produit',
+                    ],
+                    'unit_amount' => (int) round(((float) $commande->getTotal()) * 100), // en centimes
+                ],
+                'quantity' => 1,
+            ]],
+            'mode' => 'payment',
+            'success_url' => $this->generateUrl('payment_success', [], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => $this->generateUrl('payment_cancel', [], UrlGeneratorInterface::ABSOLUTE_URL),
         ]);
+
+        $commande->setStripeSessionId($session->id);
+        $em->flush();
+
+        return $this->redirect($session->url);
     }
 
-    #[Route('/annuler/{id}', name: 'paiement_annuler', methods: ['POST'])]
-    public function annuler(
-        int $id,
-        InscriptionRepository $inscriptionRepository,
+    #[Route('/paiement/panier/checkout', name: 'payment_cart_checkout', methods: ['POST'])]
+    public function checkoutPanier(
+        Request $request,
+        SessionInterface $session,
         EntityManagerInterface $em
     ): Response {
-        $inscription = $inscriptionRepository->find($id);
-        
-        if (!$inscription || $inscription->getApprenant() !== $this->getUser()) {
+        if (!$this->isCsrfTokenValid('place_order', (string) $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
-        // Supprimer l'inscription si le paiement n'est pas validé
-        if ($inscription->getModePaiement() === 'en_attente') {
-            $em->remove($inscription);
-            $em->flush();
-            $this->addFlash('info', 'Votre inscription a été annulée.');
+        $panier = $session->get('panier', []);
+        if (!$panier) {
+            $this->addFlash('error', 'Votre panier est vide.');
+            return $this->redirectToRoute('boutique_panier');
         }
 
-        return $this->redirectToRoute('apprenant_formations_index');
+        $commande = new Commande();
+        $commande->setUtilisateur($this->getUser());
+        $commande->setStatut('en_attente');
+
+        foreach ($panier as $id => $itemData) {
+            $produit = $em->getRepository(Produit::class)->find($id);
+            if (!$produit) continue;
+
+            $quantite = (int) ($itemData['quantite'] ?? 0);
+            if ($quantite <= 0) continue;
+
+            if ($produit->getStock() < $quantite) {
+                $this->addFlash('error', 'Stock insuffisant pour ' . $produit->getNom());
+                return $this->redirectToRoute('boutique_panier');
+            }
+
+            $orderItem = new CommandeItem();
+            $orderItem->setProduit($produit);
+            $orderItem->setNomProduit($produit->getNom());
+            $orderItem->setQuantite($quantite);
+            $orderItem->setPrixUnitaire($produit->getPrix());
+            $commande->addItem($orderItem);
+        }
+
+        if ($commande->getItems()->count() === 0) {
+            $this->addFlash('error', 'Votre panier ne contient aucun produit valide.');
+            return $this->redirectToRoute('boutique_panier');
+        }
+
+        $commande->calculerTotal();
+        $em->persist($commande);
+        $em->flush();
+
+        Stripe::setApiKey((string) $_ENV['STRIPE_SECRET_KEY']);
+
+        $lineItems = [];
+        foreach ($commande->getItems() as $item) {
+            $lineItems[] = [
+                'price_data' => [
+                    'currency' => 'usd',
+                    'product_data' => [
+                        'name' => $item->getNomProduit(),
+                    ],
+                    'unit_amount' => (int) round((float)$item->getPrixUnitaire() * 100), // centimes
+                ],
+                'quantity' => $item->getQuantite(),
+            ];
+        }
+
+        $stripeSession = Session::create([
+            'mode' => 'payment',
+            'payment_method_types' => ['card'],
+            'line_items' => $lineItems,
+            'client_reference_id' => (string) $commande->getReference(),
+            'success_url' => $this->generateUrl('payment_success', [], UrlGeneratorInterface::ABSOLUTE_URL) . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => $this->generateUrl('payment_cancel', [], UrlGeneratorInterface::ABSOLUTE_URL),
+            'metadata' => [
+                'commande_id' => (string) $commande->getId(),
+            ],
+        ]);
+
+        $commande->setStripeSessionId($stripeSession->id);
+        $em->flush();
+
+        return $this->redirect($stripeSession->url);
+    }
+
+    #[Route('/paiement/success', name: 'payment_success', methods: ['GET'])]
+    public function success(Request $request, SessionInterface $session, EntityManagerInterface $em): Response
+    {
+        $stripeSessionId = (string) $request->query->get('session_id', '');
+        $commande = null;
+        if ($stripeSessionId !== '') {
+            $commande = $em->getRepository(Commande::class)->findOneBy(['stripeSessionId' => $stripeSessionId]);
+        }
+
+        if ($commande && $commande->getStatut() === 'paye') {
+            $session->remove('panier');
+        }
+
+        return $this->render('payment/success.html.twig', [
+            'commande' => $commande,
+        ]);
+    }
+
+    #[Route('/paiement/annule', name: 'payment_cancel')]
+    public function cancel(): Response
+    {
+        return $this->render('payment/cancel.html.twig');
+    }
+
+    #[Route('/stripe/webhook', name: 'stripe_webhook', methods: ['POST'])]
+    public function stripeWebhook(Request $request, EntityManagerInterface $em): Response
+    {
+        $payload = $request->getContent();
+        $sigHeader = (string) $request->headers->get('stripe-signature');
+
+        $webhookSecret = (string) ($_ENV['STRIPE_WEBHOOK_SECRET'] ?? '');
+        if ($webhookSecret === '') {
+            return new Response('Clé Webhook Stripe manquante', 500);
+        }
+
+        try {
+            $event = Webhook::constructEvent($payload, $sigHeader, $webhookSecret);
+        } catch (\UnexpectedValueException $e) {
+            return new Response('Payload invalide', 400);
+        } catch (\Stripe\Exception\SignatureVerificationException $e) {
+            return new Response('Signature invalide', 400);
+        }
+
+        if ($event->type === 'checkout.session.completed') {
+            /** @var \Stripe\Checkout\Session $stripeSession */
+            $stripeSession = $event->data->object;
+            $stripeSessionId = $stripeSession->id;
+            $paymentIntentId = $stripeSession->payment_intent ?? null;
+
+            $commande = $em->getRepository(Commande::class)->findOneBy(['stripeSessionId' => $stripeSessionId]);
+            if ($commande && $commande->getStatut() !== 'paye') {
+                $commande->setStatut('paye');
+                $commande->setStripePaymentIntentId($paymentIntentId);
+
+                foreach ($commande->getItems() as $item) {
+                    $produit = $item->getProduit();
+                    $produit->setStock($produit->getStock() - $item->getQuantite());
+                }
+
+                $em->flush();
+            }
+        }
+
+        return new JsonResponse(['reçu' => true]);
     }
 }

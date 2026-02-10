@@ -40,4 +40,27 @@ class ReponseRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function countByQuiz(int $quizId): int
+{
+    return $this->createQueryBuilder('r')
+        ->select('COUNT(r.id)')
+        ->join('r.question', 'q')
+        ->andWhere('q.quiz = :quizId')
+        ->setParameter('quizId', $quizId)
+        ->getQuery()
+        ->getSingleScalarResult();
+}
+
+public function countBonnesReponsesByQuiz(int $quizId): int
+{
+    return $this->createQueryBuilder('r')
+        ->select('COUNT(r.id)')
+        ->join('r.question', 'q')
+        ->andWhere('q.quiz = :quizId')
+        ->andWhere('r.estCorrecte = true')
+        ->setParameter('quizId', $quizId)
+        ->getQuery()
+        ->getSingleScalarResult();
+}
+
 }

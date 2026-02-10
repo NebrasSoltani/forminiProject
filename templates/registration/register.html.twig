@@ -1,285 +1,899 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}register{% endblock %}
+{% block title %}Inscription - Plateforme{% endblock %}
 
 {% block body %}
+<style>
+:root {
+    --primary: #6974e8;
+    --secondary: #6974e8;
+    --success: #4cc9f0;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+}
+
+.form-container {
+    animation: fadeIn 0.6s ease-out;
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.card-header {
+    background: linear-gradient(120deg, var(--primary), #6974e8);
+    padding: 1.8rem;
+    text-align: center;
+    position: relative;
+}
+.d-flex{
+    color:white;
+}
+.card-header h2 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-size: 1.8rem;
+    color:black;
+}
+
+.card-header small {
+    opacity: 0.9;
+    font-size: 1.1rem;
+    display: block;
+    margin-top: 0.3rem;
+    color:#ffffff;
+}
+
+.form-section {
+    padding: 1.8rem;
+    background: white;
+}
+
+.form-row {
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.3rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.form-control, .form-select {
+    border: 1.5px solid #e2e8f0;
+    padding: 0.75rem 1.1rem;
+    border-radius: 10px;
+    transition: var(--transition);
+    font-size: 1rem;
+    height: calc(2.6rem + 2px);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+}
+
+/* Custom file upload */
+.custom-file-upload {
+    position: relative;
+    border: 2px dashed #cbd5e0;
+    border-radius: 12px;
+    padding: 1.2rem;
+    text-align: center;
+    background-color: #f8fafc;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.custom-file-upload:hover {
+    border-color: var(--primary);
+    background-color: #edf2f7;
+}
+
+.custom-file-upload i {
+    font-size: 2.2rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.custom-file-upload label {
+    cursor: pointer;
+    display: block;
+    font-weight: 500;
+    color: var(--secondary);
+}
+
+.file-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.file-name {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #4a5568;
+    min-height: 1.2rem;
+    font-style: italic;
+}
+
+/* Role selection enhancement */
+.role-select-container {
+    position: relative;
+}
+
+.role-select-container::before {
+    content: "🎯";
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+.role-select-container select {
+    padding-left: 2.8rem !important;
+}
+
+/* Role-specific sections */
+.role-section {
+    background: #f8fafc;
+    border-radius: var(--border-radius);
+    padding: 1.8rem;
+    margin-top: 1.5rem;
+    border-left: 4px solid var(--primary);
+    box-shadow: var(--box-shadow);
+    display: none;
+    animation: slideIn 0.4s ease-out;
+}
+
+#formateur-fields.role-section { border-left-color: #7209b7; background: #f9f7ff; }
+#apprenant-fields.role-section { border-left-color: #4cc9f0; background: #f6feff; }
+#societe-fields.role-section { border-left-color: #4895ef; background: #f8fdff; }
+
+.role-section-title {
+    display: flex;
+    align-items: center;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+#formateur-fields .role-section-title { color: #7209b7; }
+#apprenant-fields .role-section-title { color: #4cc9f0; }
+#societe-fields .role-section-title { color: #4895ef; }
+
+.role-section-title i {
+    margin-right: 0.75rem;
+    font-size: 1.5rem;
+}
+
+/* Checkbox grid */
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background: white;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+}
+
+.form-check {
+    margin: 0;
+    padding-left: 1.8rem;
+}
+
+.form-check-input {
+    width: 1.3rem;
+    height: 1.3rem;
+    margin-top: 0.2rem;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 4px;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.form-check-label {
+    font-weight: 500;
+    padding: 0.25rem 0;
+    display: block;
+    cursor: pointer;
+}
+
+/* Password fields */
+.input-group {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.input-group .form-control {
+    border-radius: 0;
+    border-right: none;
+    box-shadow: none;
+}
+
+.input-group .btn {
+    border-radius: 0;
+    border-left: none;
+    background: white;
+    color: #718096;
+    padding: 0 15px;
+    transition: var(--transition);
+}
+
+.input-group .btn:hover {
+    background: #edf2f7;
+    color: var(--primary);
+}
+
+/* Form errors */
+.form-error {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin-top: 0.4rem;
+    display: block;
+    font-weight: 500;
+    padding-left: 0.25rem;
+}
+
+.is-invalid {
+    border-color: #e53e3e !important;
+    background-color: #fff5f5;
+}
+
+/* Submit button */
+.btn-submit {
+    background: linear-gradient(120deg, var(--primary), var(--secondary));
+    border: none;
+    padding: 0.95rem 2.5rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+    transition: var(--transition);
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.45);
+    background: linear-gradient(120deg, var(--secondary), #323c9e);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Helper text */
+.form-text {
+    font-size: 0.85rem;
+    color: #718096;
+    margin-top: 0.35rem;
+    padding-left: 0.25rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-header h2 {
+        font-size: 1.6rem;
+    }
+    
+    .form-section {
+        padding: 1.5rem;
+    }
+    
+    .role-section {
+        padding: 1.5rem;
+    }
+    
+    .checkbox-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideIn {
+    from { 
+        opacity: 0; 
+        transform: translateX(-15px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateX(0);
+    }
+}
+
+/* Autre centre d'intérêt field */
+#autreCentreInteret {
+    border-top-left-radius: 10px !important;
+    border-bottom-left-radius: 10px !important;
+    border-right: none !important;
+}
+
+.add-interest-btn {
+    border-top-right-radius: 10px !important;
+    border-bottom-right-radius: 10px !important;
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0 1.2rem;
+    font-weight: 500;
+}
+
+.add-interest-btn:hover {
+    background: var(--secondary);
+    transform: none !important;
+}
+
+/* Date picker enhancement */
+input[type="date"]::-webkit-inner-spin-button,
+input[type="date"]::-webkit-calendar-picker-indicator {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    filter: invert(0.5);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    filter: invert(0.8);
+}
+</style>
 
 <br><br><br>
-<div class="container mt-5">
+<div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
+        <div class="col-lg-9 col-md-11">
+            <div class="card form-container">
                 <div class="card-header">
-                    <h2 class="text-center">Inscription</h2>
+                    <h2>Créer un compte</h2>
+                    <small>Rejoignez notre plateforme éducative en quelques secondes</small>
                 </div>
-                <div class="card-body">
-                    {{ form_start(registrationForm) }}
+                
+                <div class="card-body form-section">
+                    {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.nom, 'Nom') }}
-                                {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.nom) }}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(registrationForm.nom, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Ex: Dupont'
+                                        }
+                                    }) }}
+                                    {{ form_errors(registrationForm.nom) }}
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.prenom, 'Prénom') }}
-                                {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.prenom) }}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.prenom, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(registrationForm.prenom, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Ex: Marie'
+                                        }
+                                    }) }}
+                                    {{ form_errors(registrationForm.prenom) }}
+                                </div>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.email, 'Email') }}
-                                {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.email) }}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(registrationForm.email, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'votre@email.com',
+                                            'autocomplete': 'email'
+                                        }
+                                    }) }}
+                                    {{ form_errors(registrationForm.email) }}
+                                    <small class="form-text">Nous ne partagerons jamais votre email</small>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.telephone, 'Numéro de téléphone') }}
-                                {{ form_widget(registrationForm.telephone, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.telephone) }}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.telephone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(registrationForm.telephone, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Ex: +216 20 123 456'
+                                        }
+                                    }) }}
+                                    {{ form_errors(registrationForm.telephone) }}
+                                </div>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.gouvernorat, 'Gouvernorat') }}
-                                {{ form_widget(registrationForm.gouvernorat, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.gouvernorat) }}
-
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.gouvernorat, 'Gouvernorat', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(registrationForm.gouvernorat, {
+                                        'attr': {
+                                            'class': 'form-select'
+                                        }
+                                    }) }}
+                                    {{ form_errors(registrationForm.gouvernorat) }}
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.dateNaissance, 'Date de naissance') }}
-                                {{ form_widget(registrationForm.dateNaissance, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.dateNaissance) }}
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.dateNaissance, 'Date de naissance', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(registrationForm.dateNaissance, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'JJ/MM/AAAA'
+                                        }
+                                    }) }}
+                                    {{ form_errors(registrationForm.dateNaissance) }}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="mb-3">
-                            {{ form_label(registrationForm.profession, 'Profession') }}
-                            {{ form_widget(registrationForm.profession, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(registrationForm.profession) }}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.profession, 'Profession', {'label_attr': {'class': 'form-label'}}) }}
+                                    {{ form_widget(registrationForm.profession, {
+                                        'attr': {
+                                            'class': 'form-control',
+                                            'placeholder': 'Ex: Ingénieur, Étudiant'
+                                        }
+                                    }) }}
+                                    {{ form_errors(registrationForm.profession) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Photo de profil</label>
+                                    <div class="custom-file-upload">
+                                        <i>🖼️</i>
+                                        <span>Glissez-déposez votre photo ou cliquez ici</span>
+                                        <small class="form-text mt-1">Formats: JPG, PNG • Max: 2Mo</small>
+                                        {{ form_widget(registrationForm.photo, {
+                                            'attr': {
+                                                'class': 'file-input',
+                                                'id': 'photoInput'
+                                            }
+                                        }) }}
+                                        <div class="file-name" id="photoFileName">Aucun fichier sélectionné</div>
+                                    </div>
+                                    {{ form_errors(registrationForm.photo) }}
+                                </div>
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            {{ form_label(registrationForm.photo, 'Photo de profil') }}
-                            {{ form_widget(registrationForm.photo, {'attr': {'class': 'form-control'}}) }}
-                            {{ form_errors(registrationForm.photo) }}
-                        </div>
-
-                        <div class="mb-3">
-                            {{ form_label(registrationForm.roleUtilisateur, 'Rôle dans la plateforme') }}
-                            {{ form_widget(registrationForm.roleUtilisateur, {'attr': {'class': 'form-control'}}) }}
+                        <div class="form-group role-select-container">
+                            {{ form_label(registrationForm.roleUtilisateur, 'Rôle dans la plateforme', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(registrationForm.roleUtilisateur, {
+                                'attr': {
+                                    'class': 'form-select form-select-lg',
+                                    'aria-label': 'Sélectionnez votre rôle'
+                                }
+                            }) }}
                             {{ form_errors(registrationForm.roleUtilisateur) }}
+                            <small class="form-text">Sélectionnez votre rôle pour personnaliser votre expérience</small>
                         </div>
 
                         {# Champs spécifiques pour Formateur #}
-                        <div id="formateur-fields" style="display:none;">
-                            <h5 class="mt-4 mb-3 text-primary">Informations Formateur</h5>
+                        <div id="formateur-fields" class="role-section">
+                            <h3 class="role-section-title"><i>🎓</i> Informations Formateur</h3>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.specialite) }}
-                                    {{ form_widget(registrationForm.specialite) }}
-                                    {{ form_errors(registrationForm.specialite) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.specialite, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.specialite, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'Ex: Développement Web, Data Science'
+                                            }
+                                        }) }}
+                                        {{ form_errors(registrationForm.specialite) }}
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.experienceAnnees) }}
-                                    {{ form_widget(registrationForm.experienceAnnees) }}
-                                    {{ form_errors(registrationForm.experienceAnnees) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.experienceAnnees, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.experienceAnnees, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'Années d\'expérience'
+                                            }
+                                        }) }}
+                                        {{ form_errors(registrationForm.experienceAnnees) }}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                {{ form_label(registrationForm.bio) }}
-                                {{ form_widget(registrationForm.bio) }}
+                            <div class="form-group">
+                                {{ form_label(registrationForm.bio, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.bio, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'rows': 3,
+                                        'placeholder': 'Décrivez brièvement votre parcours et expertise...'
+                                    }
+                                }) }}
                                 {{ form_errors(registrationForm.bio) }}
                             </div>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.linkedin) }}
-                                    {{ form_widget(registrationForm.linkedin) }}
-                                    {{ form_errors(registrationForm.linkedin) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.linkedin, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.linkedin, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'URL de votre profil LinkedIn'
+                                            }
+                                        }) }}
+                                        {{ form_errors(registrationForm.linkedin) }}
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.portfolio) }}
-                                    {{ form_widget(registrationForm.portfolio) }}
-                                    {{ form_errors(registrationForm.portfolio) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.portfolio, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.portfolio, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'Lien vers votre portfolio'
+                                            }
+                                        }) }}
+                                        {{ form_errors(registrationForm.portfolio) }}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                {{ form_label(registrationForm.cv) }}
-                                {{ form_widget(registrationForm.cv) }}
+                            <div class="form-group">
+                                <label class="form-label">CV / Portfolio</label>
+                                <div class="custom-file-upload">
+                                    <i>📄</i>
+                                    <span>Ajoutez votre CV ou portfolio professionnel</span>
+                                    <small class="form-text mt-1">Formats: PDF • Max: 5Mo</small>
+                                    {{ form_widget(registrationForm.cv, {
+                                        'attr': {
+                                            'class': 'file-input',
+                                            'id': 'cvInput'
+                                        }
+                                    }) }}
+                                    <div class="file-name" id="cvFileName">Aucun fichier sélectionné</div>
+                                </div>
                                 {{ form_errors(registrationForm.cv) }}
                             </div>
                         </div>
 
                         {# Champs spécifiques pour Apprenant #}
-                        <div id="apprenant-fields" style="display:none;">
-                            <h5 class="mt-4 mb-3 text-success">Informations Apprenant</h5>
+                        <div id="apprenant-fields" class="role-section">
+                            <h3 class="role-section-title"><i>🎓</i> Informations Apprenant</h3>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.genre) }}
-                                    {{ form_widget(registrationForm.genre) }}
-                                    {{ form_errors(registrationForm.genre) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.genre, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.genre, {
+                                            'attr': {'class': 'form-select'}
+                                        }) }}
+                                        {{ form_errors(registrationForm.genre) }}
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.etatCivil) }}
-                                    {{ form_widget(registrationForm.etatCivil) }}
-                                    {{ form_errors(registrationForm.etatCivil) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.etatCivil, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.etatCivil, {
+                                            'attr': {'class': 'form-select'}
+                                        }) }}
+                                        {{ form_errors(registrationForm.etatCivil) }}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                {{ form_label(registrationForm.objectif) }}
-                                {{ form_widget(registrationForm.objectif) }}
+                            <div class="form-group">
+                                {{ form_label(registrationForm.objectif, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.objectif, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'rows': 2,
+                                        'placeholder': 'Quels sont vos objectifs d\'apprentissage ?'
+                                    }
+                                }) }}
                                 {{ form_errors(registrationForm.objectif) }}
                             </div>
-<div class="mb-3">
-    {{ form_label(registrationForm.domainesInteret) }}
-    {{ form_widget(registrationForm.domainesInteret) }}
-    {{ form_errors(registrationForm.domainesInteret) }}
-</div>
-
-<div class="mb-3">
-    <label for="autreCentreInteret">Autre centre d'intérêt</label>
-    <input type="text" id="autreCentreInteret" class="form-control" placeholder="Ajouter un centre d'intérêt">
-</div>
- 
-
-
+                            <div class="form-group">
+                                {{ form_label(registrationForm.domainesInteret, null, {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="checkbox-grid" id="domainesInteretCheckboxes">
+                                    {{ form_widget(registrationForm.domainesInteret) }}
+                                </div>
+                                {{ form_errors(registrationForm.domainesInteret) }}
+                            </div>
+                            <div class="input-group mb-3">
+                                <input type="text" id="autreCentreInteret" class="form-control" placeholder="Ajouter un autre centre d'intérêt">
+                                <button class="btn add-interest-btn" type="button" id="addInterestBtn">Ajouter</button>
+                            </div>
                         </div>
 
                         {# Champs spécifiques pour Société #}
-                        <div id="societe-fields" style="display:none;">
-                            <h5 class="mt-4 mb-3 text-info">Informations Société</h5>
+                        <div id="societe-fields" class="role-section">
+                            <h3 class="role-section-title"><i>🏢</i> Informations Société</h3>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.nomSociete) }}
-                                    {{ form_widget(registrationForm.nomSociete) }}
-                                    {{ form_errors(registrationForm.nomSociete) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.nomSociete, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.nomSociete, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'Nom de votre entreprise'
+                                            }
+                                        }) }}
+                                        {{ form_errors(registrationForm.nomSociete) }}
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.secteur) }}
-                                    {{ form_widget(registrationForm.secteur) }}
-                                    {{ form_errors(registrationForm.secteur) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.secteur, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.secteur, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'Ex: Technologie, Santé, Éducation'
+                                            }
+                                        }) }}
+                                        {{ form_errors(registrationForm.secteur) }}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="mb-3">
-                                {{ form_label(registrationForm.descriptionSociete) }}
-                                {{ form_widget(registrationForm.descriptionSociete) }}
+                            <div class="form-group">
+                                {{ form_label(registrationForm.descriptionSociete, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.descriptionSociete, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'rows': 3,
+                                        'placeholder': 'Décrivez brièvement votre entreprise et ses activités...'
+                                    }
+                                }) }}
                                 {{ form_errors(registrationForm.descriptionSociete) }}
                             </div>
-                            <div class="mb-3">
-                                {{ form_label(registrationForm.adresse) }}
-                                {{ form_widget(registrationForm.adresse) }}
+                            <div class="form-group">
+                                {{ form_label(registrationForm.adresse, null, {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(registrationForm.adresse, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'placeholder': 'Adresse complète de l\'entreprise'
+                                    }
+                                }) }}
                                 {{ form_errors(registrationForm.adresse) }}
                             </div>
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.siteWeb) }}
-                                    {{ form_widget(registrationForm.siteWeb) }}
-                                    {{ form_errors(registrationForm.siteWeb) }}
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        {{ form_label(registrationForm.siteWeb, null, {'label_attr': {'class': 'form-label'}}) }}
+                                        {{ form_widget(registrationForm.siteWeb, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'https://votre-societe.com'
+                                            }
+                                        }) }}
+                                        {{ form_errors(registrationForm.siteWeb) }}
+                                    </div>
                                 </div>
-                                <div class="col-md-6 mb-3">
-                                    {{ form_label(registrationForm.logo) }}
-                                    {{ form_widget(registrationForm.logo) }}
-                                    {{ form_errors(registrationForm.logo) }}
+                            </div>
+                        </div>
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.plainPassword.first, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                                    <div class="input-group">
+                                        {{ form_widget(registrationForm.plainPassword.first, {
+                                            'attr': {
+                                                'class': 'form-control form-control-lg password-field',
+                                                'placeholder': '••••••••',
+                                                'autocomplete': 'new-password'
+                                            }
+                                        }) }}
+                                        <button class="btn toggle-password" type="button" aria-label="Afficher le mot de passe">👁️</button>
+                                    </div>
+                                    {{ form_errors(registrationForm.plainPassword.first) }}
+                                    <small class="form-text">Au moins 8 caractères avec majuscules, chiffres et symboles</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    {{ form_label(registrationForm.plainPassword.second, 'Confirmer le mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                                    <div class="input-group">
+                                        {{ form_widget(registrationForm.plainPassword.second, {
+                                            'attr': {
+                                                'class': 'form-control form-control-lg password-field',
+                                                'placeholder': '••••••••',
+                                                'autocomplete': 'new-password'
+                                            }
+                                        }) }}
+                                        <button class="btn toggle-password" type="button" aria-label="Afficher le mot de passe">👁️</button>
+                                    </div>
+                                    {{ form_errors(registrationForm.plainPassword.second) }}
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.plainPassword.first, 'Mot de passe') }}
-                                {{ form_widget(registrationForm.plainPassword.first, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.plainPassword.first) }}
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.plainPassword.second, 'Confirmer mot de passe') }}
-                                {{ form_widget(registrationForm.plainPassword.second, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.plainPassword.second) }}
-                            </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-submit">
+                                <span class="d-flex align-items-center justify-content-center">
+                                    <span>🚀 Créer mon compte</span>
+                                </span>
+                            </button>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">S'inscrire</button>
+                        <div class="text-center mt-4 pt-3 border-top">
+                            <p class="mb-0">Déjà un compte ? <a href="{{ path('app_login') }}" class="text-decoration-none fw-bold" style="color: var(--primary);">Se connecter</a></p>
                         </div>
-
-                        <div class="text-center mt-3">
-                            <p>Vous avez déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></p>
-                        </div>
-                    {{ form_end(registrationForm) }}
+                    {{ form_end(registrationForm, {'render_rest': false}) }}
                 </div>
             </div>
         </div>
     </div>
-</div><script>
+</div>
+
+<script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            const isPassword = input.type === 'password';
+            
+            input.type = isPassword ? 'text' : 'password';
+            this.textContent = isPassword ? '🙈' : '👁️';
+            this.setAttribute('aria-label', isPassword ? 'Cacher le mot de passe' : 'Afficher le mot de passe');
+            
+            // Add visual feedback
+            input.classList.add('is-invalid');
+            setTimeout(() => input.classList.remove('is-invalid'), 300);
+        });
+    });
+
+    // Role-based fields management
     const roleSelect = document.querySelector('select[name*="roleUtilisateur"]');
     const formateurFields = document.getElementById('formateur-fields');
     const apprenantFields = document.getElementById('apprenant-fields');
     const societeFields = document.getElementById('societe-fields');
-
-    if (!roleSelect) return;
+    const sections = [formateurFields, apprenantFields, societeFields];
 
     function showRoleFields() {
-        const selectedRole = roleSelect.value;
+        // Hide all sections first
+        sections.forEach(section => {
+            section.style.display = 'none';
+            section.classList.remove('visible');
+        });
 
-        // Cacher tous les champs spécifiques
-        formateurFields.style.display = 'none';
-        apprenantFields.style.display = 'none';
-        societeFields.style.display = 'none';
+        // Show relevant section
+        const selectedRole = roleSelect.value.trim().toLowerCase();
+        let targetSection = null;
+        
+        if (selectedRole === 'formateur') targetSection = formateurFields;
+        else if (selectedRole === 'apprenant') targetSection = apprenantFields;
+        else if (selectedRole === 'societe') targetSection = societeFields;
 
-        // Afficher selon le rôle
-        if (selectedRole === 'formateur') formateurFields.style.display = 'block';
-        else if (selectedRole === 'apprenant') apprenantFields.style.display = 'block';
-        else if (selectedRole === 'societe') societeFields.style.display = 'block';
+        if (targetSection) {
+            targetSection.style.display = 'block';
+            setTimeout(() => targetSection.classList.add('visible'), 10);
+        }
     }
 
-    // Changement du rôle
-    roleSelect.addEventListener('change', showRoleFields);
+    if (roleSelect) {
+        roleSelect.addEventListener('change', showRoleFields);
+        showRoleFields(); // Initialize on load
+    }
 
-    // Afficher les champs si un rôle est déjà sélectionné (recharge du formulaire)
-    showRoleFields();
-
-    // --- Gestion "autre centre d'intérêt" pour apprenant en checklist ---
-    const checkboxesContainer = document.querySelector('#apprenant-fields div.form-check-group');
-    const autreInput = document.querySelector('input[name*="autreCentreInteret"]');
-
-    if (checkboxesContainer && autreInput) {
-        autreInput.addEventListener('blur', function() {
-            const value = this.value.trim();
-            if (!value) return;
-
-            // Vérifie si la checkbox existe déjà
-            const exists = Array.from(checkboxesContainer.querySelectorAll('input[type="checkbox"]'))
-                .some(cb => cb.value === value);
-            if (!exists) {
-                const id = 'domainesInteret_' + value.replace(/\s+/g, '_');
-
-                const div = document.createElement('div');
-                div.classList.add('form-check');
-
-                const input = document.createElement('input');
-                input.type = 'checkbox';
-                input.name = 'registration_form[domainesInteret][]';
-                input.value = value;
-                input.id = id;
-                input.classList.add('form-check-input');
-                input.checked = true;
-
-                const label = document.createElement('label');
-                label.classList.add('form-check-label');
-                label.htmlFor = id;
-                label.textContent = value;
-
-                div.appendChild(input);
-                div.appendChild(label);
-                checkboxesContainer.appendChild(div);
+    // File upload name display
+    document.querySelectorAll('.file-input').forEach(input => {
+        const fileNameDisplay = input.closest('.custom-file-upload').querySelector('.file-name');
+        
+        input.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                const fileName = this.files[0].name.length > 30 
+                    ? this.files[0].name.substring(0, 27) + '...' 
+                    : this.files[0].name;
+                fileNameDisplay.textContent = fileName;
+                fileNameDisplay.style.color = '#2b6cb0';
+                fileNameDisplay.style.fontStyle = 'normal';
+            } else {
+                fileNameDisplay.textContent = 'Aucun fichier sélectionné';
+                fileNameDisplay.style.color = '#718096';
+                fileNameDisplay.style.fontStyle = 'italic';
             }
-            this.value = '';
+        });
+    });
+
+    // Add custom interest for apprenant
+    const addInterestBtn = document.getElementById('addInterestBtn');
+    const autreInput = document.getElementById('autreCentreInteret');
+    const checkboxesContainer = document.getElementById('domainesInteretCheckboxes');
+    
+    if (addInterestBtn && autreInput && checkboxesContainer) {
+        function addCustomInterest() {
+            const value = autreInput.value.trim();
+            if (!value) return;
+            
+            // Check if already exists
+            const existing = Array.from(checkboxesContainer.querySelectorAll('input[type="checkbox"]'))
+                .some(cb => cb.value.toLowerCase() === value.toLowerCase());
+            
+            if (existing) {
+                autreInput.value = '';
+                return;
+            }
+            
+            // Create new checkbox
+            const id = 'domainesInteret_custom_' + Date.now();
+            const div = document.createElement('div');
+            div.className = 'form-check';
+            
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.name = 'registration_form[domainesInteret][]';
+            input.value = value;
+            input.id = id;
+            input.className = 'form-check-input';
+            input.checked = true;
+            
+            const label = document.createElement('label');
+            label.className = 'form-check-label';
+            label.htmlFor = id;
+            label.textContent = value;
+            
+            div.appendChild(input);
+            div.appendChild(label);
+            checkboxesContainer.appendChild(div);
+            
+            // Clear input and provide feedback
+            autreInput.value = '';
+            autreInput.focus();
+            
+            // Visual feedback
+            autreInput.classList.add('is-valid');
+            setTimeout(() => autreInput.classList.remove('is-valid'), 1500);
+        }
+        
+        addInterestBtn.addEventListener('click', addCustomInterest);
+        autreInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addCustomInterest();
         });
     }
 });
 </script>
-
-
-
 {% endblock %}
