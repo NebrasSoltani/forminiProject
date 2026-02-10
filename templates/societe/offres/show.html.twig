@@ -161,8 +161,8 @@
                                                                         {% if candidature.apprenant.niveauEtude %}
                                                                             <p class="mb-2"><strong>Niveau d'études:</strong> {{ candidature.apprenant.niveauEtude|replace({'_': ' '})|title }}</p>
                                                                         {% endif %}
-                                                                        {% if candidature.apprenant.governorat %}
-                                                                            <p class="mb-0"><strong>Localisation:</strong> {{ candidature.apprenant.governorat }}</p>
+                                                                        {% if candidature.apprenant.gouvernorat %}
+                                                                            <p class="mb-0"><strong>Localisation:</strong> {{ candidature.apprenant.gouvernorat.name }}</p>
                                                                         {% endif %}
                                                                     </div>
                                                                 </div>

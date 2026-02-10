@@ -1,0 +1,2 @@
+# Ce fichier permet de garder le dossier uploads dans le repository Git
+# Les fichiers uploadés ne seront pas versionnés (voir .gitignore)

@@ -3,37 +3,62 @@
 {% block title %}Nouvelle Formation{% endblock %}
 
 {% block body %}
-{# Font Awesome (si pas déjà inclus)
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-#}
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
+{# Flash messages #}
+{% for message in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+{% endfor %}
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-0 d-flex align-items-center justify-content-between">
+{% for message in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert">
+            <span>&times;</span>
+        </button>
+    </div>
+{% endfor %}
+
+<div class="row">
+    <div class="col-12">
+        {# Header #}
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
                     <div>
-                        <h3 class="mb-0">
+                        <h3 class="mb-1">
                             <i class="fa fa-plus-circle text-primary mr-2"></i>
                             Créer une nouvelle formation
                         </h3>
-                        <small class="text-muted">
-                            Remplis les infos puis choisis : brouillon, soumettre ou publier.
-                        </small>
+                        <p class="text-muted mb-0">
+                            <i class="fa fa-info-circle mr-1"></i>
+                            Remplis les informations puis choisis : brouillon, soumettre ou publier
+                        </p>
                     </div>
-                    <a href="{{ path('formation_index') }}" class="btn btn-soft-dark">
-                        <i class="fa fa-arrow-left mr-1"></i> Retour
-                    </a>
+                    <div>
+                        <a href="{{ path('formation_index') }}" class="btn btn-secondary">
+                            <i class="fa fa-arrow-left mr-1"></i> Retour
+                        </a>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="card-body">
-                    {{ form_start(form) }}
+        <div class="row">
+            {# Formulaire principal #}
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
 
                     {# ===== SECTION 1 : Infos ===== #}
                     <div class="section-card mb-4">
                         <div class="section-title">
-                            <i class="fa fa-info-circle mr-2"></i> Informations générales
+                            <i class="fa fa-info-circle text-primary mr-2"></i> Informations générales
                         </div>
 
                         <div class="row">
@@ -61,7 +86,7 @@
                     {# ===== SECTION 2 : Contenu ===== #}
                     <div class="section-card mb-4">
                         <div class="section-title">
-                            <i class="fa fa-graduation-cap mr-2"></i> Contenu pédagogique
+                            <i class="fa fa-graduation-cap text-primary mr-2"></i> Contenu pédagogique
                         </div>
 
                         <div class="row">
@@ -86,7 +111,7 @@
                     {# ===== SECTION 3 : Format ===== #}
                     <div class="section-card mb-4">
                         <div class="section-title">
-                            <i class="fa fa-video mr-2"></i> Format de la formation
+                            <i class="fa fa-video text-primary mr-2"></i> Format de la formation
                         </div>
 
                         <div class="row">
@@ -112,7 +137,7 @@
                     <div class="section-card mb-4">
                         <div class="section-title d-flex align-items-center justify-content-between flex-wrap">
                             <div>
-                                <i class="fa fa-coins mr-2"></i> Prix & Accès
+                                <i class="fa fa-coins text-primary mr-2"></i> Prix & Accès
                             </div>
                             <span class="badge badge-light border text-muted mt-2 mt-md-0">
                                 Les champs prix apparaissent seulement si "payant"
@@ -141,7 +166,7 @@
                     {# ===== SECTION 5 : Médias ===== #}
                     <div class="section-card mb-4">
                         <div class="section-title">
-                            <i class="fa fa-photo-video mr-2"></i> Médias
+                            <i class="fa fa-photo-video text-primary mr-2"></i> Médias
                         </div>
 
                         <div class="row">
@@ -159,7 +184,7 @@
                     {# ===== SECTION 6 : Bonus ===== #}
                     <div class="section-card mb-4">
                         <div class="section-title">
-                            <i class="fa fa-gift mr-2"></i> Options bonus
+                            <i class="fa fa-gift text-primary mr-2"></i> Options bonus
                         </div>
 
                         <div class="row">
@@ -178,8 +203,7 @@
                             <div class="col-md-3 col-6 mb-3">
                                 <label class="option-tile">
                                     {{ form_widget(form.fichiersTelechargeables) }}
-                                    <span><i class="fa fa-file mr-1"></i>
-</i> Fichiers</span>
+                                    <span><i class="fa fa-file mr-1"></i> Fichiers</span>
                                 </label>
                             </div>
                             <div class="col-md-3 col-6 mb-3">
@@ -192,34 +216,240 @@
                     </div>
 
                     {# ===== ACTIONS ===== #}
-                    <div class="d-flex flex-wrap justify-content-between align-items-center mt-4 pt-3 border-top">
-                        <a href="{{ path('formation_index') }}" class="btn btn-soft-dark mb-2 mb-md-0">
-                            <i class="fa fa-arrow-left mr-1"></i> Retour
-                        </a>
+                    <div class="form-actions mt-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center">
+                            <a href="{{ path('formation_index') }}" class="btn btn-secondary btn-lg mb-2 mb-md-0">
+                                <i class="fa fa-times mr-1"></i> Annuler
+                            </a>
 
-                        <div class="d-flex flex-wrap gap-2">
-                            <button type="submit" name="action" value="brouillon"
-                                    class="btn btn-action btn-outline-secondary mb-2 mb-md-0">
-                                <i class="fa fa-save mr-1"></i> Brouillon
-                            </button>
+                            <div class="d-flex flex-wrap gap-2">
+                                <button type="submit" name="action" value="brouillon"
+                                        class="btn btn-action btn-outline-secondary btn-lg mb-2 mb-md-0">
+                                    <i class="fa fa-save mr-1"></i> Brouillon
+                                </button>
 
-                            <button type="submit" name="action" value="soumettre"
-                                    class="btn btn-action btn-warning mb-2 mb-md-0">
-                                <i class="fa fa-paper-plane mr-1"></i> Soumettre
-                            </button>
+                                <button type="submit" name="action" value="soumettre"
+                                        class="btn btn-action btn-warning btn-lg mb-2 mb-md-0">
+                                    <i class="fa fa-paper-plane mr-1"></i> Soumettre
+                                </button>
 
-                            <button type="submit" name="action" value="publier"
-                                    class="btn btn-action btn-success mb-2 mb-md-0">
-                                <i class="fa fa-check-circle mr-1"></i> Publier
-                            </button>
+                                <button type="submit" name="action" value="publier"
+                                        class="btn btn-action btn-success btn-lg mb-2 mb-md-0">
+                                    <i class="fa fa-check-circle mr-1"></i> Publier
+                                </button>
+                            </div>
                         </div>
                     </div>
 
                     {{ form_end(form) }}
                 </div>
             </div>
-
         </div>
+
+        {# Sidebar - Conseils et informations #}
+        <div class="col-lg-4">
+            {# Conseils pour créer une formation de qualité #}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fa fa-lightbulb text-warning mr-2"></i>
+                        Conseils de création
+                    </h5>
+                    
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-bullseye text-success"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Définissez votre public cible</strong>
+                            <p class="mb-0">Identifiez clairement le niveau et les besoins de vos apprenants</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-trophy text-warning"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Objectifs d'apprentissage clairs</strong>
+                            <p class="mb-0">Définissez ce que l'apprenant saura faire à la fin de la formation</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-puzzle-piece text-info"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Structure logique et progressive</strong>
+                            <p class="mb-0">Organisez le contenu du simple au complexe avec une progression cohérente</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-video text-danger"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Contenu multimédia de qualité</strong>
+                            <p class="mb-0">Utilisez des vidéos HD, des supports visuels et des exemples pratiques</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-tasks text-primary"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Exercices et évaluations</strong>
+                            <p class="mb-0">Intégrez des quiz et des projets pour valider les acquis</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item mb-0">
+                        <div class="tip-icon">
+                            <i class="fa fa-chart-line text-success"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Mettez à jour régulièrement</strong>
+                            <p class="mb-0">Actualisez le contenu et répondez aux questions des apprenants</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Bonnes pratiques pédagogiques #}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fa fa-graduation-cap text-info mr-2"></i>
+                        Bonnes pratiques
+                    </h5>
+                    
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-clock text-primary"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Durée des vidéos</strong>
+                            <p class="mb-0">5 à 15 minutes maximum par vidéo pour maintenir l'attention</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-book text-success"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Division en modules</strong>
+                            <p class="mb-0">Découpez la formation en sections thématiques cohérentes</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-download text-info"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Ressources téléchargeables</strong>
+                            <p class="mb-0">Fournissez des PDF, fichiers sources et liens complémentaires</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-comments text-warning"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Interaction avec les apprenants</strong>
+                            <p class="mb-0">Répondez rapidement aux questions et encouragez les discussions</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item">
+                        <div class="tip-icon">
+                            <i class="fa fa-certificate text-danger"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Certificat de réussite</strong>
+                            <p class="mb-0">Offrez un certificat pour motiver et valider les compétences acquises</p>
+                        </div>
+                    </div>
+
+                    <div class="tip-item mb-0">
+                        <div class="tip-icon">
+                            <i class="fa fa-star text-warning"></i>
+                        </div>
+                        <div class="tip-content">
+                            <strong>Qualité avant quantité</strong>
+                            <p class="mb-0">Privilégiez un contenu de qualité plutôt qu'une longue durée</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Statuts disponibles #}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fa fa-info-circle text-primary mr-2"></i>
+                        Statuts disponibles
+                    </h5>
+                    
+                    <div class="status-item">
+                        <div class="status-badge badge-secondary">
+                            <i class="fa fa-save"></i>
+                        </div>
+                        <div class="status-content">
+                            <strong>Brouillon</strong>
+                            <p class="mb-0">Sauvegarde sans publier. Vous pouvez modifier plus tard</p>
+                        </div>
+                    </div>
+
+                    <div class="status-item">
+                        <div class="status-badge badge-warning">
+                            <i class="fa fa-paper-plane"></i>
+                        </div>
+                        <div class="status-content">
+                            <strong>Soumettre</strong>
+                            <p class="mb-0">Envoie pour validation par l'administration</p>
+                        </div>
+                    </div>
+
+                    <div class="status-item mb-0">
+                        <div class="status-badge badge-success">
+                            <i class="fa fa-check-circle"></i>
+                        </div>
+                        <div class="status-content">
+                            <strong>Publier</strong>
+                            <p class="mb-0">Publication immédiate (selon vos permissions)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# Actions rapides #}
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">
+                        <i class="fa fa-bolt text-warning mr-2"></i>
+                        Actions rapides
+                    </h5>
+                    
+                    <div class="quick-actions">
+                        <a href="{{ path('formation_index') }}" class="quick-action-item">
+                            <i class="fa fa-list text-primary"></i>
+                            <span>Toutes les formations</span>
+                        </a>
+                        <a href="#" onclick="window.history.back(); return false;" class="quick-action-item">
+                            <i class="fa fa-arrow-left text-secondary"></i>
+                            <span>Page précédente</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     </div>
 </div>
 
@@ -239,15 +469,21 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 
 <style>
-/* ===== Boutons soft dark ===== */
-.btn-soft-dark{
-    background:#343a40;
-    border:1px solid #495057;
-    color:#f8f9fa;
+/* ===== Cards ===== */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 1rem;
 }
-.btn-soft-dark:hover{
-    background:#3e444a;
-    color:#fff;
+
+.card-title {
+    font-weight: 600;
+    color: #1c2d41;
+}
+
+.card-body {
+    padding: 1.5rem;
 }
 
 /* ===== Sections ===== */
@@ -256,7 +492,9 @@ document.addEventListener('DOMContentLoaded', function() {
     border-radius:14px;
     padding:22px;
     background:#fff;
+    margin-bottom: 1.5rem;
 }
+
 .section-title{
     font-weight:700;
     color:#2f343a;
@@ -286,11 +524,13 @@ document.addEventListener('DOMContentLoaded', function() {
     transition:all .2s ease;
     margin-bottom:0;
 }
+
 .option-tile:hover{
     background:#eef1f4;
     transform:translateY(-1px);
     box-shadow:0 4px 10px rgba(0,0,0,.06);
 }
+
 .option-tile input[type="checkbox"]{ 
     margin:0;
     width:20px;
@@ -298,6 +538,7 @@ document.addEventListener('DOMContentLoaded', function() {
     cursor:pointer;
     flex-shrink:0;
 }
+
 .option-tile span{
     font-weight:600;
     color:#495057;
@@ -314,6 +555,28 @@ document.addEventListener('DOMContentLoaded', function() {
     min-width:130px;
 }
 
+.btn-lg {
+    border-radius: 8px;
+    padding: 12px 30px;
+    font-weight: 600;
+    transition: all .2s ease;
+}
+
+.btn-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #545b62;
+}
+
 /* ===== SELECT : force FLEX display + style uniforme ===== */
 select,
 .form-select,
@@ -326,18 +589,16 @@ select.form-control{
     background-color:#f8f9fa !important;
     height:auto !important;
     min-height:45px !important;
-
     appearance:none;
     -webkit-appearance:none;
     -moz-appearance:none;
-
     background-image:url("data:image/svg+xml,%3Csvg fill='none' stroke='%236c757d' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
     background-repeat:no-repeat;
     background-position:right 14px center;
     background-size:16px 16px;
-
     padding-right:42px !important;
 }
+
 select:focus,
 .form-select:focus,
 select.form-control:focus{
@@ -360,6 +621,7 @@ textarea.form-control{
     background-color:#f8f9fa !important;
     min-height:45px !important;
 }
+
 input[type="text"].form-control:focus,
 input[type="number"].form-control:focus,
 input[type="date"].form-control:focus,
@@ -382,11 +644,13 @@ input[type="file"].form-control{
     cursor:pointer;
     min-height:60px !important;
 }
+
 input[type="file"]:hover,
 input[type="file"].form-control:hover{
     background:#eef1f4 !important;
     border-color:#adb5bd !important;
 }
+
 input[type="file"]::file-selector-button{
     border:none !important;
     background:#343a40 !important;
@@ -396,6 +660,7 @@ input[type="file"]::file-selector-button{
     margin-right:10px !important;
     cursor:pointer;
 }
+
 input[type="file"]::file-selector-button:hover{
     background:#3e444a !important;
 }
@@ -408,12 +673,151 @@ label{
     display:block;
 }
 
+/* ===== Tips ===== */
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.tip-item:last-child {
+    border-bottom: none;
+}
+
+.tip-icon {
+    width: 30px;
+    flex-shrink: 0;
+}
+
+.tip-icon i {
+    font-size: 18px;
+}
+
+.tip-content {
+    flex: 1;
+}
+
+.tip-content strong {
+    display: block;
+    color: #1c2d41;
+    margin-bottom: 4px;
+}
+
+.tip-content p {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* ===== Status items ===== */
+.status-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.status-item:last-child {
+    border-bottom: none;
+}
+
+.status-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.status-badge i {
+    font-size: 16px;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-content {
+    flex: 1;
+}
+
+.status-content strong {
+    display: block;
+    color: #1c2d41;
+    margin-bottom: 4px;
+}
+
+.status-content p {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+/* ===== Quick actions ===== */
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.quick-action-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all .2s ease;
+    text-decoration: none;
+    color: #495057;
+}
+
+.quick-action-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+    text-decoration: none;
+    color: #495057;
+}
+
+.quick-action-item i {
+    width: 30px;
+    font-size: 18px;
+    margin-right: 12px;
+}
+
+/* ===== Form actions ===== */
+.form-actions {
+    background: #f8f9fa;
+    margin: 0 -1.5rem -1.5rem;
+    padding: 1.5rem;
+    border-radius: 0 0 12px 12px;
+    border-top: 1px solid #e9ecef;
+}
+
 /* ===== Gap util BS4 ===== */
 .gap-2 > *:not(:last-child){ 
     margin-right:10px; 
 }
 
 /* ===== Responsive adjustments ===== */
+@media (max-width: 991px) {
+    .col-lg-4 {
+        margin-top: 1rem;
+    }
+}
+
 @media (max-width: 768px) {
     .section-card{
         padding:16px;
