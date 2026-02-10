@@ -1,70 +1,401 @@
                        {% extends 'base.html.twig' %}
 
 {% block body %}
-<h1>Liste des sociétés</h1>
-
-<a href="{{ path('admin_societe_new') }}">➕ Ajouter société</a>
-
-<form method="get" action="{{ path('admin_societe_index') }}" style="margin: 10px 0;">
-    <input type="text" name="q" value="{{ q|default('') }}" placeholder="Recherche (nom société/email/secteur)">
-    <select name="limit">
-        {% set currentLimit = limit|default(10) %}
-        <option value="10" {% if currentLimit == 10 %}selected{% endif %}>10</option>
-        <option value="25" {% if currentLimit == 25 %}selected{% endif %}>25</option>
-        <option value="50" {% if currentLimit == 50 %}selected{% endif %}>50</option>
-        <option value="100" {% if currentLimit == 100 %}selected{% endif %}>100</option>
-    </select>
-    <button type="submit">Filtrer</button>
-    <a href="{{ path('admin_societe_index') }}">Réinitialiser</a>
-</form>
-
-<div style="margin: 10px 0;">
-    Total: {{ total|default(societes|length) }}
-</div>
-
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Nom société</th>
-        <th>Email</th>
-        <th>Vérifiée</th>
-        <th>Actions</th>
-    </tr>
-    {% for societe in societes %}
-        <tr>
-            <td>{{ societe.id }}</td>
-            <td>{{ societe.nomSociete }}</td>
-            <td>{{ societe.user.email }}</td>
-            <td>{{ societe.isVerifie ? 'Oui' : 'Non' }}</td>
-            <td>
-                <a href="{{ path('admin_societe_show', {id: societe.id}) }}">👁️</a>
-                <a href="{{ path('admin_societe_edit', {id: societe.id}) }}">✏️</a>
-                <form method="post" action="{{ path('admin_societe_delete', {id: societe.id}) }}" style="display:inline" onsubmit="return confirm('Supprimer ?')">
-                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ societe.id) }}">
-                    <button type="submit">🗑️</button>
-                </form>
-            </td>
-        </tr>
+<!-- Flash messages -->
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mt-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-{{ type == 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' }} me-2"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
     {% endfor %}
-</table>
+{% endfor %}
 
-<div style="margin-top: 10px;">
-    {% set currentPage = page|default(1) %}
-    {% set pages = totalPages|default(1) %}
-    {% set params = { q: q|default(''), limit: limit|default(10) } %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-primary">
+            <i class="bi bi-building me-2"></i>Liste des sociétés
+        </h1>
+        <a href="{{ path('admin_societe_new') }}" class="btn btn-success btn-lg shadow-sm">
+            <i class="bi bi-plus-circle-dotted me-1"></i>Ajouter une société
+        </a>
+    </div>
 
-    {% if currentPage > 1 %}
-        <a href="{{ path('admin_societe_index', params|merge({page: (currentPage - 1) })) }}">← Précédent</a>
-    {% else %}
-        <span style="color:#999;">← Précédent</span>
-    {% endif %}
+    <!-- Barre de recherche et filtres améliorés -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <!-- Filtres actifs badges -->
+            {% if q %}
+            <div class="mb-4 p-3 bg-light rounded">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="fw-medium text-muted">Filtres actifs :</span>
+                    <span class="badge bg-primary rounded-pill px-3 py-2">
+                        <i class="bi bi-search me-1"></i>Recherche: "{{ q }}"
+                        <a href="{{ path('admin_societe_index') }}" 
+                           class="ms-2 text-white text-decoration-none" 
+                           title="Supprimer ce filtre">
+                            <i class="bi bi-x-lg"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+            {% endif %}
 
-    Page {{ currentPage }} / {{ pages }}
+            <!-- Formulaire de recherche principal -->
+            <form method="get" action="{{ path('admin_societe_index') }}" class="row g-3">
+                <!-- Recherche rapide -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               name="q" 
+                               value="{{ q|default('') }}" 
+                               class="form-control border-start-0" 
+                               placeholder="Rechercher (nom, email, secteur...)"
+                               style="border-left: none;">
+                    </div>
+                </div>
 
-    {% if currentPage < pages %}
-        <a href="{{ path('admin_societe_index', params|merge({page: (currentPage + 1) })) }}">Suivant →</a>
-    {% else %}
-        <span style="color:#999;">Suivant →</span>
+                <!-- Filtres avancés toggle -->
+                <div class="col-md-6 col-lg-8 text-end">
+                    <button type="button" 
+                            class="btn btn-outline-primary d-none d-md-inline-flex align-items-center"
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#advancedFilters"
+                            aria-controls="advancedFilters">
+                        <i class="bi bi-sliders me-1"></i>Filtres avancés
+                        <i class="bi bi-chevron-down ms-1 transition-icon"></i>
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg ms-2">
+                        <i class="bi bi-search me-1"></i>Filtrer
+                    </button>
+                </div>
+
+                <!-- Filtres avancés collapsible -->
+                <div class="col-12 collapse" id="advancedFilters">
+                    <div class="row g-3 mt-2 pt-3 border-top">
+                        <div class="col-md-4 col-lg-3">
+                            <label class="form-label fw-medium text-muted small mb-1">
+                                <i class="bi bi-briefcase me-1"></i>Secteur d'activité
+                            </label>
+                            <input type="text" 
+                                   name="secteur" 
+                                   value="{{ secteur|default('') }}" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="Filtrer par secteur...">
+                        </div>
+                        
+                       
+                        
+                        <div class="col-md-4 col-lg-3">
+                            <label class="form-label fw-medium text-muted small mb-1">
+                                <i class="bi bi-list-ol me-1"></i>Résultats/page
+                            </label>
+                            <select name="limit" class="form-select form-select-lg">
+                                {% set currentLimit = limit|default(10) %}
+                                <option value="10" {% if currentLimit == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if currentLimit == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if currentLimit == 50 %}selected{% endif %}>50</option>
+                                <option value="100" {% if currentLimit == 100 %}selected{% endif %}>100</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4 col-lg-3 align-self-end">
+                            <button type="reset" 
+                                    class="btn btn-outline-secondary w-100 h-100"
+                                    onclick="window.location.href='{{ path('admin_societe_index') }}'">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Réinitialiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="col-12 mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="mb-0 text-muted">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>{{ total|default(societes|length) }}</strong> société(s) trouvée(s)
+                        </p>
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>Dernière mise à jour : {{ "now"|date("d/m/Y H:i") }}
+                        </small>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tableau responsive et moderne -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm mb-0">
+                    <thead class="table-primary">
+                        <tr>
+                            <th class="px-4 py-3 fw-bold">ID</th>
+                            <th class="py-3 fw-bold">Nom société</th>
+                            <th class="py-3 fw-bold">Email</th>
+                            <th class="py-3 fw-bold">Secteur</th>
+                            <th class="py-3 fw-bold text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for societe in societes %}
+                        <tr class="align-middle">
+                            <td class="px-4 py-3">
+                                <span class="badge bg-secondary">{{ societe.id }}</span>
+                            </td>
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-building-fill text-primary me-2"></i>
+                                    <span class="fw-medium">{{ societe.nomSociete }}</span>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-envelope-fill text-info me-2"></i>
+                                    <span class="text-break">{{ societe.user.email }}</span>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                {% if societe.secteur %}
+                                    <span class="badge bg-info text-dark">{{ societe.secteur }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                           
+                            <td class="py-3 text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ path('admin_societe_show', {id: societe.id}) }}" 
+                                       class="btn btn-info text-white" 
+                                       title="Voir les détails">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('admin_societe_edit', {id: societe.id}) }}" 
+                                       class="btn btn-warning text-white" 
+                                       title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form method="post" 
+                                          action="{{ path('admin_societe_delete', {id: societe.id}) }}" 
+                                          style="display:inline" 
+                                          onsubmit="return confirm('⚠️ Attention !\n\nÊtes-vous sûr de vouloir supprimer cette société ?\nCette action est irréversible et supprimera toutes les données associées.')"
+                                          class="d-inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ societe.id) }}">
+                                        <button type="submit" class="btn btn-danger" title="Supprimer">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-building fs-1 mb-2 d-block"></i>
+                                    <p class="h5">Aucune société trouvée</p>
+                                    <p class="text-muted">Essayez d'ajuster vos critères de recherche</p>
+                                    <a href="{{ path('admin_societe_index') }}" class="btn btn-sm btn-outline-primary mt-2">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Réinitialiser les filtres
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination améliorée -->
+    {% if societes|length > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <p class="text-muted mb-0">
+            <i class="bi bi-grid-3x3-gap me-2"></i>
+            Affichage de <strong>{{ (page-1)*limit + 1 }}</strong> à <strong>{{ (page*limit) < total ? page*limit : total }}</strong> sur <strong>{{ total }}</strong> résultats
+        </p>
+        
+        {% set currentPage = page|default(1) %}
+        {% set pages = totalPages|default(1) %}
+       
+        
+        <nav aria-label="Pagination">
+            <ul class="pagination mb-0">
+                <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage > 1 %}{{ path('admin_societe_index', params|merge({page: (currentPage - 1) })) }}{% else %}#{% endif %}" tabindex="-1">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                
+                {% for i in 1..pages %}
+                    {% if i == currentPage or i == 1 or i == pages or (i >= currentPage - 1 and i <= currentPage + 1) %}
+                        <li class="page-item {% if i == currentPage %}active{% endif %}">
+                            <a class="page-link" href="{{ path('admin_societe_index', params|merge({page: i})) }}">{{ i }}</a>
+                        </li>
+                    {% elseif i == currentPage - 2 or i == currentPage + 2 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <li class="page-item {% if currentPage >= pages %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage < pages %}{{ path('admin_societe_index', params|merge({page: (currentPage + 1) })) }}{% else %}#{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
     {% endif %}
 </div>
+
+<!-- CSS personnalisé amélioré -->
+<style>
+    /* Améliorations générales */
+    .btn {
+        transition: all 0.3s ease !important;
+        border-radius: 8px !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Tableau */
+    .table-hover tbody tr:hover {
+        background-color: rgba(67, 94, 190, 0.05) !important;
+        transform: scale(1.002);
+        transition: all 0.2s ease;
+    }
+    
+    .table thead th {
+        border-bottom: 3px solid #dee2e6;
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+    }
+    
+    /* Cartes */
+    .card {
+        border-radius: 12px !important;
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
+    }
+    
+    /* Badges filtres */
+    .badge {
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Input groups */
+    .input-group-lg .form-control, 
+    .input-group-lg .input-group-text {
+        height: 3.5rem;
+        font-size: 1.1rem;
+    }
+    
+    /* Pagination */
+    .pagination .page-link {
+        color: #435ebe;
+        border-radius: 6px !important;
+        margin: 0 2px;
+        border: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #435ebe;
+        border-color: #435ebe;
+        color: white;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #f0f4ff;
+        color: #2c3e8c;
+    }
+    
+    /* Transition icône toggle */
+    .transition-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .collapse.show + .transition-icon {
+        transform: rotate(180deg);
+    }
+    
+    /* Responsive amélioré */
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .btn-group-sm > .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .badge {
+            font-size: 0.85rem;
+        }
+    }
+    
+    /* Animation badges */
+    @keyframes badgePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .badge.bg-primary, .badge.bg-info, .badge.bg-success, .badge.bg-warning, .badge.bg-danger {
+        animation: badgePulse 2s ease-in-out infinite;
+        animation-delay: calc(var(--animation-delay, 0) * 0.1s);
+        color:white;
+    }
+</style>
+
+<!-- JavaScript pour améliorations UX -->
+<script>
+    // Fermer les filtres avancés au submit
+    document.querySelector('form').addEventListener('submit', function() {
+        const advancedFilters = document.getElementById('advancedFilters');
+        if (advancedFilters && !advancedFilters.classList.contains('show')) {
+            advancedFilters.classList.add('show');
+        }
+    });
+    
+    // Effet de focus sur les inputs
+    document.querySelectorAll('.form-control, .form-select').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement?.classList.add('focused');
+        });
+        input.addEventListener('blur', function() {
+            this.parentElement?.classList.remove('focused');
+        });
+    });
+</script>
 {% endblock %}

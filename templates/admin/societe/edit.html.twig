@@ -1,12 +1,294 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<h1>Modifier société</h1>
+<style>
+    /* Modern form styling */
+    .form-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px 15px 0 0;
+        text-align: center;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .form-header h1 {
+        margin: 0;
+        font-size: 2rem;
+        font-weight: 700;
+    }
+    
+    .form-header p {
+        margin: 0.5rem 0 0 0;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .form-section {
+        padding: 2rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+    }
+    
+    .section-title {
+        color: #333;
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-title i {
+        margin-right: 0.5rem;
+        color: #667eea;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #555;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        outline: none;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    
+    .invalid-feedback {
+        color: #dc3545;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+    
+    .btn-secondary {
+        background: #6c757d;
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: #5a6268;
+        transform: translateY(-2px);
+    }
+    
+    .form-actions {
+        padding: 2rem;
+        background: #f8f9fa;
+        text-align: center;
+    }
+    
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 1rem;
+        }
+        
+        .form-header {
+            padding: 1.5rem;
+        }
+        
+        .form-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .form-section {
+            padding: 1.5rem;
+        }
+    }
+</style>
 
-{{ form_start(form) }}
-{{ form_widget(form) }}
-<button>Modifier</button>
-{{ form_end(form) }}
+<div class="form-container">
+    <!-- Header -->
+    <div class="form-header">
+        <h1><i class="bi bi-building me-2"></i>Modifier la société</h1>
+        <p>Mettez à jour les informations de la société</p>
+    </div>
 
-<a href="{{ path('admin_societe_index') }}">⬅️ Retour</a>
+    <!-- Form -->
+    <div class="form-card">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+        
+        <!-- Informations générales -->
+        <div class="form-section">
+            <h2 class="section-title">
+                <i class="bi bi-building"></i>
+                Informations générales
+            </h2>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.nomSociete, 'Nom de la société', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.nomSociete, {'attr': {'class': 'form-control', 'placeholder': 'Nom de votre entreprise'}}) }}
+                    {{ form_errors(form.nomSociete) }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.secteur, 'Secteur d\'activité', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.secteur, {'attr': {'class': 'form-control', 'placeholder': 'Technologie, Commerce, Services...'}}) }}
+                    {{ form_errors(form.secteur) }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.adresse, 'Adresse', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.adresse, {'attr': {'class': 'form-control', 'placeholder': '123 Rue Example, Ville'}}) }}
+                    {{ form_errors(form.adresse) }}
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.siteWeb, 'Site web', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.siteWeb, {'attr': {'class': 'form-control', 'placeholder': 'https://www.example.com'}}) }}
+                    {{ form_errors(form.siteWeb) }}
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-12 mb-3">
+                    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Décrivez votre entreprise, ses services, et son secteur d\'activité...'}}) }}
+                    {{ form_errors(form.description) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-lg me-3">
+                <i class="bi bi-check-circle me-2"></i>Mettre à jour la société
+            </button>
+            
+            <a href="{{ path('admin_societe_show', {id: societe.id}) }}" class="btn btn-secondary btn-lg me-2">
+                <i class="bi bi-eye me-2"></i>Voir les détails
+            </a>
+            
+            <a href="{{ path('admin_societe_index') }}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+            </a>
+        </div>
+        
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+// Form validation
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const submitButton = form.querySelector('button[type="submit"]');
+    
+    form.addEventListener('submit', function(e) {
+        const nomSociete = form.querySelector('[name*="[nomSociete]"]');
+        const secteur = form.querySelector('[name*="[secteur]"]');
+        const adresse = form.querySelector('[name*="[adresse]"]');
+        const siteWeb = form.querySelector('[name*="[siteWeb]"]');
+        const description = form.querySelector('[name*="[description]"]');
+        
+        let isValid = true;
+        
+        // Basic validation
+        if (!nomSociete.value.trim()) {
+            nomSociete.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            nomSociete.classList.remove('is-invalid');
+        }
+        
+        if (!secteur.value.trim()) {
+            secteur.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            secteur.classList.remove('is-invalid');
+        }
+        
+        if (!adresse.value.trim()) {
+            adresse.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            adresse.classList.remove('is-invalid');
+        }
+        
+        if (!siteWeb.value.trim()) {
+            siteWeb.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            siteWeb.classList.remove('is-invalid');
+        }
+        
+        if (!description.value.trim()) {
+            description.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            description.classList.remove('is-invalid');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            
+            // Scroll to first error
+            const firstError = form.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+    
+    // Remove invalid class on input
+    form.querySelectorAll('.form-control, .form-select').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+    });
+});
+</script>
 {% endblock %}

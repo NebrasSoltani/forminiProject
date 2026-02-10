@@ -1,27 +1,444 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<h1>Détails formateur</h1>
+<!-- Flash messages -->
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mt-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-{{ type == 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' }} me-2"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
 
-<table border="1">
-    <tr><th>ID</th><td>{{ formateur.id }}</td></tr>
-    <tr><th>Email</th><td>{{ formateur.user.email }}</td></tr>
-    <tr><th>Nom</th><td>{{ formateur.user.nom }}</td></tr>
-    <tr><th>Prénom</th><td>{{ formateur.user.prenom }}</td></tr>
-    <tr><th>Téléphone</th><td>{{ formateur.user.telephone }}</td></tr>
-    <tr><th>Gouvernorat</th><td>{{ formateur.user.gouvernorat ? formateur.user.gouvernorat.value : '' }}</td></tr>
-    <tr><th>Date naissance</th><td>{{ formateur.user.dateNaissance ? formateur.user.dateNaissance|date('Y-m-d') : '' }}</td></tr>
-    <tr><th>Profession</th><td>{{ formateur.user.profession }}</td></tr>
-    <tr><th>Spécialité</th><td>{{ formateur.specialite }}</td></tr>
-    <tr><th>Bio</th><td>{{ formateur.bio }}</td></tr>
-    <tr><th>Expérience (années)</th><td>{{ formateur.experienceAnnees }}</td></tr>
-    <tr><th>LinkedIn</th><td>{{ formateur.linkedin }}</td></tr>
-    <tr><th>Portfolio</th><td>{{ formateur.portfolio }}</td></tr>
-    <tr><th>CV</th><td>{{ formateur.cv }}</td></tr>
-    <tr><th>Note moyenne</th><td>{{ formateur.noteMoyenne }}</td></tr>
-    <tr><th>Vérifié</th><td>{{ formateur.isVerifie ? 'Oui' : 'Non' }}</td></tr>
-</table>
+<div class="container-fluid py-4">
+    <!-- Header avec actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-primary mb-1">
+                <i class="bi bi-person-badge-fill me-2"></i>Détails du formateur
+            </h1>
+            <p class="text-muted mb-0">
+                <i class="bi bi-info-circle me-2"></i>Informations complètes sur le formateur
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_formateur_edit', {id: formateur.id}) }}" class="btn btn-warning btn-lg shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i>Modifier
+            </a>
+            <a href="{{ path('admin_formateur_index') }}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-arrow-left me-1"></i>Retour
+            </a>
+        </div>
+    </div>
 
-<a href="{{ path('admin_formateur_edit', {id: formateur.id}) }}">✏️ Modifier</a>
-<a href="{{ path('admin_formateur_index') }}">⬅️ Retour</a>
+    <!-- Carte principale des informations -->
+    <div class="row">
+        <!-- Colonne gauche - Informations personnelles -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-person me-2"></i>Informations personnelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-hash me-1"></i>ID Formateur
+                                </label>
+                                <div class="h5 mb-0">
+                                    <span class="badge bg-secondary">{{ formateur.id }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-envelope me-1"></i>Email
+                                </label>
+                                <div class="h6 mb-0">
+                                    <a href="mailto:{{ formateur.user.email }}" class="text-decoration-none text-primary">
+                                        {{ formateur.user.email }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-person me-1"></i>Nom
+                                </label>
+                                <div class="h5 mb-0 fw-bold">{{ formateur.user.nom }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-person me-1"></i>Prénom
+                                </label>
+                                <div class="h5 mb-0">{{ formateur.user.prenom }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-telephone me-1"></i>Téléphone
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if formateur.user.telephone %}
+                                        <a href="tel:{{ formateur.user.telephone }}" class="text-decoration-none text-success">
+                                            {{ formateur.user.telephone }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-calendar-date me-1"></i>Date de naissance
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if formateur.user.dateNaissance %}
+                                        {{ formateur.user.dateNaissance|date('d/m/Y') }}
+                                        <span class="text-muted small ms-2">
+                                            ({{ date().diff(formateur.user.dateNaissance).y }} ans)
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-geo-alt me-1"></i>Gouvernorat
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if formateur.user.gouvernorat %}
+                                        <span class="badge bg-info text-dark">
+                                            {{ formateur.user.gouvernorat.value }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-briefcase me-1"></i>Profession
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if formateur.user.profession %}
+                                        <span class="badge bg-warning text-dark">{{ formateur.user.profession }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Biographie -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-file-text me-2"></i>Biographie
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0 fs-5">
+                        {% if formateur.bio %}
+                            {{ formateur.bio|nl2br }}
+                        {% else %}
+                            <span class="text-muted">Aucune biographie spécifiée</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Liens professionnels -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-link-45deg me-2"></i>Liens professionnels
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-linkedin me-1"></i>LinkedIn
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if formateur.linkedin %}
+                                        <a href="{{ formateur.linkedin }}" target="_blank" class="text-decoration-none text-primary">
+                                            {{ formateur.linkedin }}
+                                            <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-globe me-1"></i>Portfolio
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if formateur.portfolio %}
+                                        <a href="{{ formateur.portfolio }}" target="_blank" class="text-decoration-none text-primary">
+                                            {{ formateur.portfolio }}
+                                            <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite - Informations complémentaires -->
+        <div class="col-lg-4">
+            <!-- Statut et spécialité -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-info-circle me-2"></i>Informations professionnelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item mb-4">
+                        <label class="text-muted small fw-medium mb-2">
+                            <i class="bi bi-star me-1"></i>Spécialité
+                        </label>
+                        <div class="h5 mb-0">
+                            {% if formateur.specialite %}
+                                <span class="badge bg-primary rounded-pill px-4 py-2">
+                                    {{ formateur.specialite }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-item mb-4">
+                        <label class="text-muted small fw-medium mb-2">
+                            <i class="bi bi-clock-history me-1"></i>Expérience
+                        </label>
+                        <div class="h5 mb-0">
+                            {% if formateur.experienceAnnees %}
+                                <span class="badge bg-success rounded-pill px-4 py-2">
+                                    {{ formateur.experienceAnnees }} an{{ formateur.experienceAnnees > 1 ? 's' : '' }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <label class="text-muted small fw-medium mb-2">Statut</label>
+                        <div class="h5 mb-1">
+                            <i class="bi bi-person-check-circle text-primary me-2"></i>
+                            {{ formateur.user.email }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Évaluation -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-star-fill me-2"></i>Évaluation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="h1 mb-2">
+                            {% if formateur.noteMoyenne %}
+                                {{ formateur.noteMoyenne|number_format(1) }}
+                                <small class="text-muted">/5</small>
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            {% for i in 1..5 %}
+                                {% if formateur.noteMoyenne %}
+                                    {% set filled = i <= formateur.noteMoyenne %}
+                                    <i class="bi bi-star{{ filled ? '-fill' : '' }} text-{{ filled ? 'warning' : 'muted' }}"></i>
+                                {% else %}
+                                    <i class="bi bi-star text-muted"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                        <small class="text-muted">Note moyenne</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résumé rapide -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-file-earmark-text me-2"></i>Résumé
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-hash text-muted me-2"></i>ID</span>
+                            <strong>{{ formateur.id }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-envelope text-muted me-2"></i>Email</span>
+                            <span class="badge bg-primary">{{ formateur.user.email ? '✓' : '✗' }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-telephone text-muted me-2"></i>Téléphone</span>
+                            <span class="badge bg-{{ formateur.user.telephone ? 'success' : 'danger' }}">
+                                {{ formateur.user.telephone ? '✓' : '✗' }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-calendar text-muted me-2"></i>Date naissance</span>
+                            <span class="badge bg-{{ formateur.user.dateNaissance ? 'info' : 'secondary' }}">
+                                {{ formateur.user.dateNaissance ? '✓' : '✗' }}
+                            </span>
+                        </li>
+                       
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-lightning me-2"></i>Actions rapides
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('admin_formateur_edit', {id: formateur.id}) }}" class="btn btn-warning btn-lg">
+                            <i class="bi bi-pencil-square me-2"></i>Modifier les informations
+                        </a>
+                        <a href="{{ path('admin_formateur_index') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                        </a>
+                        <a href="mailto:{{ formateur.user.email }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-envelope-fill me-2"></i>Envoyer un email
+                        </a>
+                        {% if formateur.user.telephone %}
+                        <a href="tel:{{ formateur.user.telephone }}" class="btn btn-success btn-lg">
+                            <i class="bi bi-telephone-fill me-2"></i>Appeler
+                        </a>
+                        {% endif %}
+                        {% if formateur.linkedin %}
+                        <a href="{{ formateur.linkedin }}" target="_blank" class="btn btn-info btn-lg">
+                            <i class="bi bi-linkedin me-2"></i>Voir LinkedIn
+                        </a>
+                        {% endif %}
+                        {% if formateur.portfolio %}
+                        <a href="{{ formateur.portfolio }}" target="_blank" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-globe me-2"></i>Voir Portfolio
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+<style>
+    /* Styles personnalisés */
+    .info-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
+    }
+    
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        font-weight: 600;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.45em 0.85em;
+        color:white;
+    }
+    
+    .btn {
+        transition: all 0.3s ease !important;
+        border-radius: 8px !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    /* Effets hover sur les badges */
+    .badge:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s ease;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .info-item {
+            padding: 8px 0;
+        }
+        
+        .card-header h5 {
+            font-size: 1rem;
+        }
+        
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+        }
+    }
+</style>
 {% endblock %}
