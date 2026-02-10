@@ -72,9 +72,6 @@ class FormateurAdminType extends AbstractType
             ->add('cv', TextType::class, [
                 'required' => false,
             ])
-            ->add('isVerifie', CheckboxType::class, [
-                'required' => false,
-            ])
             ->add('plainPassword', PasswordType::class, [
                 'mapped' => false,
                 'required' => !$options['is_edit'],
