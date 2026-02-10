@@ -176,7 +176,7 @@
                                     </div>
                                 </div>
 
-                                <form method="post" action="{{ path('boutique_commander') }}">
+                                <form method="post" action="{{ path('payment_cart_checkout') }}">
                                     <input type="hidden" name="_token" value="{{ csrf_token('place_order') }}">
                                     <button type="submit" 
                                             class="tera-checkout-btn w-100"

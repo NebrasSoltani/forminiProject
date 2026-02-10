@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>Modifier formateur</h1>
+
+{{ form_start(form) }}
+{{ form_widget(form) }}
+<button>Modifier</button>
+{{ form_end(form) }}
+
+<a href="{{ path('admin_formateur_index') }}">⬅️ Retour</a>
+{% endblock %}

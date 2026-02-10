@@ -160,19 +160,39 @@
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <a href="{{ path('admin_evenement_single_pdf', {id: evenement.id}) }}" 
-                                                   class="btn btn-sm btn-danger" title="Export PDF">
-                                                    <i class="mdi mdi-file-pdf"></i>
-                                                </a>
-                                                <a href="{{ path('admin_evenement_edit', {id: evenement.id}) }}" class="btn btn-sm btn-primary">
-                                                    <i class="mdi mdi-pencil"></i>
-                                                </a>
-                                                <form method="post" action="{{ path('admin_evenement_delete', {id: evenement.id}) }}" style="display: inline-block;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet événement ?');">
-                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
-                                                    <button type="submit" class="btn btn-sm btn-danger">
-                                                        <i class="mdi mdi-delete"></i>
-                                                    </button>
-                                                </form>
+                                                <div class="btn-group btn-group-sm" role="group">
+                                                    {# Bouton PDF #}
+                                                    <a href="{{ path('admin_evenement_single_pdf', {id: evenement.id}) }}" 
+                                                       class="btn btn-outline-danger" 
+                                                       title="Exporter en PDF">
+                                                        <i class="fas fa-file-pdf"></i>
+                                                    </a>
+                                                    
+                                                    {# Bouton Participants #}
+                                                    <a href="{{ path('admin_evenement_participants', {id: evenement.id}) }}" 
+                                                       class="btn btn-outline-info" 
+                                                       title="Voir les participants">
+                                                        <i class="fas fa-users"></i>
+                                                    </a>
+
+                                                    {# Bouton Modifier #}
+                                                    <a href="{{ path('admin_evenement_edit', {id: evenement.id}) }}" 
+                                                       class="btn btn-outline-primary" 
+                                                       title="Modifier">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+
+                                                    {# Bouton Supprimer avec formulaire #}
+                                                    <form method="post" 
+                                                          action="{{ path('admin_evenement_delete', {'id': evenement.id}) }}" 
+                                                          style="display:inline;"
+                                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer l\'événement « {{ evenement.titre|escape('js') }} » ?');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ evenement.id) }}">
+                                                        <button type="submit" class="btn btn-outline-danger" title="Supprimer">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     {% else %}

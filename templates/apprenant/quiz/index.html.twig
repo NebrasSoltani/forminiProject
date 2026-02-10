@@ -43,8 +43,8 @@
         <div class="card-body">
             <h5>📚 Progression des leçons</h5>
             <div class="progress mb-2" style="height: 25px;">
-                <div class="progress-bar {% if toutesLeconsTerminees %}bg-success{% endif %}" 
-                     role="progressbar" 
+                <div class="progress-bar {% if toutesLeconsTerminees %}bg-success{% endif %}"
+                     role="progressbar"
                      style="width: {{ totalLecons > 0 ? (leconsTerminees / totalLecons * 100)|round : 0 }}%">
                     {{ leconsTerminees }} / {{ totalLecons }} leçons terminées
                 </div>
@@ -81,7 +81,7 @@
                         {% if quiz.description %}
                             <p class="card-text text-muted">{{ quiz.description }}</p>
                         {% endif %}
-                        
+
                         <ul class="list-unstyled mb-3">
                             <li><strong>⏱️ Durée :</strong> {{ quiz.duree }} minutes</li>
                             <li><strong>❓ Questions :</strong> {{ quiz.questions|length }}</li>
@@ -89,7 +89,7 @@
                         </ul>
 
                         {% if toutesLeconsTerminees %}
-                            <a href="{{ path('apprenant_quiz_passer', {'formationId': formation.id, 'quizId': quiz.id}) }}" 
+                            <a href="{{ path('apprenant_quiz_passer', {'formationId': formation.id, 'quizId': quiz.id}) }}"
                                class="btn btn-primary w-100">
                                 🎯 Passer le quiz
                             </a>

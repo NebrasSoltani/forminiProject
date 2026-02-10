@@ -8,27 +8,44 @@ use App\Form\EvenementType;
 use App\Repository\EvenementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Dompdf\Dompdf;
-use Dompdf\Options; // Cette ligne était manquante
+use Dompdf\Options;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use App\Entity\ParticipationEvenement;
+use App\Entity\Blog; // <-- AJOUTEZ CETTE LIGNE
+
 
 #[Route('/admin/evenement')]
 class EvenementController extends AbstractController
 {
-    #[Route('/', name: 'admin_evenement_index')]
-    public function index(Request $request, EvenementRepository $evenementRepository): Response
+    #[Route('/participation/{id}/ticket', name: 'admin_participation_ticket')]
+    public function ticket(ParticipationEvenement $participation): Response
     {
-        // Vérifier que l'utilisateur est admin
         $user = $this->getUser();
         if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
             $this->addFlash('error', 'Accès réservé aux administrateurs.');
             return $this->redirectToRoute('accueil');
         }
 
-        // Récupération des paramètres de recherche et tri
+        return $this->render('admin/evenement/ticket.html.twig', [
+            'participation' => $participation,
+            'evenement' => $participation->getEvenement(),
+            'user' => $participation->getUser(),
+        ]);
+    }
+
+    #[Route('/', name: 'admin_evenement_index')]
+    public function index(Request $request, EvenementRepository $evenementRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
+            $this->addFlash('error', 'Accès réservé aux administrateurs.');
+            return $this->redirectToRoute('accueil');
+        }
+
         $searchTerm = $request->query->get('search');
         $type = $request->query->get('type');
         $statut = $request->query->get('statut');
@@ -43,7 +60,6 @@ class EvenementController extends AbstractController
             $sortOrder
         );
 
-        // Types disponibles pour le filtre
         $typesDisponibles = [
             'Conférence', 'Atelier', 'Webinaire', 'Formation', 
             'Networking', 'Séminaire', 'Hackathon', 'Autre'
@@ -87,7 +103,6 @@ class EvenementController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-        // Récupérer les mêmes filtres que l'index
         $searchTerm = $request->query->get('search');
         $type = $request->query->get('type');
         $statut = $request->query->get('statut');
@@ -104,14 +119,12 @@ class EvenementController extends AbstractController
 
         $stats = $evenementRepository->getStatistiques();
 
-        // Configuration de Dompdf
         $pdfOptions = new Options();
         $pdfOptions->set('defaultFont', 'Arial');
         $pdfOptions->set('isRemoteEnabled', true);
         
         $dompdf = new Dompdf($pdfOptions);
         
-        // Générer le HTML
         $html = $this->renderView('admin/evenement/pdf.html.twig', [
             'evenements' => $evenements,
             'stats' => $stats,
@@ -166,20 +179,36 @@ class EvenementController extends AbstractController
         );
     }
 
+    
     #[Route('/new', name: 'admin_evenement_new')]
-    public function new(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
-    {
-        $user = $this->getUser();
-        if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
-            $this->addFlash('error', 'Accès réservé aux administrateurs.');
-            return $this->redirectToRoute('accueil');
+public function new(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
+{
+    $user = $this->getUser();
+    if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
+        $this->addFlash('error', 'Accès réservé aux administrateurs.');
+        return $this->redirectToRoute('accueil');
+    }
+
+    $evenement = new Evenement();
+    // ✅ DÉFINIR L'ORGANISATEUR AVANT LA CRÉATION DU FORMULAIRE
+    $evenement->setOrganisateur($user);
+    
+    $form = $this->createForm(EvenementType::class, $evenement);
+    
+    $form->handleRequest($request);
+
+    if ($form->isSubmitted()) {
+        // Afficher les erreurs de validation
+        if (!$form->isValid()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
-
-        $evenement = new Evenement();
-        $form = $this->createForm(EvenementType::class, $evenement);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        
+        if ($form->isValid()) {
+            // L'organisateur est déjà défini plus haut
+            
+            // Gestion de l'image
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
                 $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
@@ -187,29 +216,38 @@ class EvenementController extends AbstractController
                 $newFilename = $safeFilename.'-'.uniqid().'.'.$imageFile->guessExtension();
 
                 try {
-                    $imageFile->move(
-                        $this->getParameter('kernel.project_dir').'/public/uploads/evenements',
-                        $newFilename
-                    );
+                    // Créer le dossier s'il n'existe pas
+                    $uploadDir = $this->getParameter('kernel.project_dir').'/public/uploads/evenements';
+                    if (!file_exists($uploadDir)) {
+                        mkdir($uploadDir, 0777, true);
+                    }
+                    
+                    $imageFile->move($uploadDir, $newFilename);
                     $evenement->setImage($newFilename);
                 } catch (\Exception $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image.');
+                    $this->addFlash('error', 'Erreur lors de l\'upload de l\'image : ' . $e->getMessage());
+                    return $this->render('admin/evenement/new.html.twig', [
+                        'form' => $form->createView(),
+                    ]);
                 }
             }
-
-            $evenement->setOrganisateur($user);
-            $em->persist($evenement);
-            $em->flush();
-
-            $this->addFlash('success', 'Événement créé avec succès !');
-            return $this->redirectToRoute('admin_evenement_index');
+            
+            try {
+                $em->persist($evenement);
+                $em->flush();
+                
+                $this->addFlash('success', 'Événement créé avec succès !');
+                return $this->redirectToRoute('admin_evenement_index');
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Erreur lors de la création de l\'événement : ' . $e->getMessage());
+            }
         }
-
-        return $this->render('admin/evenement/new.html.twig', [
-            'form' => $form->createView(),
-        ]);
     }
 
+    return $this->render('admin/evenement/new.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
     #[Route('/{id}/edit', name: 'admin_evenement_edit')]
     public function edit(Request $request, Evenement $evenement, EntityManagerInterface $em, SluggerInterface $slugger): Response
     {
@@ -218,10 +256,11 @@ class EvenementController extends AbstractController
             $this->addFlash('error', 'Accès réservé aux administrateurs.');
             return $this->redirectToRoute('accueil');
         }
-
+    
         $form = $this->createForm(EvenementType::class, $evenement);
+        
         $form->handleRequest($request);
-
+    
         if ($form->isSubmitted() && $form->isValid()) {
             $imageFile = $form->get('image')->getData();
             if ($imageFile) {
@@ -252,7 +291,7 @@ class EvenementController extends AbstractController
             $this->addFlash('success', 'Événement modifié avec succès !');
             return $this->redirectToRoute('admin_evenement_index');
         }
-
+    
         return $this->render('admin/evenement/edit.html.twig', [
             'form' => $form->createView(),
             'evenement' => $evenement,
@@ -260,7 +299,46 @@ class EvenementController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'admin_evenement_delete', methods: ['POST'])]
-    public function delete(Request $request, Evenement $evenement, EntityManagerInterface $em): Response
+    public function delete(
+        Request $request, 
+        Evenement $evenement, 
+        EntityManagerInterface $entityManager
+    ): Response
+    {
+        // Vérification des droits d'accès
+        $user = $this->getUser();
+        if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
+            $this->addFlash('error', 'Accès réservé aux administrateurs.');
+            return $this->redirectToRoute('accueil');
+        }
+        
+        // Vérification du token CSRF
+        if ($this->isCsrfTokenValid('delete'.$evenement->getId(), $request->request->get('_token'))) {
+            // IMPORTANT : Ajoutez cet import en haut de votre fichier
+            // use App\Entity\Blog;
+            
+            // Supprimer d'abord les articles de blog liés
+            $blogPosts = $entityManager->getRepository(Blog::class)
+                ->findBy(['evenement' => $evenement]);
+                
+            foreach ($blogPosts as $blogPost) {
+                $entityManager->remove($blogPost);
+            }
+            
+            // Supprimer l'événement
+            $entityManager->remove($evenement);
+            $entityManager->flush();
+            
+            $this->addFlash('success', 'Événement supprimé avec succès');
+        } else {
+            $this->addFlash('error', 'Token CSRF invalide.');
+        }
+        
+        return $this->redirectToRoute('admin_evenement_index');
+    }
+
+    #[Route('/{id}/participants', name: 'admin_evenement_participants')]
+    public function participants(Evenement $evenement): Response
     {
         $user = $this->getUser();
         if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
@@ -268,19 +346,9 @@ class EvenementController extends AbstractController
             return $this->redirectToRoute('accueil');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$evenement->getId(), $request->request->get('_token'))) {
-            if ($evenement->getImage()) {
-                $imagePath = $this->getParameter('kernel.project_dir').'/public/uploads/evenements/'.$evenement->getImage();
-                if (file_exists($imagePath)) {
-                    unlink($imagePath);
-                }
-            }
-
-            $em->remove($evenement);
-            $em->flush();
-            $this->addFlash('success', 'Événement supprimé avec succès !');
-        }
-
-        return $this->redirectToRoute('admin_evenement_index');
+        return $this->render('admin/evenement/participants.html.twig', [
+            'evenement' => $evenement,
+            'participations' => $evenement->getParticipations(),
+        ]);
     }
 }
