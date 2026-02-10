@@ -2,162 +2,822 @@
 
 {% block title %}{{ offre.id ? 'Modifier' : 'Nouvelle' }} Offre{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .page-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+        }
+
+        .form-header {
+            background: var(--primary-gradient);
+            padding: 3rem 2.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .form-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .form-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-header p {
+            margin: 0;
+            opacity: 0.95;
+            font-size: 1.05rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-body {
+            padding: 2.5rem;
+        }
+
+        .form-section {
+            background: var(--gray-50);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .form-section:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .required-star {
+            color: var(--danger-color);
+            margin-left: 4px;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--gray-400);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.6;
+        }
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-400);
+            pointer-events: none;
+        }
+
+        .input-with-icon .form-control {
+            padding-left: 2.75rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0;
+        }
+
+        .input-group .form-control {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .input-group-text {
+            padding: 0.875rem 1rem;
+            background: var(--gray-100);
+            border: 2px solid var(--gray-200);
+            border-left: none;
+            border-top-right-radius: 12px;
+            border-bottom-right-radius: 12px;
+            color: var(--gray-600);
+            font-weight: 500;
+        }
+
+        .form-help {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .form-help i {
+            color: var(--primary-color);
+        }
+
+        /* STYLES POUR LES ERREURS */
+        .form-error-message {
+            color: var(--danger-color);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        .form-error-message i {
+            font-size: 0.9rem;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Champ avec erreur */
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: var(--danger-color) !important;
+            background-color: #fef2f2;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+        }
+
+        .form-control.is-invalid:focus,
+        .form-select.is-invalid:focus {
+            border-color: var(--danger-color) !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15) !important;
+        }
+
+        /* Icône d'erreur dans l'input */
+        .input-error-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--danger-color);
+            pointer-events: none;
+        }
+
+        .has-error {
+            position: relative;
+        }
+
+        /* Erreurs globales du formulaire */
+        .form-errors-global {
+            background: #fef2f2;
+            border: 2px solid var(--danger-color);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 2rem;
+            color: var(--danger-color);
+            font-weight: 500;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .form-errors-global i {
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .form-errors-global ul {
+            margin: 0;
+            padding-left: 1.25rem;
+            list-style: none;
+        }
+
+        .form-errors-global ul li {
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 1.25rem;
+        }
+
+        .form-errors-global ul li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+
+        .form-errors-global ul li:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+
+        .btn i {
+            font-size: 1.1rem;
+        }
+
+        .row {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .row:last-child {
+            margin-bottom: 0;
+        }
+
+        .col-md-4 {
+            flex: 1;
+        }
+
+        .col-md-6 {
+            flex: 1;
+        }
+
+        .col-md-8 {
+            flex: 2;
+        }
+
+        @media (max-width: 768px) {
+            .row {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .form-header {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-body {
+                padding: 1.5rem;
+            }
+
+            .form-section {
+                padding: 1.5rem;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+                gap: 1rem;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .btn.loading i {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="page-wrapper">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-10 col-12 mx-auto">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title mb-4">{{ offre.id ? 'Modifier l\'offre' : 'Nouvelle offre de stage' }}</h4>
-                        
-                        {{ form_start(form) }}
-                        
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    {{ form_label(form.titre) }}
-                                    {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+<div class="page-container">
+    <div class="form-card">
+        <!-- Header -->
+        <div class="form-header">
+            <h1>
+                <i class="fas fa-{{ offre.id ? 'edit' : 'briefcase' }}"></i>
+                {{ offre.id ? 'Modifier l\'offre de stage' : 'Publier une nouvelle offre' }}
+            </h1>
+            <p>{{ offre.id ? 'Actualisez les informations de votre offre de stage' : 'Créez une offre attractive pour trouver le candidat idéal' }}</p>
+        </div>
+
+        <!-- Body -->
+        <div class="form-body">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'offreForm'}}) }}
+
+            {# Erreurs globales du formulaire #}
+            {% if form_errors(form) %}
+                <div class="form-errors-global">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Veuillez corriger les erreurs suivantes :</strong>
+                        {{ form_errors(form) }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Section 1: Informations générales -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <h2 class="section-title">Informations générales</h2>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Titre du stage<span class="required-star">*</span>
+                            </label>
+                            <div class="has-error">
+                                {{ form_widget(form.titre, {'attr': {'class': form_errors(form.titre) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'Ex: Développeur Full Stack'}}) }}
+                                {% if form_errors(form.titre) %}
+                                    <i class="fas fa-exclamation-circle input-error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if form_errors(form.titre) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.titre) }}
                                 </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Entreprise<span class="required-star">*</span>
+                            </label>
+                            <div class="has-error">
+                                {{ form_widget(form.entreprise, {'attr': {'class': form_errors(form.entreprise) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'Nom de votre entreprise'}}) }}
+                                {% if form_errors(form.entreprise) %}
+                                    <i class="fas fa-exclamation-circle input-error-icon"></i>
+                                {% endif %}
                             </div>
-                            
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form_label(form.entreprise) }}
-                                    {{ form_widget(form.entreprise, {'attr': {'class': 'form-control'}}) }}
+                            {% if form_errors(form.entreprise) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.entreprise) }}
                                 </div>
-                            </div>
+                            {% endif %}
                         </div>
-                        
-                        <div class="mb-3">
-                            {{ form_label(form.description) }}
-                            {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Description<span class="required-star">*</span>
+                    </label>
+                    {{ form_widget(form.description, {'attr': {'class': form_errors(form.description) ? 'form-control is-invalid' : 'form-control', 'rows': '6', 'placeholder': 'Décrivez les missions, l\'environnement de travail et les objectifs du stage...'}}) }}
+                    {% if form_errors(form.description) %}
+                        <div class="form-error-message">
+                            <i class="fas fa-times-circle"></i>
                             {{ form_errors(form.description) }}
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.domaine) }}
-                                    {{ form_widget(form.domaine, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.domaine) }}
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.profilDemande) }}
-                                    {{ form_widget(form.profilDemande, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.profilDemande) }}
-                                </div>
-                            </div>
+                    {% else %}
+                        <div class="form-help">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>Soyez précis et attractif pour attirer les meilleurs talents</span>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form_label(form.typeStage) }}
-                                    {{ form_widget(form.typeStage, {'attr': {'class': 'form-select'}}) }}
-                                    {{ form_errors(form.typeStage) }}
-                                </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Section 2: Détails du stage -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h2 class="section-title">Détails du stage</h2>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Durée<span class="required-star">*</span>
+                            </label>
+                            <div class="has-error">
+                                {{ form_widget(form.duree, {'attr': {'class': form_errors(form.duree) ? 'form-control is-invalid' : 'form-control', 'placeholder': '3 mois'}}) }}
+                                {% if form_errors(form.duree) %}
+                                    <i class="fas fa-exclamation-circle input-error-icon"></i>
+                                {% endif %}
                             </div>
-                            
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form_label(form.duree) }}
-                                    {{ form_widget(form.duree, {'attr': {'class': 'form-control'}}) }}
+                            {% if form_errors(form.duree) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.duree) }}
                                 </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Type de stage<span class="required-star">*</span>
+                            </label>
+                            {{ form_widget(form.typeStage, {'attr': {'class': form_errors(form.typeStage) ? 'form-select is-invalid' : 'form-select'}}) }}
+                            {% if form_errors(form.typeStage) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form_errors(form.typeStage) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Lieu<span class="required-star">*</span>
+                            </label>
+                            <div class="has-error">
+                                {{ form_widget(form.lieu, {'attr': {'class': form_errors(form.lieu) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'Paris, France'}}) }}
+                                {% if form_errors(form.lieu) %}
+                                    <i class="fas fa-exclamation-circle input-error-icon"></i>
+                                {% endif %}
                             </div>
-                            
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form_label(form.lieu) }}
-                                    {{ form_widget(form.lieu, {'attr': {'class': 'form-control'}}) }}
+                            {% if form_errors(form.lieu) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.lieu) }}
                                 </div>
-                            </div>
+                            {% endif %}
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form_label(form.dateDebut) }}
-                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Date de début<span class="required-star">*</span>
+                            </label>
+                            {{ form_widget(form.dateDebut, {'attr': {'class': form_errors(form.dateDebut) ? 'form-control is-invalid' : 'form-control', 'type': 'date'}}) }}
+                            {% if form_errors(form.dateDebut) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.dateDebut) }}
                                 </div>
-                            </div>
-                            
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form_label(form.dateFin) }}
-                                    {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Date de fin
+                            </label>
+                            {{ form_widget(form.dateFin, {'attr': {'class': form_errors(form.dateFin) ? 'form-control is-invalid' : 'form-control', 'type': 'date'}}) }}
+                            {% if form_errors(form.dateFin) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.dateFin) }}
                                 </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Rémunération
+                            </label>
+                            <div class="input-group">
+                                {{ form_widget(form.remuneration, {'attr': {'class': form_errors(form.remuneration) ? 'form-control is-invalid' : 'form-control', 'placeholder': '600'}}) }}
+                                <span class="input-group-text">€ / mois</span>
                             </div>
-                            
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form_label(form.remuneration) }}
-                                    {{ form_widget(form.remuneration, {'attr': {'class': 'form-control'}}) }}
+                            {% if form_errors(form.remuneration) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.remuneration) }}
                                 </div>
-                            </div>
+                            {% endif %}
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-8">
-                                <div class="mb-3">
-                                    {{ form_label(form.competencesRequises) }}
-                                    {{ form_widget(form.competencesRequises, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.competencesRequises) }}
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-4">
-                                <div class="mb-3">
-                                    {{ form_label(form.statut) }}
-                                    {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
-                                    {{ form_errors(form.statut) }}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <h5 class="mt-4 mb-3">Informations de contact</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.contactEmail) }}
-                                    {{ form_widget(form.contactEmail, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.contactEmail) }}
-                                </div>
-                            </div>
-                            
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ form_label(form.contactTel) }}
-                                    {{ form_widget(form.contactTel, {'attr': {'class': 'form-control'}}) }}
-                                    {{ form_errors(form.contactTel) }}
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{{ path('societe_offres_index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Retour
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save"></i> {{ offre.id ? 'Mettre à jour' : 'Publier' }}
-                            </button>
-                        </div>
-                        
-                        {{ form_end(form) }}
                     </div>
                 </div>
             </div>
+
+            <!-- Section 3: Compétences -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h2 class="section-title">Compétences & Profil</h2>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Compétences requises
+                            </label>
+                            {{ form_widget(form.competencesRequises, {'attr': {'class': form_errors(form.competencesRequises) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'PHP, Symfony, MySQL, Git, JavaScript...'}}) }}
+                            {% if form_errors(form.competencesRequises) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form_errors(form.competencesRequises) }}
+                                </div>
+                            {% else %}
+                                <div class="form-help">
+                                    <i class="fas fa-tag"></i>
+                                    <span>Séparez les compétences par des virgules</span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Statut<span class="required-star">*</span>
+                            </label>
+                            {{ form_widget(form.statut, {'attr': {'class': form_errors(form.statut) ? 'form-select is-invalid' : 'form-select'}}) }}
+                            {% if form_errors(form.statut) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form_errors(form.statut) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                {% if form.domaine is defined %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Domaine
+                            </label>
+                            <div class="has-error">
+                                {{ form_widget(form.domaine, {'attr': {'class': form_errors(form.domaine) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'Ex: Informatique, Marketing, Finance'}}) }}
+                                {% if form_errors(form.domaine) %}
+                                    <i class="fas fa-exclamation-circle input-error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if form_errors(form.domaine) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form_errors(form.domaine) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Profil demandé
+                            </label>
+                            <div class="has-error">
+                                {{ form_widget(form.profilDemande, {'attr': {'class': form_errors(form.profilDemande) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'Ex: Étudiant en Master 2 Informatique'}}) }}
+                                {% if form_errors(form.profilDemande) %}
+                                    <i class="fas fa-exclamation-circle input-error-icon"></i>
+                                {% endif %}
+                            </div>
+                            {% if form_errors(form.profilDemande) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form_errors(form.profilDemande) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Section 4: Contact -->
+            <div class="form-section">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-address-card"></i>
+                    </div>
+                    <h2 class="section-title">Informations de contact</h2>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Email de contact<span class="required-star">*</span>
+                            </label>
+                            <div class="input-with-icon has-error">
+                                <i class="fas fa-envelope input-icon"></i>
+                                {{ form_widget(form.contactEmail, {'attr': {'class': form_errors(form.contactEmail) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'recrutement@entreprise.com'}}) }}
+                                {% if form_errors(form.contactEmail) %}
+                                    <i class="fas fa-exclamation-circle input-error-icon" style="right: 1rem;"></i>
+                                {% endif %}
+                            </div>
+                            {% if form_errors(form.contactEmail) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form_errors(form.contactEmail) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">
+                                Téléphone de contact
+                            </label>
+                            <div class="input-with-icon has-error">
+                                <i class="fas fa-phone input-icon"></i>
+                                {{ form_widget(form.contactTel, {'attr': {'class': form_errors(form.contactTel) ? 'form-control is-invalid' : 'form-control', 'placeholder': '+216 XX XXX XXX'}}) }}
+                                {% if form_errors(form.contactTel) %}
+                                    <i class="fas fa-exclamation-circle input-error-icon" style="right: 1rem;"></i>
+                                {% endif %}
+                            </div>
+                            {% if form_errors(form.contactTel) %}
+                                <div class="form-error-message">
+                                    <i class="fas fa-times-circle"></i>
+                                    {{ form_errors(form.contactTel) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions - TOUJOURS À LA FIN -->
+            <div class="form-actions">
+                <a href="{{ path('societe_offres_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Retour à la liste
+                </a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="fas fa-{{ offre.id ? 'save' : 'paper-plane' }}"></i>
+                    {{ offre.id ? 'Enregistrer les modifications' : 'Publier l\'offre' }}
+                </button>
+            </div>
+
+            {{ form_end(form) }}
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('offreForm');
+            const submitBtn = document.getElementById('submitBtn');
+
+            // Animation de soumission
+            form.addEventListener('submit', function(e) {
+                submitBtn.classList.add('loading');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner"></i> Enregistrement en cours...';
+            });
+
+            // Scroll vers la première erreur
+            const firstError = document.querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        });
+    </script>
 {% endblock %}

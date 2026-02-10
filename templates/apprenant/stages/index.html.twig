@@ -4,370 +4,1052 @@
 
 {% block body %}
 <div class="container-fluid px-3 px-md-4 py-4">
-    <!-- En-tête moderne avec gradient -->
+    <!-- En-tête avec animation de particules -->
     <div class="row mb-5">
         <div class="col-12">
-            <div class="text-center py-4">
-                <h1 class="display-4 fw-bold text-dark mb-3">
-                    <i class="bi bi-briefcase-fill me-3" style="color: #667eea;"></i>Offres de Stage
-                </h1>
-                <p class="lead text-muted mb-0">Trouvez votre opportunité professionnelle</p>
+            <div class="hero-header">
+                <div class="particles-bg"></div>
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="pulse-dot"></span>
+                        <span>{{ offres|length }} Nouvelles opportunités</span>
+                    </div>
+                    <h1 class="hero-title">
+                        <span class="gradient-text">Offres de Stage</span>
+                        <div class="title-underline"></div>
+                    </h1>
+                    <p class="hero-subtitle">Découvrez votre prochaine aventure professionnelle</p>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <!-- Section Filtres -->
+        <!-- Section Filtres Améliorés -->
         <div class="col-12 mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0 text-muted">
-                    <span class="badge rounded-pill" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">{{ offres|length }}</span>
-                    offre(s) disponible(s)
-                </h5>
-            </div>
+            <div class="filters-container">
+                <div class="filters-header">
+                    <div class="filter-count">
+                        <div class="count-number">{{ offres|length }}</div>
+                        <div class="count-label">offre(s)</div>
+                    </div>
+                    <div class="search-box">
+                        <i class="bi bi-search"></i>
+                        <input type="text" placeholder="Rechercher une offre..." id="searchInput">
+                    </div>
+                </div>
 
-            <!-- Filtres Pills modernes -->
-            <div class="tera-stage-filters">
-                <a href="{{ path('apprenant_stages_index') }}" 
-                   class="tera-filter-pill {{ typeFilter is null ? 'active' : '' }}">
-                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Toutes
-                </a>
-                <a href="{{ path('apprenant_stages_index', {type: 'stage_observation'}) }}" 
-                   class="tera-filter-pill {{ typeFilter == 'stage_observation' ? 'active' : '' }}">
-                    <i class="bi bi-eye-fill me-2"></i>Stage observation
-                </a>
-                <a href="{{ path('apprenant_stages_index', {type: 'stage_application'}) }}" 
-                   class="tera-filter-pill {{ typeFilter == 'stage_application' ? 'active' : '' }}">
-                    <i class="bi bi-code-square me-2"></i>Stage application
-                </a>
-                <a href="{{ path('apprenant_stages_index', {type: 'stage_perfectionnement'}) }}" 
-                   class="tera-filter-pill {{ typeFilter == 'stage_perfectionnement' ? 'active' : '' }}">
-                    <i class="bi bi-star-fill me-2"></i>Stage perfectionnement
-                </a>
-                <a href="{{ path('apprenant_stages_index', {type: 'pfe'}) }}" 
-                   class="tera-filter-pill {{ typeFilter == 'pfe' ? 'active' : '' }}">
-                    <i class="bi bi-mortarboard-fill me-2"></i>PFE
-                </a>
-            </div>
-        </div>
-
-        <!-- Liste des offres -->
-        <div class="col-12">
-    {% if offres is empty %}
-        <div class="text-center py-5">
-            <div class="tera-empty-state">
-                <i class="bi bi-inbox display-1 mb-4"></i>
-                <h4 class="mb-3">Aucune offre disponible</h4>
-                <p class="text-muted mb-0">Revenez plus tard pour découvrir de nouvelles opportunités</p>
-            </div>
-        </div>
-    {% else %}
-        <div class="row g-4">
-            {% for offre in offres %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="job-card h-100">
-
-                        <!-- Top: logo + title -->
-                        <div class="job-card-top">
-                            <div class="job-logo">
-                                {# Si tu as un logo: <img src="{{ asset('uploads/' ~ offre.logo) }}" alt="logo"> #}
-                                <i class="bi bi-building"></i>
-                            </div>
-
-                            <div class="job-head">
-                                <h5 class="job-title mb-1">{{ offre.titre }}</h5>
-                                <div class="job-company">{{ offre.entreprise }}</div>
-                            </div>
+                <!-- Filtres Pills Ultra-Modernes -->
+                <div class="modern-filters">
+                    <a href="{{ path('apprenant_stages_index') }}" 
+                       class="filter-chip {{ typeFilter is null ? 'active' : '' }}" data-filter="all">
+                        <div class="chip-icon">
+                            <i class="bi bi-grid-3x3-gap-fill"></i>
                         </div>
+                        <span>Toutes</span>
+                        <div class="chip-glow"></div>
+                    </a>
+                    <a href="{{ path('apprenant_stages_index', {type: 'stage_observation'}) }}" 
+                       class="filter-chip {{ typeFilter == 'stage_observation' ? 'active' : '' }}" data-filter="observation">
+                        <div class="chip-icon">
+                            <i class="bi bi-eye-fill"></i>
+                        </div>
+                        <span>Observation</span>
+                        <div class="chip-glow"></div>
+                    </a>
+                    <a href="{{ path('apprenant_stages_index', {type: 'stage_application'}) }}" 
+                       class="filter-chip {{ typeFilter == 'stage_application' ? 'active' : '' }}" data-filter="application">
+                        <div class="chip-icon">
+                            <i class="bi bi-code-square"></i>
+                        </div>
+                        <span>Application</span>
+                        <div class="chip-glow"></div>
+                    </a>
+                    <a href="{{ path('apprenant_stages_index', {type: 'stage_perfectionnement'}) }}" 
+                       class="filter-chip {{ typeFilter == 'stage_perfectionnement' ? 'active' : '' }}" data-filter="perfectionnement">
+                        <div class="chip-icon">
+                            <i class="bi bi-star-fill"></i>
+                        </div>
+                        <span>Perfectionnement</span>
+                        <div class="chip-glow"></div>
+                    </a>
+                    <a href="{{ path('apprenant_stages_index', {type: 'pfe'}) }}" 
+                       class="filter-chip {{ typeFilter == 'pfe' ? 'active' : '' }}" data-filter="pfe">
+                        <div class="chip-icon">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <span>PFE</span>
+                        <div class="chip-glow"></div>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-                        <!-- Description du poste -->
-                        {% if offre.description %}
-                            <div class="job-description">
-                                <div class="job-section-title">Description du poste</div>
-                                <p class="job-desc-text">
-                                    {{ offre.description|length > 150 ? offre.description|slice(0, 150) ~ '...' : offre.description }}
-                                </p>
-                            </div>
-                        {% endif %}
+        <!-- Liste des offres avec design révolutionnaire -->
+        <div class="col-12">
+            {% if offres is empty %}
+                <div class="empty-state">
+                    <div class="empty-animation">
+                        <div class="empty-circle"></div>
+                        <div class="empty-circle"></div>
+                        <div class="empty-circle"></div>
+                    </div>
+                    <i class="bi bi-inbox empty-icon"></i>
+                    <h4 class="empty-title">Aucune offre disponible</h4>
+                    <p class="empty-text">Revenez plus tard pour découvrir de nouvelles opportunités</p>
+                </div>
+            {% else %}
+                <div class="row g-4 offers-grid">
+                    {% for offre in offres %}
+                        <div class="col-lg-4 col-md-6">
+                            <div class="premium-card" data-card-index="{{ loop.index }}">
+                                <div class="card-background"></div>
+                                <div class="card-shine"></div>
+                                
+                                <!-- Badge Type -->
+                                <div class="card-badge">
+                                    <span class="badge-dot"></span>
+                                    {{ offre.typeStage ? offre.typeStage|replace({'_': ' '})|title : 'Stage' }}
+                                </div>
 
-                        <!-- Info grid -->
-                        <div class="job-grid">
-                            <div class="job-item">
-                                <div class="job-label">Domaine</div>
-                                <div class="job-value">{{ offre.domaine ?? '—' }}</div>
-                            </div>
+                                <!-- Header -->
+                                <div class="card-header-modern">
+                                    <div class="company-logo">
+                                        <div class="logo-ring"></div>
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                    <div class="card-title-area">
+                                        <h5 class="card-title-modern">{{ offre.titre }}</h5>
+                                        <div class="company-name">
+                                            <i class="bi bi-briefcase"></i>
+                                            {{ offre.entreprise }}
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div class="job-item">
-                                <div class="job-label">Type de stage</div>
-                                <div class="job-value">{{ offre.typeStage ? offre.typeStage|replace({'_': ' '})|title : '—' }}</div>
-                            </div>
+                                <!-- Description -->
+                                {% if offre.description %}
+                                    <div class="card-description">
+                                        <p>{{ offre.description|length > 120 ? offre.description|slice(0, 120) ~ '...' : offre.description }}</p>
+                                    </div>
+                                {% endif %}
 
-                            <div class="job-item">
-                                <div class="job-label">Lieu</div>
-                                <div class="job-value">{{ offre.lieu ?? '—' }}</div>
-                            </div>
+                                <!-- Info Tags -->
+                                <div class="info-tags">
+                                    <div class="info-tag">
+                                        <i class="bi bi-geo-alt-fill"></i>
+                                        <span>{{ offre.lieu ?? 'Non spécifié' }}</span>
+                                    </div>
+                                    <div class="info-tag">
+                                        <i class="bi bi-diagram-3-fill"></i>
+                                        <span>{{ offre.domaine ?? 'Divers' }}</span>
+                                    </div>
+                                </div>
 
-                            <div class="job-item">
-                                <div class="job-label">Profil demandé</div>
-                                <div class="job-value">
-                                    {{ offre.profilDemande ? offre.profilDemande : '—' }}
+                                <!-- Stats Bar -->
+                                <div class="stats-bar">
+                                    <div class="stat-item">
+                                        <i class="bi bi-person-badge"></i>
+                                        <span class="stat-label">Profil</span>
+                                        <span class="stat-value">{{ offre.profilDemande ? offre.profilDemande : 'Ouvert' }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="card-footer-modern">
+                                    <div class="publish-date">
+                                        <i class="bi bi-calendar-check"></i>
+                                        {{ offre.datePublication ? offre.datePublication|date('d M Y') : 'Récent' }}
+                                    </div>
+                                    <a href="{{ path('apprenant_stage_show', {id: offre.id}) }}" class="apply-btn">
+                                        <span>Postuler</span>
+                                        <i class="bi bi-arrow-right-circle-fill"></i>
+                                        <div class="btn-glow"></div>
+                                    </a>
+                                </div>
+
+                                <!-- Hover Particles -->
+                                <div class="card-particles">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Published -->
-                        <div class="job-published">
-                            <i class="bi bi-calendar3"></i>
-                            Publié : {{ offre.datePublication ? offre.datePublication|date('d/m/Y') : '—' }}
-                        </div>
-
-                        <!-- CTA -->
-                        <div class="job-cta">
-                            <a href="{{ path('apprenant_stage_show', {id: offre.id}) }}" class="job-btn">
-                                <i class="bi bi-rocket-takeoff me-2"></i> Postuler
-                            </a>
-                        </div>
-
-                    </div>
+                    {% endfor %}
                 </div>
-            {% endfor %}
+            {% endif %}
         </div>
-    {% endif %}
-</div>
-
     </div>
 </div>
 
 <style>
-.job-card{
-  background:#fff;
-  border-radius:22px;
-  border:1px solid #eef2f7;
-  box-shadow:0 10px 30px rgba(15, 23, 42, .06);
-  padding:18px;
-  transition:.25s ease;
+:root {
+    --primary: #667eea;
+    --primary-dark: #5568d3;
+    --secondary: #764ba2;
+    --accent: #f093fb;
+    --dark: #0f172a;
+    --gray: #64748b;
+    --light: #f8fafc;
+    --success: #10b981;
+    --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 16px 48px rgba(15, 23, 42, 0.12);
+    --shadow-xl: 0 24px 64px rgba(15, 23, 42, 0.16);
 }
 
-.job-card:hover{
-  transform: translateY(-4px);
-  box-shadow:0 16px 40px rgba(15, 23, 42, .10);
+/* Hero Header Ultra-Moderne */
+.hero-header {
+    position: relative;
+    padding: 80px 40px;
+    border-radius: 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
 }
 
-.job-card-top{
-  display:flex;
-  gap:14px;
-  align-items:center;
-  margin-bottom:14px;
+.particles-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    animation: particlesFloat 20s ease-in-out infinite;
 }
 
-.job-logo{
-  width:54px;
-  height:54px;
-  border-radius:14px;
-  background:#f4f7ff;
-  border:1px solid #e8eeff;
-  display:grid;
-  place-items:center;
-  flex:0 0 auto;
+@keyframes particlesFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.1); }
+    66% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
-.job-logo i{
-  font-size:22px;
-  color:#2f5bff;
+.hero-content {
+    position: relative;
+    text-align: center;
+    z-index: 2;
 }
 
-.job-head .job-title{
-  font-weight:800;
-  font-size:1.05rem;
-  color:#0f172a;
-  line-height:1.2;
-}
-
-.job-company{
-  color:#64748b;
-  font-weight:600;
-  font-size:.95rem;
-}
-
-/* Description du poste */
-.job-description{
-  margin-bottom:14px;
-}
-
-.job-desc-text{
-  font-size:.90rem;
-  color:#64748b;
-  line-height:1.6;
-  margin-bottom:0;
-}
-
-/* Grid infos (2 colonnes) */
-.job-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:12px 14px;
-  margin-top:10px;
-  margin-bottom:14px;
-}
-
-.job-item{
-  background:#f8fafc;
-  border:1px solid #eef2f7;
-  border-radius:14px;
-  padding:10px 12px;
-}
-
-.job-label{
-  font-size:.78rem;
-  color:#94a3b8;
-  font-weight:700;
-  margin-bottom:2px;
-}
-
-.job-value{
-  font-size:.95rem;
-  color:#0f172a;
-  font-weight:800;
-}
-
-/* Skills */
-.job-section-title{
-  font-weight:800;
-  color:#0f172a;
-  margin:6px 0 10px;
-}
-
-.job-skills{
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-bottom:12px;
-}
-
-.job-pill{
-  background:#eaf1ff;
-  color:#2563eb;
-  border:1px solid #dbe7ff;
-  padding:7px 12px;
-  border-radius:999px;
-  font-weight:800;
-  font-size:.82rem;
-  line-height:1;
-  white-space:nowrap;
-}
-
-.job-pill-more{
-  background:#f1f5f9;
-  color:#0f172a;
-  border-color:#e2e8f0;
-}
-
-/* Published */
-.job-published{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  color:#94a3b8;
-  font-weight:700;
-  font-size:.85rem;
-  margin:10px 0 14px;
-}
-
-.job-published i{
-  font-size:1rem;
-}
-
-/* CTA Button */
-.job-cta{
-  display:flex;
-  justify-content:center;
-}
-
-.job-btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  max-width:260px;
-  padding:12px 16px;
-  border-radius:14px;
-  background:#2f5bff;
-  color:#fff;
-  font-weight:900;
-  text-decoration:none;
-  box-shadow:0 10px 22px rgba(47, 91, 255, .25);
-  transition:.2s ease;
-}
-
-.job-btn:hover{
-  background:#2449d6;
-  transform: translateY(-1px);
-  color:#fff;
-}
-
-/* Responsive */
-@media (max-width: 420px){
-  .job-grid{ grid-template-columns: 1fr; }
-}
-
-/* FILTRES STYLES */
-.tera-stage-filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 20px;
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
-}
-
-.tera-filter-pill {
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     padding: 12px 24px;
-    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
     font-weight: 700;
     font-size: 14px;
-    color: #64748b;
-    background: #f8fafc;
+    margin-bottom: 24px;
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    position: relative;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.pulse-dot::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulseRing 2s ease-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes pulseRing {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
+.hero-title {
+    margin-bottom: 16px;
+}
+
+.gradient-text {
+    font-size: 3.5rem;
+    font-weight: 900;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    position: relative;
+    animation: titleFloat 3s ease-in-out infinite;
+}
+
+@keyframes titleFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.title-underline {
+    height: 6px;
+    width: 120px;
+    background: linear-gradient(90deg, transparent, white, transparent);
+    margin: 16px auto 0;
+    border-radius: 3px;
+    animation: underlineGlow 2s ease-in-out infinite;
+}
+
+@keyframes underlineGlow {
+    0%, 100% { opacity: 0.5; transform: scaleX(1); }
+    50% { opacity: 1; transform: scaleX(1.2); }
+}
+
+.hero-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Filters Container Ultra-Moderne */
+.filters-container {
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid rgba(102, 126, 234, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.filters-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    background-size: 200% 100%;
+    animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.filter-count {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.count-number {
+    font-size: 2rem;
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+}
+
+.count-label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: 0.875rem;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: var(--light);
+    border-radius: 16px;
     border: 2px solid transparent;
-    text-decoration: none;
     transition: all 0.3s ease;
+    flex: 1;
+    max-width: 400px;
+}
+
+.search-box:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    background: white;
+}
+
+.search-box i {
+    color: var(--gray);
+    font-size: 1.25rem;
+}
+
+.search-box input {
+    border: none;
+    background: transparent;
+    outline: none;
+    flex: 1;
+    font-weight: 600;
+    color: var(--dark);
+    font-size: 1rem;
+}
+
+.search-box input::placeholder {
+    color: var(--gray);
+}
+
+/* Modern Filters */
+.modern-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.filter-chip {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 24px;
+    background: var(--light);
+    border-radius: 16px;
+    border: 2px solid transparent;
+    color: var(--gray);
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
+}
+
+.chip-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 12px;
+    background: white;
+    display: grid;
+    place-items: center;
+    transition: all 0.4s ease;
+}
+
+.chip-icon i {
+    font-size: 1.125rem;
+    transition: all 0.4s ease;
+}
+
+.chip-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(102, 126, 234, 0.3), transparent 70%);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: all 0.4s ease;
+    pointer-events: none;
+}
+
+.filter-chip:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.filter-chip:hover .chip-icon {
+    transform: rotate(10deg) scale(1.1);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+}
+
+.filter-chip:hover .chip-icon i {
+    color: white;
+}
+
+.filter-chip:hover .chip-glow {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 1;
+}
+
+.filter-chip.active {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+}
+
+.filter-chip.active .chip-icon {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.filter-chip.active .chip-icon i {
+    color: white;
+}
+
+/* Premium Card Design */
+.premium-card {
+    position: relative;
+    background: white;
+    border-radius: 24px;
+    padding: 28px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.card-shine {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, 
+        transparent 30%, 
+        rgba(255, 255, 255, 0.3) 50%, 
+        transparent 70%);
+    transform: translateX(-100%) rotate(45deg);
+    transition: transform 0.8s ease;
+}
+
+.premium-card:hover {
+    transform: translateY(-12px);
+    box-shadow: 0 24px 64px rgba(102, 126, 234, 0.15);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.premium-card:hover .card-background {
+    opacity: 1;
+}
+
+.premium-card:hover .card-shine {
+    transform: translateX(100%) rotate(45deg);
+}
+
+.card-badge {
     display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    align-self: flex-start;
+}
+
+.badge-dot {
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.card-header-modern {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.company-logo {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #f4f7ff, #e8eeff);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.logo-ring {
+    position: absolute;
+    inset: -4px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.premium-card:hover .logo-ring {
+    opacity: 0.2;
+    animation: ringPulse 2s ease-in-out infinite;
+}
+
+@keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.2; }
+    50% { transform: scale(1.1); opacity: 0.4; }
+}
+
+.company-logo i {
+    font-size: 1.75rem;
+    color: var(--primary);
+    position: relative;
+    z-index: 1;
+}
+
+.card-title-area {
+    flex: 1;
+}
+
+.card-title-modern {
+    font-size: 1.25rem;
+    font-weight: 900;
+    color: var(--dark);
+    line-height: 1.3;
+    margin-bottom: 8px;
+    transition: color 0.3s ease;
+}
+
+.premium-card:hover .card-title-modern {
+    color: var(--primary);
+}
+
+.company-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--gray);
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.company-name i {
+    font-size: 0.875rem;
+}
+
+.card-description {
+    margin-bottom: 20px;
+}
+
+.card-description p {
+    color: var(--gray);
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    margin: 0;
+}
+
+.info-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.info-tag {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--light);
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--dark);
+    transition: all 0.3s ease;
+}
+
+.info-tag i {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.premium-card:hover .info-tag {
+    background: white;
+    border-color: rgba(102, 126, 234, 0.2);
+    transform: translateY(-2px);
+}
+
+.stats-bar {
+    padding: 16px;
+    background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.stat-item {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 12px;
     align-items: center;
 }
 
-.tera-filter-pill:hover {
-    color: #667eea;
-    background: #f1f5f9;
+.stat-item i {
+    font-size: 1.25rem;
+    color: var(--primary);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--gray);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-value {
+    font-size: 0.9375rem;
+    font-weight: 800;
+    color: var(--dark);
+    text-align: right;
+}
+
+.card-footer-modern {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.publish-date {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--gray);
+    font-weight: 700;
+    font-size: 0.875rem;
+}
+
+.publish-date i {
+    font-size: 1rem;
+    color: var(--primary);
+}
+
+.apply-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-radius: 14px;
+    font-weight: 900;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.apply-btn span {
+    position: relative;
+    z-index: 2;
+}
+
+.apply-btn i {
+    font-size: 1.25rem;
+    transition: transform 0.4s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: all 0.4s ease;
+}
+
+.apply-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 16px 40px rgba(102, 126, 234, 0.4);
+    color: white;
 }
 
-.tera-filter-pill.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #fff;
-    border-color: transparent;
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+.apply-btn:hover i {
+    transform: translateX(4px);
 }
 
-.tera-filter-pill.active:hover {
-    color: #fff;
-    transform: translateY(-2px);
+.apply-btn:hover .btn-glow {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 1;
 }
 
-.tera-filter-pill i {
-    font-size: 16px;
+.card-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
 }
 
+.premium-card:hover .card-particles {
+    opacity: 1;
+}
+
+.card-particles span {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 50%;
+    animation: float 3s ease-in-out infinite;
+}
+
+.card-particles span:nth-child(1) {
+    top: 20%;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.card-particles span:nth-child(2) {
+    top: 60%;
+    left: 80%;
+    animation-delay: 1s;
+}
+
+.card-particles span:nth-child(3) {
+    top: 80%;
+    left: 40%;
+    animation-delay: 2s;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); opacity: 0; }
+    50% { transform: translateY(-30px) scale(1.5); opacity: 0.8; }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    position: relative;
+}
+
+.empty-animation {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 40px;
+}
+
+.empty-circle {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 4px solid var(--primary);
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: ripple 3s ease-out infinite;
+}
+
+.empty-circle:nth-child(2) {
+    animation-delay: 1s;
+}
+
+.empty-circle:nth-child(3) {
+    animation-delay: 2s;
+}
+
+@keyframes ripple {
+    0% { transform: scale(0.5); opacity: 0.5; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: var(--primary);
+    margin-bottom: 24px;
+}
+
+.empty-title {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 12px;
+}
+
+.empty-text {
+    color: var(--gray);
+    font-size: 1.125rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Animations d'entrée */
+.offers-grid > div {
+    animation: cardSlideIn 0.6s ease-out backwards;
+}
+
+.offers-grid > div:nth-child(1) { animation-delay: 0.1s; }
+.offers-grid > div:nth-child(2) { animation-delay: 0.2s; }
+.offers-grid > div:nth-child(3) { animation-delay: 0.3s; }
+.offers-grid > div:nth-child(4) { animation-delay: 0.4s; }
+.offers-grid > div:nth-child(5) { animation-delay: 0.5s; }
+.offers-grid > div:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes cardSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
 @media (max-width: 768px) {
-    .tera-stage-filters {
-        padding: 16px;
+    .gradient-text {
+        font-size: 2.5rem;
     }
     
-    .tera-filter-pill {
-        padding: 10px 18px;
-        font-size: 13px;
+    .hero-header {
+        padding: 60px 24px;
+    }
+    
+    .filters-container {
+        padding: 20px;
+    }
+    
+    .filters-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        max-width: 100%;
+    }
+    
+    .modern-filters {
+        gap: 12px;
+    }
+    
+    .filter-chip {
+        padding: 12px 18px;
+        font-size: 0.875rem;
+    }
+    
+    .premium-card {
+        padding: 20px;
+    }
+    
+    .card-footer-modern {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .apply-btn {
+        justify-content: center;
     }
 }
 
+@media (max-width: 576px) {
+    .gradient-text {
+        font-size: 2rem;
+    }
+    
+    .info-tags {
+        flex-direction: column;
+    }
+    
+    .info-tag {
+        width: 100%;
+    }
+}
 </style>
+
+<script>
+// Animation d'entrée progressive
+document.addEventListener('DOMContentLoaded', function() {
+    const cards = document.querySelectorAll('.premium-card');
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, {
+        threshold: 0.1
+    });
+    
+    cards.forEach(card => {
+        observer.observe(card);
+    });
+    
+    // Recherche en temps réel
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const offerCards = document.querySelectorAll('.premium-card');
+            
+            offerCards.forEach(card => {
+                const title = card.querySelector('.card-title-modern').textContent.toLowerCase();
+                const company = card.querySelector('.company-name').textContent.toLowerCase();
+                const description = card.querySelector('.card-description p')?.textContent.toLowerCase() || '';
+                
+                if (title.includes(searchTerm) || company.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.closest('.col-lg-4').style.display = '';
+                } else {
+                    card.closest('.col-lg-4').style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

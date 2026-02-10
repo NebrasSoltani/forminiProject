@@ -4,88 +4,1235 @@
 
 {% block body %}
 <div class="page-wrapper">
-    <div class="container-fluid">
-        <div class="row">
+    <div class="container-fluid px-3 px-md-4 py-4">
+        <!-- Hero Header Moderne -->
+        <div class="row mb-5">
             <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title mb-4"><i class="fas fa-file-alt"></i> Mes Candidatures</h4>
-
-                        {% if candidatures is empty %}
-                            <div class="alert alert-info">
-                                <i class="fas fa-info-circle"></i> Vous n'avez encore postulé à aucune offre de stage.
-                                <a href="{{ path('apprenant_stages_index') }}" class="alert-link">Parcourir les offres disponibles</a>
-                            </div>
-                        {% else %}
-                            <div class="row">
-                                {% for candidature in candidatures %}
-                                <div class="col-12 mb-4">
-                                    <div class="card shadow-sm">
-                                        <div class="card-header bg-light">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-8">
-                                                    <h5 class="mb-1">{{ candidature.offreStage.titre }}</h5>
-                                                    <p class="text-muted mb-0">
-                                                        <i class="fas fa-building"></i> {{ candidature.offreStage.entreprise }} | 
-                                                        <i class="fas fa-calendar"></i> Postulé le {{ candidature.dateCandidature|date('d/m/Y à H:i') }}
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-4 text-end">
-                                                    {% if candidature.statut == 'en_attente' %}
-                                                        <span class="badge bg-warning text-dark fs-6"><i class="fas fa-clock"></i> En attente</span>
-                                                    {% elseif candidature.statut == 'acceptee' %}
-                                                        <span class="badge bg-success fs-6"><i class="fas fa-check-circle"></i> Acceptée</span>
-                                                    {% else %}
-                                                        <span class="badge bg-danger fs-6"><i class="fas fa-times-circle"></i> Refusée</span>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="row">
-                                                <div class="col-md-6">
-                                                    <h6><i class="fas fa-briefcase"></i> Détails de l'offre</h6>
-                                                    <ul class="list-unstyled">
-                                                        <li><strong>Type:</strong> <span class="badge bg-info">{{ candidature.offreStage.typeStage|replace({'_': ' '})|title }}</span></li>
-                                                        <li><strong>Lieu:</strong> {{ candidature.offreStage.lieu }}</li>
-                                                        <li><strong>Durée:</strong> {{ candidature.offreStage.duree }}</li>
-                                                        <li><strong>Période:</strong> {{ candidature.offreStage.dateDebut|date('d/m/Y') }} - {{ candidature.offreStage.dateFin|date('d/m/Y') }}</li>
-                                                    </ul>
-                                                    <a href="{{ path('apprenant_stage_show', {id: candidature.offreStage.id}) }}" class="btn btn-sm btn-outline-primary">
-                                                        <i class="fas fa-external-link-alt"></i> Voir l'offre complète
-                                                    </a>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <h6><i class="fas fa-envelope"></i> Ma lettre de motivation</h6>
-                                                    <div class="bg-light p-3 rounded mb-3" style="max-height: 200px; overflow-y: auto;">
-                                                        {{ candidature.lettreMotivation|nl2br }}
-                                                    </div>
-                                                    
-                                                    {% if candidature.cv %}
-                                                        <a href="{{ asset('uploads/cv/' ~ candidature.cv) }}" target="_blank" class="btn btn-sm btn-primary">
-                                                            <i class="fas fa-download"></i> Télécharger mon CV
-                                                        </a>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                            
-                                            {% if candidature.commentaire %}
-                                                <hr>
-                                                <div class="alert alert-info mb-0">
-                                                    <h6 class="alert-heading"><i class="fas fa-comment"></i> Commentaire de l'entreprise</h6>
-                                                    <p class="mb-0">{{ candidature.commentaire|nl2br }}</p>
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        {% endif %}
+                <div class="candidatures-hero">
+                    <div class="hero-pattern"></div>
+                    <div class="hero-content-wrapper">
+                        <div class="hero-icon-container">
+                            <div class="icon-ring"></div>
+                            <div class="icon-ring ring-2"></div>
+                            <i class="bi bi-file-earmark-text-fill hero-icon"></i>
+                        </div>
+                        <h1 class="hero-title-main">Mes Candidatures</h1>
+                        <p class="hero-subtitle-main">Suivez l'évolution de vos demandes de stage</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        {% if candidatures is empty %}
+            <!-- État Vide Créatif -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="empty-state-modern">
+                        <div class="empty-bg-shapes">
+                            <div class="shape shape-1"></div>
+                            <div class="shape shape-2"></div>
+                            <div class="shape shape-3"></div>
+                        </div>
+                        <div class="empty-content">
+                            <div class="empty-icon-wrapper">
+                                <i class="bi bi-inbox"></i>
+                            </div>
+                            <h3 class="empty-title">Aucune candidature pour le moment</h3>
+                            <p class="empty-description">Commencez votre aventure professionnelle en postulant à des offres de stage</p>
+                            <a href="{{ path('apprenant_stages_index') }}" class="btn-explore">
+                                <span>Explorer les offres</span>
+                                <i class="bi bi-arrow-right-circle-fill"></i>
+                                <div class="btn-ripple"></div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Stats Overview -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="stats-container">
+                        <div class="stat-card stat-total">
+                            <div class="stat-icon">
+                                <i class="bi bi-file-earmark-check"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number">{{ candidatures|length }}</div>
+                                <div class="stat-label">Total candidatures</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card stat-pending">
+                            <div class="stat-icon">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number">
+                                    {{ candidatures|filter(c => c.statut == 'en_attente')|length }}
+                                </div>
+                                <div class="stat-label">En attente</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card stat-accepted">
+                            <div class="stat-icon">
+                                <i class="bi bi-check-circle-fill"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number">
+                                    {{ candidatures|filter(c => c.statut == 'acceptee')|length }}
+                                </div>
+                                <div class="stat-label">Acceptées</div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card stat-rejected">
+                            <div class="stat-icon">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </div>
+                            <div class="stat-info">
+                                <div class="stat-number">
+                                    {{ candidatures|filter(c => c.statut == 'refusee')|length }}
+                                </div>
+                                <div class="stat-label">Refusées</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline des Candidatures -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="candidatures-timeline">
+                        {% for candidature in candidatures %}
+                            <div class="timeline-item" data-status="{{ candidature.statut }}">
+                                <div class="timeline-connector">
+                                    <div class="timeline-dot"></div>
+                                    <div class="timeline-line"></div>
+                                </div>
+                                
+                                <div class="candidature-card-premium">
+                                    <div class="card-glow"></div>
+                                    <div class="card-shine-effect"></div>
+                                    
+                                    <!-- Header -->
+                                    <div class="candidature-header">
+                                        <div class="header-left">
+                                            <div class="company-avatar">
+                                                <i class="bi bi-building"></i>
+                                            </div>
+                                            <div class="header-info">
+                                                <h3 class="candidature-title">{{ candidature.offreStage.titre }}</h3>
+                                                <div class="company-meta">
+                                                    <span class="meta-item">
+                                                        <i class="bi bi-briefcase"></i>
+                                                        {{ candidature.offreStage.entreprise }}
+                                                    </span>
+                                                    <span class="meta-divider">•</span>
+                                                    <span class="meta-item">
+                                                        <i class="bi bi-calendar3"></i>
+                                                        {{ candidature.dateCandidature|date('d/m/Y') }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="header-right">
+                                            {% if candidature.statut == 'en_attente' %}
+                                                <div class="status-badge status-pending">
+                                                    <span class="status-dot"></span>
+                                                    <span>En attente</span>
+                                                </div>
+                                            {% elseif candidature.statut == 'acceptee' %}
+                                                <div class="status-badge status-accepted">
+                                                    <i class="bi bi-check-circle-fill"></i>
+                                                    <span>Acceptée</span>
+                                                </div>
+                                            {% else %}
+                                                <div class="status-badge status-rejected">
+                                                    <i class="bi bi-x-circle-fill"></i>
+                                                    <span>Refusée</span>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Body -->
+                                    <div class="candidature-body">
+                                        <div class="row g-4">
+                                            <!-- Détails de l'offre -->
+                                            <div class="col-lg-6">
+                                                <div class="info-section">
+                                                    <div class="section-header">
+                                                        <i class="bi bi-info-circle-fill"></i>
+                                                        <h4>Détails de l'offre</h4>
+                                                    </div>
+                                                    
+                                                    <div class="info-grid">
+                                                        <div class="info-item">
+                                                            <div class="info-icon">
+                                                                <i class="bi bi-tag-fill"></i>
+                                                            </div>
+                                                            <div class="info-content">
+                                                                <div class="info-label">Type de stage</div>
+                                                                <div class="info-value">
+                                                                    {{ candidature.offreStage.typeStage|replace({'_': ' '})|title }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="info-item">
+                                                            <div class="info-icon">
+                                                                <i class="bi bi-geo-alt-fill"></i>
+                                                            </div>
+                                                            <div class="info-content">
+                                                                <div class="info-label">Localisation</div>
+                                                                <div class="info-value">{{ candidature.offreStage.lieu }}</div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="info-item">
+                                                            <div class="info-icon">
+                                                                <i class="bi bi-clock-fill"></i>
+                                                            </div>
+                                                            <div class="info-content">
+                                                                <div class="info-label">Durée</div>
+                                                                <div class="info-value">{{ candidature.offreStage.duree }}</div>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="info-item">
+                                                            <div class="info-icon">
+                                                                <i class="bi bi-calendar-range-fill"></i>
+                                                            </div>
+                                                            <div class="info-content">
+                                                                <div class="info-label">Période</div>
+                                                                <div class="info-value">
+                                                                    {{ candidature.offreStage.dateDebut|date('d/m/Y') }} - 
+                                                                    {{ candidature.offreStage.dateFin|date('d/m/Y') }}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <a href="{{ path('apprenant_stage_show', {id: candidature.offreStage.id}) }}" 
+                                                       class="view-offer-btn">
+                                                        <span>Voir l'offre complète</span>
+                                                        <i class="bi bi-arrow-up-right"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+
+                                            <!-- Ma candidature -->
+                                            <div class="col-lg-6">
+                                                <div class="info-section">
+                                                    <div class="section-header">
+                                                        <i class="bi bi-file-text-fill"></i>
+                                                        <h4>Ma candidature</h4>
+                                                    </div>
+
+                                                    <div class="motivation-letter">
+                                                        <div class="letter-header">
+                                                            <i class="bi bi-chat-quote-fill"></i>
+                                                            <span>Lettre de motivation</span>
+                                                        </div>
+                                                        <div class="letter-content">
+                                                            {{ candidature.lettreMotivation|nl2br }}
+                                                        </div>
+                                                    </div>
+
+                                                    {% if candidature.cv %}
+                                                        <a href="{{ asset('uploads/cv/' ~ candidature.cv) }}" 
+                                                           target="_blank" 
+                                                           class="download-cv-btn">
+                                                            <div class="btn-icon">
+                                                                <i class="bi bi-file-earmark-arrow-down-fill"></i>
+                                                            </div>
+                                                            <div class="btn-text">
+                                                                <span class="btn-title">Mon CV</span>
+                                                                <span class="btn-subtitle">Télécharger le document</span>
+                                                            </div>
+                                                            <i class="bi bi-download"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Commentaire de l'entreprise -->
+                                        {% if candidature.commentaire %}
+                                            <div class="company-feedback">
+                                                <div class="feedback-header">
+                                                    <div class="feedback-icon">
+                                                        <i class="bi bi-chat-left-dots-fill"></i>
+                                                    </div>
+                                                    <h4>Message de l'entreprise</h4>
+                                                </div>
+                                                <div class="feedback-content">
+                                                    {{ candidature.commentaire|nl2br }}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
+
+<style>
+:root {
+    --primary: #667eea;
+    --primary-dark: #5568d3;
+    --secondary: #764ba2;
+    --accent: #f093fb;
+    --dark: #0f172a;
+    --gray: #64748b;
+    --light: #f8fafc;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #3b82f6;
+}
+
+/* Hero Header */
+.candidatures-hero {
+    position: relative;
+    padding: 60px 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(102, 126, 234, 0.2);
+}
+
+.hero-pattern {
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+    animation: patternMove 15s ease-in-out infinite;
+}
+
+@keyframes patternMove {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(20px, -20px); }
+}
+
+.hero-content-wrapper {
+    position: relative;
+    text-align: center;
+    z-index: 2;
+}
+
+.hero-icon-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 24px;
+}
+
+.icon-ring {
+    position: absolute;
+    inset: 0;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: ringPulse 3s ease-in-out infinite;
+}
+
+.ring-2 {
+    animation-delay: 1.5s;
+}
+
+@keyframes ringPulse {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.2); opacity: 0.1; }
+}
+
+.hero-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    color: white;
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+    50% { transform: translate(-50%, -50%) translateY(-8px); }
+}
+
+.hero-title-main {
+    font-size: 3rem;
+    font-weight: 900;
+    color: white;
+    margin-bottom: 12px;
+    text-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.hero-subtitle-main {
+    font-size: 1.125rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+}
+
+/* Empty State */
+.empty-state-modern {
+    position: relative;
+    padding: 100px 40px;
+    background: white;
+    border-radius: 32px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.empty-bg-shapes {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+}
+
+.shape-1 {
+    width: 300px;
+    height: 300px;
+    top: -150px;
+    right: -150px;
+    animation: shapeFloat 20s ease-in-out infinite;
+}
+
+.shape-2 {
+    width: 200px;
+    height: 200px;
+    bottom: -100px;
+    left: -100px;
+    animation: shapeFloat 15s ease-in-out infinite reverse;
+}
+
+.shape-3 {
+    width: 150px;
+    height: 150px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: shapeFloat 25s ease-in-out infinite;
+}
+
+@keyframes shapeFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -30px) scale(1.1); }
+    66% { transform: translate(-30px, 30px) scale(0.9); }
+}
+
+.empty-content {
+    position: relative;
+    text-align: center;
+    z-index: 2;
+}
+
+.empty-icon-wrapper {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 32px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 30px;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+    animation: iconBounce 3s ease-in-out infinite;
+}
+
+@keyframes iconBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+}
+
+.empty-icon-wrapper i {
+    font-size: 3.5rem;
+    color: white;
+}
+
+.empty-title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 16px;
+}
+
+.empty-description {
+    font-size: 1.125rem;
+    color: var(--gray);
+    margin-bottom: 32px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-explore {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 32px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border-radius: 16px;
+    font-weight: 800;
+    font-size: 1.0625rem;
+    text-decoration: none;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+    transition: all 0.4s ease;
+}
+
+.btn-explore:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 48px rgba(102, 126, 234, 0.5);
+    color: white;
+}
+
+.btn-explore i {
+    font-size: 1.5rem;
+    transition: transform 0.4s ease;
+}
+
+.btn-explore:hover i {
+    transform: translateX(4px);
+}
+
+.btn-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3), transparent 70%);
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 0;
+    transition: all 0.6s ease;
+}
+
+.btn-explore:hover .btn-ripple {
+    transform: translate(-50%, -50%) scale(2);
+    opacity: 1;
+}
+
+/* Stats Container */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 24px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    border: 2px solid transparent;
+    transition: all 0.4s ease;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    transition: width 0.4s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+.stat-card:hover::before {
+    width: 100%;
+    opacity: 0.1;
+}
+
+.stat-total::before { background: linear-gradient(180deg, var(--primary), var(--secondary)); }
+.stat-pending::before { background: var(--warning); }
+.stat-accepted::before { background: var(--success); }
+.stat-rejected::before { background: var(--danger); }
+
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.stat-total .stat-icon {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15), rgba(118, 75, 162, 0.15));
+}
+
+.stat-pending .stat-icon {
+    background: rgba(245, 158, 11, 0.15);
+}
+
+.stat-accepted .stat-icon {
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.stat-rejected .stat-icon {
+    background: rgba(239, 68, 68, 0.15);
+}
+
+.stat-icon i {
+    font-size: 1.75rem;
+}
+
+.stat-total .stat-icon i { color: var(--primary); }
+.stat-pending .stat-icon i { color: var(--warning); }
+.stat-accepted .stat-icon i { color: var(--success); }
+.stat-rejected .stat-icon i { color: var(--danger); }
+
+.stat-info {
+    flex: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--dark);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Timeline */
+.candidatures-timeline {
+    position: relative;
+}
+
+.timeline-item {
+    position: relative;
+    display: flex;
+    gap: 32px;
+    margin-bottom: 40px;
+    animation: timelineSlideIn 0.6s ease-out backwards;
+}
+
+.timeline-item:nth-child(1) { animation-delay: 0.1s; }
+.timeline-item:nth-child(2) { animation-delay: 0.2s; }
+.timeline-item:nth-child(3) { animation-delay: 0.3s; }
+.timeline-item:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes timelineSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.timeline-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.timeline-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    border: 4px solid var(--primary);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    position: relative;
+    z-index: 3;
+}
+
+.timeline-item[data-status="acceptee"] .timeline-dot {
+    border-color: var(--success);
+    background: var(--success);
+}
+
+.timeline-item[data-status="refusee"] .timeline-dot {
+    border-color: var(--danger);
+    background: var(--danger);
+}
+
+.timeline-item[data-status="en_attente"] .timeline-dot {
+    border-color: var(--warning);
+    animation: dotPulse 2s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+    0%, 100% { box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3); }
+    50% { box-shadow: 0 4px 24px rgba(245, 158, 11, 0.6); }
+}
+
+.timeline-line {
+    flex: 1;
+    width: 2px;
+    background: linear-gradient(180deg, rgba(102, 126, 234, 0.3), transparent);
+    margin-top: 8px;
+}
+
+.timeline-item:last-child .timeline-line {
+    display: none;
+}
+
+/* Candidature Card Premium */
+.candidature-card-premium {
+    position: relative;
+    flex: 1;
+    background: white;
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+    transition: all 0.5s ease;
+}
+
+.candidature-card-premium:hover {
+    transform: translateX(8px);
+    box-shadow: 0 16px 48px rgba(15, 23, 42, 0.12);
+    border-color: rgba(102, 126, 234, 0.2);
+}
+
+.card-glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.03), rgba(118, 75, 162, 0.03));
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.candidature-card-premium:hover .card-glow {
+    opacity: 1;
+}
+
+.card-shine-effect {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.2) 50%, transparent 70%);
+    transform: translateX(-100%) rotate(45deg);
+    transition: transform 0.8s ease;
+}
+
+.candidature-card-premium:hover .card-shine-effect {
+    transform: translateX(100%) rotate(45deg);
+}
+
+/* Header */
+.candidature-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid rgba(15, 23, 42, 0.06);
+    position: relative;
+    z-index: 2;
+}
+
+.header-left {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex: 1;
+}
+
+.company-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #f4f7ff, #e8eeff);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+}
+
+.company-avatar i {
+    font-size: 1.75rem;
+    color: var(--primary);
+}
+
+.header-info {
+    flex: 1;
+}
+
+.candidature-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.company-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: var(--gray);
+}
+
+.meta-item i {
+    font-size: 1rem;
+    color: var(--primary);
+}
+
+.meta-divider {
+    color: rgba(15, 23, 42, 0.2);
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 14px;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    white-space: nowrap;
+}
+
+.status-pending {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.1));
+    color: #d97706;
+    border: 2px solid rgba(245, 158, 11, 0.3);
+}
+
+.status-accepted {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.1));
+    color: #059669;
+    border: 2px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-rejected {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.1));
+    color: #dc2626;
+    border: 2px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: currentColor;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.status-badge i {
+    font-size: 1.125rem;
+}
+
+/* Body */
+.candidature-body {
+    position: relative;
+    z-index: 2;
+}
+
+.info-section {
+    background: var(--light);
+    border-radius: 20px;
+    padding: 24px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.section-header i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.section-header h4 {
+    font-size: 1.125rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin: 0;
+}
+
+.info-grid {
+    display: grid;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 16px;
+    background: white;
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    transition: all 0.3s ease;
+}
+
+.info-item:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.info-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+.info-icon i {
+    font-size: 1.125rem;
+    color: var(--primary);
+}
+
+.info-content {
+    flex: 1;
+}
+
+.info-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.info-value {
+    font-size: 0.9375rem;
+    font-weight: 800;
+    color: var(--dark);
+}
+
+.view-offer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: white;
+    color: var(--primary);
+    border-radius: 12px;
+    border: 2px solid var(--primary);
+    font-weight: 800;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    margin-top: auto;
+}
+
+.view-offer-btn:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.view-offer-btn i {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.view-offer-btn:hover i {
+    transform: translate(2px, -2px);
+}
+
+/* Motivation Letter */
+.motivation-letter {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.letter-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
+    border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.letter-header i {
+    font-size: 1.125rem;
+    color: var(--primary);
+}
+
+.letter-header span {
+    font-size: 0.875rem;
+    font-weight: 800;
+    color: var(--dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.letter-content {
+    padding: 18px;
+    max-height: 220px;
+    overflow-y: auto;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--gray);
+}
+
+.letter-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.letter-content::-webkit-scrollbar-track {
+    background: var(--light);
+}
+
+.letter-content::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 3px;
+}
+
+/* Download CV Button */
+.download-cv-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    background: white;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    border-radius: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.download-cv-btn:hover {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+}
+
+.btn-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.download-cv-btn:hover .btn-icon {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-icon i {
+    font-size: 1.5rem;
+    color: var(--primary);
+    transition: color 0.3s ease;
+}
+
+.download-cv-btn:hover .btn-icon i {
+    color: white;
+}
+
+.btn-text {
+    flex: 1;
+}
+
+.btn-title {
+    display: block;
+    font-size: 0.9375rem;
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 2px;
+    transition: color 0.3s ease;
+}
+
+.download-cv-btn:hover .btn-title {
+    color: white;
+}
+
+.btn-subtitle {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--gray);
+    transition: color 0.3s ease;
+}
+
+.download-cv-btn:hover .btn-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.download-cv-btn > i:last-child {
+    font-size: 1.5rem;
+    color: var(--primary);
+    transition: color 0.3s ease;
+}
+
+.download-cv-btn:hover > i:last-child {
+    color: white;
+}
+
+/* Company Feedback */
+.company-feedback {
+    margin-top: 24px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(59, 130, 246, 0.05));
+    border-radius: 16px;
+    border: 2px solid rgba(59, 130, 246, 0.2);
+    position: relative;
+    z-index: 2;
+}
+
+.feedback-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.feedback-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(59, 130, 246, 0.15);
+    display: grid;
+    place-items: center;
+}
+
+.feedback-icon i {
+    font-size: 1.25rem;
+    color: var(--info);
+}
+
+.feedback-header h4 {
+    font-size: 1.0625rem;
+    font-weight: 900;
+    color: var(--dark);
+    margin: 0;
+}
+
+.feedback-content {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--gray);
+    padding-left: 56px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .timeline-item {
+        gap: 20px;
+    }
+    
+    .candidature-header {
+        flex-direction: column;
+    }
+    
+    .header-right {
+        align-self: flex-start;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-title-main {
+        font-size: 2.25rem;
+    }
+    
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .candidature-card-premium {
+        padding: 20px;
+    }
+    
+    .timeline-connector {
+        display: none;
+    }
+    
+    .timeline-item {
+        gap: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title-main {
+        font-size: 1.875rem;
+    }
+    
+    .company-meta {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+    
+    .meta-divider {
+        display: none;
+    }
+}
+</style>
 {% endblock %}

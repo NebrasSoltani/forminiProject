@@ -2,211 +2,787 @@
 
 {% block title %}{{ offre.titre }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+
+        .page-wrapper {
+            padding: 2rem 0;
+        }
+
+        .offer-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .offer-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background: var(--primary-gradient);
+            opacity: 0.05;
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .offer-title-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            position: relative;
+            z-index: 1;
+        }
+
+        .offer-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .offer-title i {
+            color: var(--primary-color);
+        }
+
+        .offer-subtitle {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .badge-status {
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-status.published {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .badge-status.closed {
+            background: var(--gray-400);
+            color: white;
+        }
+
+        .badge-status.expired {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .info-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .info-card-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        .info-card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            padding: 0.75rem 0;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid var(--gray-100);
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-list strong {
+            color: var(--gray-700);
+            min-width: 150px;
+            font-weight: 600;
+        }
+
+        .info-list span {
+            color: var(--gray-600);
+        }
+
+        .badge-type {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .description-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .description-text {
+            color: var(--gray-700);
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .candidatures-section {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .candidatures-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .candidatures-count {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 0.5rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table {
+            margin: 0;
+        }
+
+        .table thead th {
+            background: var(--gray-50);
+            color: var(--gray-700);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 1rem;
+            border: none;
+        }
+
+        .table tbody tr {
+            border-bottom: 1px solid var(--gray-200);
+            transition: all 0.2s ease;
+        }
+
+        .table tbody tr:hover {
+            background: var(--gray-50);
+        }
+
+        .table tbody td {
+            padding: 1.25rem 1rem;
+            vertical-align: middle;
+            border: none;
+        }
+
+        .candidate-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 1rem;
+        }
+
+        .candidate-email {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+        }
+
+        .badge-candidature {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-pending {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .badge-accepted {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .badge-rejected {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-action-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-accept {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-reject {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .empty-icon {
+            font-size: 3.5rem;
+            color: var(--gray-300);
+            margin-bottom: 1rem;
+        }
+
+        .empty-text {
+            color: var(--gray-500);
+            font-size: 1.05rem;
+        }
+
+        .action-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 2rem;
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 1.5rem 2rem;
+            border: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-section h6 {
+            color: var(--gray-800);
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .modal-section h6 i {
+            color: var(--primary-color);
+        }
+
+        .info-box {
+            background: var(--gray-50);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-download {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .offer-title-section {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+
+            .offer-title {
+                font-size: 1.5rem;
+            }
+
+            .info-list li {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .info-list strong {
+                min-width: auto;
+                margin-bottom: 0.25rem;
+            }
+
+            .btn-action-group {
+                flex-direction: column;
+            }
+
+            .action-footer {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
 {% block body %}
 <div class="page-wrapper">
     <div class="container-fluid">
+        <!-- Header -->
+        <div class="offer-header">
+            <div class="offer-title-section">
+                <div>
+                    <h1 class="offer-title">
+                        <i class="fas fa-briefcase"></i>
+                        {{ offre.titre }}
+                    </h1>
+                    <p class="offer-subtitle">
+                        <i class="fas fa-building"></i> {{ offre.entreprise }}
+                        <span>•</span>
+                        <i class="fas fa-map-marker-alt"></i> {{ offre.lieu }}
+                    </p>
+                </div>
+                <div>
+                    {% if offre.statut == 'publiee' %}
+                        <span class="badge-status published">
+                            <i class="fas fa-check-circle"></i> Publiée
+                        </span>
+                    {% elseif offre.statut == 'fermee' %}
+                        <span class="badge-status closed">
+                            <i class="fas fa-lock"></i> Fermée
+                        </span>
+                    {% else %}
+                        <span class="badge-status expired">
+                            <i class="fas fa-times-circle"></i> Expirée
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    <i class="fas fa-{{ label == 'success' ? 'check-circle' : 'exclamation-circle' }}"></i>
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
         <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-4">
-                            <div>
-                                <h3 class="card-title"><i class="fas fa-briefcase"></i> {{ offre.titre }}</h3>
-                                <p class="text-muted">{{ offre.entreprise }} - {{ offre.lieu }}</p>
-                            </div>
-                            <div>
-                                {% if offre.statut == 'publiee' %}
-                                    <span class="badge bg-success fs-6">Publiée</span>
-                                {% elseif offre.statut == 'fermee' %}
-                                    <span class="badge bg-secondary fs-6">Fermée</span>
-                                {% else %}
-                                    <span class="badge bg-danger fs-6">Expirée</span>
-                                {% endif %}
-                            </div>
+            <!-- Left Column -->
+            <div class="col-md-6">
+                <!-- Informations générales -->
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <div class="info-card-icon">
+                            <i class="fas fa-info-circle"></i>
                         </div>
+                        <h3 class="info-card-title">Informations générales</h3>
+                    </div>
+                    <ul class="info-list">
+                        <li>
+                            <strong>Type de stage</strong>
+                            <span class="badge-type">{{ offre.typeStage|replace({'_': ' '})|title }}</span>
+                        </li>
+                        {% if offre.domaine %}
+                        <li>
+                            <strong>Domaine</strong>
+                            <span>{{ offre.domaine }}</span>
+                        </li>
+                        {% endif %}
+                        <li>
+                            <strong>Durée</strong>
+                            <span>{{ offre.duree }}</span>
+                        </li>
+                        <li>
+                            <strong>Période</strong>
+                            <span>{{ offre.dateDebut|date('d/m/Y') }} - {{ offre.dateFin|date('d/m/Y') }}</span>
+                        </li>
+                        <li>
+                            <strong>Rémunération</strong>
+                            <span>{{ offre.remuneration ? offre.remuneration ~ ' €/mois' : 'Non spécifiée' }}</span>
+                        </li>
+                        <li>
+                            <strong>Date de publication</strong>
+                            <span>{{ offre.datePublication|date('d/m/Y') }}</span>
+                        </li>
+                    </ul>
+                </div>
 
-                        {% for label, messages in app.flashes %}
-                            {% for message in messages %}
-                                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        {% endfor %}
+                <!-- Contact -->
+                {% if offre.contactEmail or offre.contactTel %}
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <div class="info-card-icon">
+                            <i class="fas fa-address-card"></i>
+                        </div>
+                        <h3 class="info-card-title">Informations de contact</h3>
+                    </div>
+                    <ul class="info-list">
+                        {% if offre.contactEmail %}
+                        <li>
+                            <strong><i class="fas fa-envelope"></i> Email</strong>
+                            <span>{{ offre.contactEmail }}</span>
+                        </li>
+                        {% endif %}
+                        {% if offre.contactTel %}
+                        <li>
+                            <strong><i class="fas fa-phone"></i> Téléphone</strong>
+                            <span>{{ offre.contactTel }}</span>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
 
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <div class="bg-light p-3 rounded">
-                                    <h6><i class="fas fa-info-circle"></i> Informations générales</h6>
-                                    <ul class="list-unstyled mb-0">
-                                        <li><strong>Type:</strong> <span class="badge bg-info">{{ offre.typeStage|replace({'_': ' '})|title }}</span></li>
-                                        {% if offre.domaine %}
-                                            <li><strong>Domaine:</strong> {{ offre.domaine }}</li>
+            <!-- Right Column -->
+            <div class="col-md-6">
+                <!-- Profil recherché -->
+                <div class="info-card">
+                    <div class="info-card-header">
+                        <div class="info-card-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <h3 class="info-card-title">Profil recherché</h3>
+                    </div>
+                    {% if offre.profilDemande %}
+                        <p class="description-text mb-3">{{ offre.profilDemande }}</p>
+                    {% endif %}
+                    
+                    {% if offre.competencesRequises %}
+                    <div class="mt-3">
+                        <h6 style="color: var(--gray-700); font-weight: 600; margin-bottom: 1rem;">
+                            <i class="fas fa-check-circle" style="color: var(--primary-color);"></i>
+                            Compétences requises
+                        </h6>
+                        <p class="description-text">{{ offre.competencesRequises|nl2br }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Description -->
+        <div class="description-card">
+            <div class="info-card-header">
+                <div class="info-card-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <h3 class="info-card-title">Description du poste</h3>
+            </div>
+            <p class="description-text">{{ offre.description|nl2br }}</p>
+        </div>
+
+        <!-- Candidatures -->
+        <div class="candidatures-section">
+            <div class="candidatures-header">
+                <div class="info-card-header" style="border: none; padding: 0; margin: 0;">
+                    <div class="info-card-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3 class="info-card-title">Candidatures reçues</h3>
+                </div>
+                <span class="candidatures-count">
+                    <i class="fas fa-user-graduate"></i>
+                    {{ offre.candidatures|length }} candidature{{ offre.candidatures|length > 1 ? 's' : '' }}
+                </span>
+            </div>
+
+            {% if offre.candidatures is empty %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-inbox"></i>
+                    </div>
+                    <p class="empty-text">Aucune candidature reçue pour le moment</p>
+                </div>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Candidat</th>
+                                <th>Date</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for candidature in offre.candidatures %}
+                            <tr>
+                                <td>
+                                    <div class="candidate-name">{{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}</div>
+                                    <div class="candidate-email">{{ candidature.apprenant.email }}</div>
+                                </td>
+                                <td>{{ candidature.dateCandidature|date('d/m/Y H:i') }}</td>
+                                <td>
+                                    {% if candidature.statut == 'en_attente' %}
+                                        <span class="badge-candidature badge-pending">
+                                            <i class="fas fa-clock"></i> En attente
+                                        </span>
+                                    {% elseif candidature.statut == 'acceptee' %}
+                                        <span class="badge-candidature badge-accepted">
+                                            <i class="fas fa-check"></i> Acceptée
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-candidature badge-rejected">
+                                            <i class="fas fa-times"></i> Refusée
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-action-group">
+                                        <button type="button" class="btn btn-view btn-sm" data-bs-toggle="modal" data-bs-target="#candidatureModal{{ candidature.id }}">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </button>
+                                        
+                                        {% if candidature.statut == 'en_attente' %}
+                                            <form method="post" action="{{ path('societe_candidature_update_statut', {id: candidature.id}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('update_statut' ~ candidature.id) }}">
+                                                <input type="hidden" name="statut" value="acceptee">
+                                                <button type="submit" class="btn btn-accept btn-sm">
+                                                    <i class="fas fa-check"></i> Accepter
+                                                </button>
+                                            </form>
+                                            <form method="post" action="{{ path('societe_candidature_update_statut', {id: candidature.id}) }}" style="display:inline;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('update_statut' ~ candidature.id) }}">
+                                                <input type="hidden" name="statut" value="refusee">
+                                                <button type="submit" class="btn btn-reject btn-sm">
+                                                    <i class="fas fa-times"></i> Refuser
+                                                </button>
+                                            </form>
                                         {% endif %}
-                                        <li><strong>Durée:</strong> {{ offre.duree }}</li>
-                                        <li><strong>Période:</strong> {{ offre.dateDebut|date('d/m/Y') }} - {{ offre.dateFin|date('d/m/Y') }}</li>
-                                        <li><strong>Rémunération:</strong> {{ offre.remuneration ?: 'Non spécifiée' }}</li>
-                                        <li><strong>Date publication:</strong> {{ offre.datePublication|date('d/m/Y') }}</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="bg-light p-3 rounded mb-3">
-                                    <h6><i class="fas fa-user-tie"></i> Profil recherché</h6>
-                                    {% if offre.profilDemande %}
-                                        <p class="mb-2">{{ offre.profilDemande }}</p>
-                                    {% endif %}
-                                    <h6 class="mt-3"><i class="fas fa-check-circle"></i> Compétences requises</h6>
-                                    <p class="mb-0">{{ offre.competencesRequises|nl2br }}</p>
-                                </div>
-                                {% if offre.contactEmail or offre.contactTel %}
-                                <div class="bg-light p-3 rounded">
-                                    <h6><i class="fas fa-address-book"></i> Contact</h6>
-                                    {% if offre.contactEmail %}
-                                        <p class="mb-1"><strong>Email:</strong> {{ offre.contactEmail }}</p>
-                                    {% endif %}
-                                    {% if offre.contactTel %}
-                                        <p class="mb-0"><strong>Tél:</strong> {{ offre.contactTel }}</p>
-                                    {% endif %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
+                                    </div>
+                                </td>
+                            </tr>
 
-                        <div class="mb-4">
-                            <h5><i class="fas fa-file-alt"></i> Description</h5>
-                            <p class="text-justify">{{ offre.description|nl2br }}</p>
-                        </div>
-
-                        <div class="mb-4">
-                            <h5><i class="fas fa-users"></i> Candidatures ({{ offre.candidatures|length }})</h5>
-                            
-                            {% if offre.candidatures is empty %}
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i> Aucune candidature reçue pour le moment
-                                </div>
-                            {% else %}
-                                <div class="table-responsive">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>Apprenant</th>
-                                                <th>Date candidature</th>
-                                                <th>Statut</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {% for candidature in offre.candidatures %}
-                                            <tr>
-                                                <td>
-                                                    <strong>{{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}</strong><br>
-                                                    <small class="text-muted">{{ candidature.apprenant.email }}</small>
-                                                </td>
-                                                <td>{{ candidature.dateCandidature|date('d/m/Y H:i') }}</td>
-                                                <td>
-                                                    {% if candidature.statut == 'en_attente' %}
-                                                        <span class="badge bg-warning">En attente</span>
-                                                    {% elseif candidature.statut == 'acceptee' %}
-                                                        <span class="badge bg-success">Acceptée</span>
-                                                    {% else %}
-                                                        <span class="badge bg-danger">Refusée</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td>
-                                                    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#candidatureModal{{ candidature.id }}">
-                                                        <i class="fas fa-eye"></i> Détails
-                                                    </button>
-                                                    
-                                                    {% if candidature.statut == 'en_attente' %}
-                                                        <form method="post" action="{{ path('societe_candidature_update_statut', {id: candidature.id}) }}" style="display:inline;">
-                                                            <input type="hidden" name="_token" value="{{ csrf_token('update_statut' ~ candidature.id) }}">
-                                                            <input type="hidden" name="statut" value="acceptee">
-                                                            <button type="submit" class="btn btn-sm btn-success">
-                                                                <i class="fas fa-check"></i> Accepter
-                                                            </button>
-                                                        </form>
-                                                        <form method="post" action="{{ path('societe_candidature_update_statut', {id: candidature.id}) }}" style="display:inline;">
-                                                            <input type="hidden" name="_token" value="{{ csrf_token('update_statut' ~ candidature.id) }}">
-                                                            <input type="hidden" name="statut" value="refusee">
-                                                            <button type="submit" class="btn btn-sm btn-danger">
-                                                                <i class="fas fa-times"></i> Refuser
-                                                            </button>
-                                                        </form>
-                                                    {% endif %}
-                                                </td>
-                                            </tr>
-
-                                            {# Modal for candidature details #}
-                                            <div class="modal fade" id="candidatureModal{{ candidature.id }}" tabindex="-1" aria-labelledby="candidatureModalLabel{{ candidature.id }}" aria-hidden="true">
-                                                <div class="modal-dialog modal-lg">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="candidatureModalLabel{{ candidature.id }}">Candidature de {{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}</h5>
-                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            <!-- Modal -->
+                            <div class="modal fade" id="candidatureModal{{ candidature.id }}" tabindex="-1">
+                                <div class="modal-dialog modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">
+                                                <i class="fas fa-user-circle"></i>
+                                                Candidature de {{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="modal-section">
+                                                <h6><i class="fas fa-user"></i> Informations du candidat</h6>
+                                                <div class="info-box">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <p class="mb-2"><strong>Nom complet:</strong> {{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}</p>
+                                                            <p class="mb-2"><strong>Email:</strong> {{ candidature.apprenant.email }}</p>
+                                                            <p class="mb-0"><strong>Téléphone:</strong> {{ candidature.apprenant.telephone }}</p>
                                                         </div>
-                                                        <div class="modal-body">
-                                                            <h6><i class="fas fa-user"></i> Informations du candidat</h6>
-                                                            <div class="bg-light p-3 rounded mb-3">
-                                                                <div class="row">
-                                                                    <div class="col-md-6">
-                                                                        <p class="mb-2"><strong>Nom complet:</strong> {{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}</p>
-                                                                        <p class="mb-2"><strong>Email:</strong> {{ candidature.apprenant.email }}</p>
-                                                                        <p class="mb-0"><strong>Téléphone:</strong> {{ candidature.apprenant.telephone }}</p>
-                                                                    </div>
-                                                                    <div class="col-md-6">
-                                                                        {% if candidature.apprenant.profession %}
-                                                                            <p class="mb-2"><strong>Profession:</strong> {{ candidature.apprenant.profession }}</p>
-                                                                        {% endif %}
-                                                                        {% if candidature.apprenant.niveauEtude %}
-                                                                            <p class="mb-2"><strong>Niveau d'études:</strong> {{ candidature.apprenant.niveauEtude|replace({'_': ' '})|title }}</p>
-                                                                        {% endif %}
-                                                                        {% if candidature.apprenant.gouvernorat.value %}
-                                                                            <p class="mb-0"><strong>Localisation:</strong> {{ candidature.apprenant.gouvernorat.value }}</p>
-                                                                        {% endif %}
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-
-                                                            <h6><i class="fas fa-envelope"></i> Lettre de motivation</h6>
-                                                            <p class="bg-light p-3 rounded">{{ candidature.lettreMotivation|nl2br }}</p>
-                                                            
-                                                            {% if candidature.cv %}
-                                                                <h6><i class="fas fa-file-pdf"></i> CV</h6>
-                                                                <a href="{{ asset('uploads/cv/' ~ candidature.cv) }}" target="_blank" class="btn btn-primary mb-3">
-                                                                    <i class="fas fa-download"></i> Télécharger le CV
-                                                                </a>
+                                                        <div class="col-md-6">
+                                                            {% if candidature.apprenant.profession %}
+                                                                <p class="mb-2"><strong>Profession:</strong> {{ candidature.apprenant.profession }}</p>
                                                             {% endif %}
-                                                            
-                                                            {% if candidature.commentaire %}
-                                                                <h6 class="mt-3"><i class="fas fa-comment"></i> Votre commentaire</h6>
-                                                                <p class="bg-light p-3 rounded">{{ candidature.commentaire|nl2br }}</p>
+                                                            {% if candidature.apprenant.niveauEtude %}
+                                                                <p class="mb-2"><strong>Niveau:</strong> {{ candidature.apprenant.niveauEtude|replace({'_': ' '})|title }}</p>
                                                             {% endif %}
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                                            {% if candidature.apprenant.gouvernorat.value %}
+                                                                <p class="mb-0"><strong>Localisation:</strong> {{ candidature.apprenant.gouvernorat.value }}</p>
+                                                            {% endif %}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            {% endfor %}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            {% endif %}
-                        </div>
 
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ path('societe_offres_index') }}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Retour
-                            </a>
-                            <a href="{{ path('societe_offre_edit', {id: offre.id}) }}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Modifier
-                            </a>
-                        </div>
-                    </div>
+                                            <div class="modal-section">
+                                                <h6><i class="fas fa-envelope"></i> Lettre de motivation</h6>
+                                                <div class="info-box">
+                                                    {{ candidature.lettreMotivation|nl2br }}
+                                                </div>
+                                            </div>
+                                            
+                                            {% if candidature.cv %}
+                                                <div class="modal-section">
+                                                    <h6><i class="fas fa-file-pdf"></i> Curriculum Vitae</h6>
+                                                    <a href="{{ asset('uploads/cv/' ~ candidature.cv) }}" target="_blank" class="btn btn-download">
+                                                        <i class="fas fa-download"></i> Télécharger le CV
+                                                    </a>
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {% if candidature.commentaire %}
+                                                <div class="modal-section">
+                                                    <h6><i class="fas fa-comment"></i> Votre commentaire</h6>
+                                                    <div class="info-box">
+                                                        {{ candidature.commentaire|nl2br }}
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                <i class="fas fa-times"></i> Fermer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+            {% endif %}
+        </div>
+
+        <!-- Actions Footer -->
+        <div class="action-footer">
+            <a href="{{ path('societe_offres_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <a href="{{ path('societe_offre_edit', {id: offre.id}) }}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Modifier l'offre
+            </a>
         </div>
     </div>
 </div>

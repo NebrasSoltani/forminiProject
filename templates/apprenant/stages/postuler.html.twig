@@ -3,45 +3,862 @@
 {% block title %}Postuler - {{ offre.titre }}{% endblock %}
 
 {% block body %}
-<div class="page-wrapper">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-8 col-12 mx-auto">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title mb-4"><i class="fas fa-paper-plane"></i> Postuler pour : {{ offre.titre }}</h4>
-                        <p class="text-muted">{{ offre.entreprise }} - {{ offre.lieu }}</p>
+<div class="page-wrapper application-experience">
+    <div class="container-fluid py-5">
+        <!-- Animated Background -->
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+        </div>
 
-                        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
-                        
-                        <div class="mb-3">
-                            {{ form_label(form.lettreMotivation, 'Lettre de motivation') }}
-                            {{ form_widget(form.lettreMotivation, {'attr': {'class': 'form-control', 'rows': 10}}) }}
-                            <div class="form-text">Expliquez pourquoi vous êtes intéressé par cette offre</div>
-                            {{ form_errors(form.lettreMotivation) }}
-                        </div>
-                        
-                        <div class="mb-4">
-                            {{ form_label(form.cv, 'Curriculum Vitae (CV)') }}
-                            {{ form_widget(form.cv, {'attr': {'class': 'form-control'}}) }}
-                            <div class="form-text">Format PDF uniquement, taille max 5MB</div>
-                            {{ form_errors(form.cv) }}
-                        </div>
-                        
-                        <div class="d-flex justify-content-between">
-                            <a href="{{ path('apprenant_stage_show', {id: offre.id}) }}" class="btn btn-secondary">
-                                <i class="fas fa-times"></i> Annuler
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-paper-plane"></i> Envoyer ma candidature
-                            </button>
-                        </div>
-                        
-                        {{ form_end(form) }}
+        <div class="row">
+            <div class="col-lg-9 col-xl-8 mx-auto">
+                <!-- Header Section -->
+                <div class="application-header text-center mb-5">
+                    <div class="icon-wrapper mb-3">
+                        <i class="fas fa-rocket launch-icon"></i>
                     </div>
+                    <h1 class="display-5 fw-bold gradient-text mb-2">Lancez votre carrière</h1>
+                    <p class="lead text-muted">Votre prochaine aventure professionnelle commence ici</p>
+                </div>
+
+                <!-- Opportunity Card -->
+                <div class="opportunity-card mb-4">
+                    <div class="card border-0 shadow-lg">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-start">
+                                <div class="opportunity-icon">
+                                    <i class="fas fa-briefcase"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h3 class="fw-bold mb-2">{{ offre.titre }}</h3>
+                                    <div class="opportunity-meta">
+                                        <span class="badge bg-primary-soft me-2">
+                                            <i class="fas fa-building me-1"></i>{{ offre.entreprise }}
+                                        </span>
+                                        <span class="badge bg-success-soft">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ offre.lieu }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Application Form -->
+                <div class="application-form-card">
+                    <div class="card border-0 shadow-xl">
+                        <div class="card-body p-5">
+                            <!-- Progress Steps -->
+                            <div class="application-steps mb-5">
+                                <div class="step-line"></div>
+                                <div class="steps-container">
+                                    <div class="step active" data-step="1">
+                                        <div class="step-number">1</div>
+                                        <div class="step-label">Motivation</div>
+                                    </div>
+                                    <div class="step active" data-step="2">
+                                        <div class="step-number">2</div>
+                                        <div class="step-label">CV</div>
+                                    </div>
+                                    <div class="step" data-step="3">
+                                        <div class="step-number">3</div>
+                                        <div class="step-label">Envoi</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'class': 'creative-form', 'id': 'applicationForm'}}) }}
+                            
+                            <!-- Lettre de Motivation -->
+                            <div class="form-section mb-5">
+                                <div class="section-header mb-4">
+                                    <div class="section-icon">
+                                        <i class="fas fa-pen-fancy"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="mb-1">{{ form_label(form.lettreMotivation, 'Votre lettre de motivation', {'label_attr': {'class': 'form-label-custom'}}) }}</h4>
+                                        <p class="text-muted small mb-0">Exprimez votre passion et montrez pourquoi vous êtes le candidat idéal</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group-wrapper">
+                                    {{ form_widget(form.lettreMotivation, {
+                                        'attr': {
+                                            'class': 'form-control-creative',
+                                            'rows': 12,
+                                            'placeholder': 'Commencez par exprimer votre enthousiasme pour cette opportunité...'
+                                        }
+                                    }) }}
+                                    <div class="character-counter">
+                                        <span class="current-count">0</span> caractères
+                                    </div>
+                                    {{ form_errors(form.lettreMotivation) }}
+                                </div>
+
+                                <!-- Quick Tips -->
+                                <div class="tips-box mt-3">
+                                    <div class="tips-header">
+                                        <i class="fas fa-lightbulb"></i> Conseils pour une lettre percutante
+                                    </div>
+                                    <ul class="tips-list">
+                                        <li>Personnalisez votre message pour l'entreprise</li>
+                                        <li>Mettez en avant vos compétences clés</li>
+                                        <li>Montrez votre motivation et votre enthousiasme</li>
+                                        <li>Soyez concis et précis (300-500 mots idéalement)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- CV Upload -->
+                            <div class="form-section mb-5">
+                                <div class="section-header mb-4">
+                                    <div class="section-icon">
+                                        <i class="fas fa-file-upload"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="mb-1">{{ form_label(form.cv, 'Votre CV', {'label_attr': {'class': 'form-label-custom'}}) }}</h4>
+                                        <p class="text-muted small mb-0">Partagez votre parcours professionnel</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="upload-zone" id="uploadZone">
+                                    <div class="upload-placeholder">
+                                        <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                        <h5 class="mt-3 mb-2">Glissez-déposez votre CV ici</h5>
+                                        <p class="text-muted mb-3">ou cliquez pour parcourir vos fichiers</p>
+                                        
+                                        <div style="display: none;">
+                                            {{ form_widget(form.cv) }}
+                                        </div>
+                                        
+                                        <button type="button" class="btn btn-outline-primary" id="browseButton">
+                                            <i class="fas fa-folder-open me-2"></i>Parcourir
+                                        </button>
+                                    </div>
+                                    <div class="upload-success" style="display: none;">
+                                        <i class="fas fa-check-circle success-icon"></i>
+                                        <h5 class="mt-3 mb-2">Fichier chargé avec succès</h5>
+                                        <p class="filename mb-3"></p>
+                                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeFile()">
+                                            <i class="fas fa-trash-alt me-1"></i>Supprimer
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="file-requirements mt-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <span>Format PDF uniquement • Taille maximale: 5 MB</span>
+                                </div>
+                                {{ form_errors(form.cv) }}
+                            </div>
+                            
+                            <!-- Render hidden fields and CSRF token -->
+                            {{ form_rest(form) }}
+                            
+                            <!-- Action Buttons -->
+                            <div class="form-actions">
+                                <a href="{{ path('apprenant_stage_show', {id: offre.id}) }}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fas fa-arrow-left me-2"></i>Retour
+                                </a>
+                                <button type="submit" class="btn btn-primary-gradient btn-lg submit-btn">
+                                    <span class="btn-text">
+                                        <i class="fas fa-paper-plane me-2"></i>Envoyer ma candidature
+                                    </span>
+                                    <span class="btn-loading" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin me-2"></i>Envoi en cours...
+                                    </span>
+                                </button>
+                            </div>
+                            
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Confidence Booster -->
+                <div class="confidence-box text-center mt-4">
+                    <p class="mb-0">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        <strong>Vous êtes prêt !</strong> Votre candidature va faire la différence
+                        <i class="fas fa-star text-warning ms-2"></i>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+.application-experience {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Floating Background Shapes */
+.floating-shapes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.shape {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 20s infinite ease-in-out;
+}
+
+.shape-1 {
+    width: 300px;
+    height: 300px;
+    top: -150px;
+    left: -150px;
+    animation-delay: 0s;
+}
+
+.shape-2 {
+    width: 200px;
+    height: 200px;
+    top: 50%;
+    right: -100px;
+    animation-delay: 5s;
+}
+
+.shape-3 {
+    width: 150px;
+    height: 150px;
+    bottom: -75px;
+    left: 30%;
+    animation-delay: 10s;
+}
+
+.shape-4 {
+    width: 250px;
+    height: 250px;
+    top: 20%;
+    right: 20%;
+    animation-delay: 15s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-50px) rotate(180deg);
+    }
+}
+
+/* Header */
+.application-header {
+    position: relative;
+    z-index: 10;
+}
+
+.icon-wrapper {
+    display: inline-block;
+    animation: bounce 2s infinite;
+}
+
+.launch-icon {
+    font-size: 4rem;
+    color: #fff;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Opportunity Card */
+.opportunity-card {
+    position: relative;
+    z-index: 10;
+    animation: slideInDown 0.6s ease-out;
+}
+
+.opportunity-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.opportunity-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.bg-primary-soft {
+    background-color: rgba(102, 126, 234, 0.15);
+    color: #667eea;
+}
+
+.bg-success-soft {
+    background-color: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+/* Form Card */
+.application-form-card {
+    position: relative;
+    z-index: 10;
+    animation: slideInUp 0.6s ease-out;
+}
+
+.card {
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+}
+
+.shadow-xl {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Progress Steps */
+.application-steps {
+    position: relative;
+    margin-bottom: 3rem;
+}
+
+.step-line {
+    position: absolute;
+    top: 20px;
+    left: 10%;
+    right: 10%;
+    height: 3px;
+    background: #e5e7eb;
+    z-index: 1;
+}
+
+.steps-container {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    z-index: 2;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+}
+
+.step-number {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #e5e7eb;
+    color: #9ca3af;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.step.active .step-number {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: scale(1.1);
+}
+
+.step-label {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    transition: color 0.3s ease;
+}
+
+.step.active .step-label {
+    color: #667eea;
+}
+
+/* Form Sections */
+.form-section {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.section-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.section-icon i {
+    font-size: 1.25rem;
+    color: white;
+}
+
+.form-label-custom {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0;
+}
+
+/* Custom Form Controls */
+.form-control-creative {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    resize: vertical;
+}
+
+.form-control-creative:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.character-counter {
+    text-align: right;
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.current-count {
+    font-weight: 600;
+    color: #667eea;
+}
+
+/* Tips Box */
+.tips-box {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border-left: 4px solid #f59e0b;
+}
+
+.tips-header {
+    font-weight: 700;
+    color: #92400e;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.tips-list li {
+    color: #78350f;
+    padding: 0.5rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+}
+
+.tips-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #f59e0b;
+    font-weight: bold;
+}
+
+/* Upload Zone */
+.upload-zone {
+    border: 3px dashed #d1d5db;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #f9fafb;
+    position: relative;
+}
+
+.upload-zone:hover {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+.upload-zone.drag-over {
+    border-color: #667eea;
+    background: #e0e7ff;
+    transform: scale(1.02);
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: #9ca3af;
+    transition: all 0.3s ease;
+}
+
+.upload-zone:hover .upload-icon {
+    color: #667eea;
+    transform: scale(1.1);
+}
+
+#browseButton {
+    cursor: pointer;
+}
+
+#browseButton:hover {
+    background-color: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.success-icon {
+    font-size: 3rem;
+    color: #10b981;
+    animation: scaleIn 0.5s ease-out;
+}
+
+@keyframes scaleIn {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.filename {
+    color: #374151;
+    font-weight: 600;
+}
+
+.file-requirements {
+    background: #eff6ff;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    color: #1e40af;
+    font-size: 0.875rem;
+}
+
+/* Action Buttons */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 2rem;
+    border-top: 2px solid #f3f4f6;
+}
+
+.btn-primary-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 0.875rem 2.5rem;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary-gradient:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+.btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary-gradient:hover:before {
+    left: 100%;
+}
+
+.btn-outline-secondary {
+    border: 2px solid #d1d5db;
+    color: #6b7280;
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+    transform: translateY(-2px);
+}
+
+/* Confidence Box */
+.confidence-box {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1.25rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+/* Animations */
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-primary-gradient,
+    .btn-outline-secondary {
+        width: 100%;
+    }
+    
+    .steps-container {
+        max-width: 100%;
+    }
+    
+    .step-label {
+        font-size: 0.75rem;
+    }
+    
+    .section-header {
+        flex-direction: column;
+    }
+    
+    .section-icon {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+
+<script>
+// Character counter
+document.addEventListener('DOMContentLoaded', function() {
+    const textarea = document.querySelector('.form-control-creative');
+    const counter = document.querySelector('.current-count');
+    
+    if (textarea && counter) {
+        // Initial count
+        counter.textContent = textarea.value.length;
+        
+        textarea.addEventListener('input', function() {
+            counter.textContent = this.value.length;
+        });
+    }
+    
+    // File upload functionality
+    const uploadZone = document.getElementById('uploadZone');
+    const browseButton = document.getElementById('browseButton');
+    
+    // Find the file input generated by Symfony
+    let fileInput = document.querySelector('input[type="file"]');
+    
+    console.log('File input found:', fileInput); // Debug
+    
+    if (browseButton && fileInput) {
+        // Click on browse button triggers file input
+        browseButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Browse button clicked'); // Debug
+            fileInput.click();
+        });
+    }
+    
+    if (uploadZone && fileInput) {
+        // Drag and drop
+        uploadZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.add('drag-over');
+        });
+        
+        uploadZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+        });
+        
+        uploadZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.classList.remove('drag-over');
+            
+            if (e.dataTransfer.files.length) {
+                // Create a new FileList and assign to input
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(e.dataTransfer.files[0]);
+                fileInput.files = dataTransfer.files;
+                
+                // Trigger change event
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+                
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+        
+        // File input change
+        fileInput.addEventListener('change', function() {
+            console.log('File input changed:', this.files); // Debug
+            if (this.files.length) {
+                handleFileSelect(this.files[0]);
+            }
+        });
+    }
+    
+    // Form submission
+    const form = document.getElementById('applicationForm');
+    const submitBtn = document.querySelector('.submit-btn');
+    
+    if (form && submitBtn) {
+        form.addEventListener('submit', function(e) {
+            console.log('Form submitting...'); // Debug
+            
+            const btnText = submitBtn.querySelector('.btn-text');
+            const btnLoading = submitBtn.querySelector('.btn-loading');
+            
+            if (btnText && btnLoading) {
+                btnText.style.display = 'none';
+                btnLoading.style.display = 'inline';
+                submitBtn.disabled = true;
+            }
+            
+            // Don't prevent default - let the form submit normally
+        });
+        
+        // Also handle button click directly
+        submitBtn.addEventListener('click', function(e) {
+            console.log('Submit button clicked'); // Debug
+        });
+    }
+});
+
+function handleFileSelect(file) {
+    console.log('Handling file:', file); // Debug
+    const uploadZone = document.getElementById('uploadZone');
+    const placeholder = uploadZone.querySelector('.upload-placeholder');
+    const success = uploadZone.querySelector('.upload-success');
+    const filename = success.querySelector('.filename');
+    
+    if (file && file.type === 'application/pdf') {
+        placeholder.style.display = 'none';
+        success.style.display = 'block';
+        filename.textContent = file.name;
+        
+        // Activate step 3
+        const step3 = document.querySelector('[data-step="3"]');
+        if (step3) {
+            step3.classList.add('active');
+        }
+    } else if (file) {
+        alert('Veuillez sélectionner un fichier PDF uniquement.');
+        removeFile();
+    }
+}
+
+function removeFile() {
+    const uploadZone = document.getElementById('uploadZone');
+    const fileInput = document.querySelector('input[type="file"]');
+    const placeholder = uploadZone.querySelector('.upload-placeholder');
+    const success = uploadZone.querySelector('.upload-success');
+    
+    if (fileInput) {
+        fileInput.value = '';
+    }
+    placeholder.style.display = 'block';
+    success.style.display = 'none';
+    
+    // Deactivate step 3
+    const step3 = document.querySelector('[data-step="3"]');
+    if (step3) {
+        step3.classList.remove('active');
+    }
+}
+</script>
 {% endblock %}
