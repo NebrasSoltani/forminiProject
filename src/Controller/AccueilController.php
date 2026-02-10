@@ -9,7 +9,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class AccueilController extends AbstractController
 {
-    #[Route('/accueil', name: 'accueil')]
+    #[Route('/', name: 'accueil')]
     public function index(UserRepository $userRepository): Response
     {
         // Récupérer les formateurs avec leurs profils
