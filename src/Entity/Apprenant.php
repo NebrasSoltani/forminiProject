@@ -6,6 +6,8 @@ use App\Repository\ApprenantRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+
 
 #[ORM\Entity(repositoryClass: ApprenantRepository::class)]
 class Apprenant
@@ -19,19 +21,23 @@ class Apprenant
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\Column(length: 100, nullable: true)]
-    private ?string $niveauEtude = null;
-
-    #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $dateNaissance = null;
+    
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Assert\Choice(
+    choices: ['homme', 'femme', 'autre'],
+    message: "Choisissez un genre valide"
+        )]
     private ?string $genre = null;
 
     #[ORM\Column(length: 50, nullable: true)]
     private ?string $etatCivil = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(
+    min: 10,
+    minMessage: "L'objectif doit contenir au moins  10 caractères"
+    )]
     private ?string $objectif = null;
 
     #[ORM\ManyToOne(targetEntity: Domaine::class)]
@@ -40,6 +46,10 @@ class Apprenant
 
 
     #[ORM\Column(type: 'json', nullable: true)]
+    #[Assert\Count(
+    min: 1,
+    minMessage: "Choisissez au moins un centre d'intérêt"
+    )]
     private ?array $domainesInteret = [];
 
 
@@ -59,27 +69,8 @@ class Apprenant
         return $this;
     }
 
-    public function getNiveauEtude(): ?string
-    {
-        return $this->niveauEtude;
-    }
-
-    public function setNiveauEtude(?string $niveauEtude): static
-    {
-        $this->niveauEtude = $niveauEtude;
-        return $this;
-    }
-
-    public function getDateNaissance(): ?\DateTimeInterface
-    {
-        return $this->dateNaissance;
-    }
-
-    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
-    {
-        $this->dateNaissance = $dateNaissance;
-        return $this;
-    }
+    
+    
 
     public function getGenre(): ?string
     {

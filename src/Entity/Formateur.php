@@ -20,21 +20,30 @@ class Formateur
     private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\NotBlank(message: "La spécialité est obligatoire")]
     private ?string $specialite = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(
+    min: 20,
+    minMessage: "La biographie doit contenir au moins 20 caractères"
+    )]
     private ?string $bio = null;
-
     #[ORM\Column(nullable: true)]
+
+    #[Assert\Positive(message: "L'expérience doit être un nombre positif")]
     private ?int $experienceAnnees = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Url]
-    private ?string $linkedin = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    #[Assert\Url]
+    #[Assert\Url(message: "Lien LinkedIn invalide")]
+    private ?string $linkedin = null;
+
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Assert\Url(message: "Lien portfolio invalide")]
     private ?string $portfolio = null;
+
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $cv = null;
@@ -42,8 +51,7 @@ class Formateur
     #[ORM\Column(nullable: true)]
     private ?float $noteMoyenne = null;
 
-    #[ORM\Column(options: ['default' => false])]
-    private ?bool $isVerifie = false;
+    
 
     public function getId(): ?int
     {
@@ -138,14 +146,5 @@ class Formateur
         return $this;
     }
 
-    public function isVerifie(): ?bool
-    {
-        return $this->isVerifie;
-    }
-
-    public function setIsVerifie(bool $isVerifie): static
-    {
-        $this->isVerifie = $isVerifie;
-        return $this;
-    }
+   
 }
