@@ -1,12 +1,367 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<h1>Ajouter société</h1>
+<!-- Flash messages -->
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mt-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-{{ type == 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' }} me-2"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
 
-{{ form_start(form) }}
-{{ form_widget(form) }}
-<button>Enregistrer</button>
-{{ form_end(form) }}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-primary mb-1">
+                <i class="bi bi-building-add me-2"></i>Ajouter une société
+            </h1>
+            <p class="text-muted mb-0">
+                <i class="bi bi-info-circle me-2"></i>Créer une nouvelle entreprise dans le système
+            </p>
+        </div>
+        <a href="{{ path('admin_societe_index') }}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-arrow-left me-1"></i>Retour à la liste
+        </a>
+    </div>
 
-<a href="{{ path('admin_societe_index') }}">⬅️ Retour</a>
+    <!-- Formulaire -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-building me-2"></i>Informations de la société
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <div class="row g-3">
+                        <!-- Nom de la société -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.nomSociete, 'Nom de la société*', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-building text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.nomSociete, {'attr': {'class': 'form-control border-start-0', 'placeholder': 'Entrez le nom de la société'}}) }}
+                                </div>
+                                {{ form_errors(form.nomSociete) }}
+                            </div>
+                        </div>
+
+                        <!-- Secteur d'activité -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.secteur, 'Secteur d\'activité', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-briefcase text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.secteur, {'attr': {'class': 'form-control border-start-0', 'placeholder': 'Ex: Informatique, Finance...'}}) }}
+                                </div>
+                                {{ form_errors(form.secteur) }}
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.email, 'Email*', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-envelope text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control border-start-0', 'placeholder': 'email@exemple.com'}}) }}
+                                </div>
+                                {{ form_errors(form.email) }}
+                            </div>
+                        </div>
+
+                        <!-- Mot de passe -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.plainPassword, 'Mot de passe*', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-lock text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control border-start-0', 'placeholder': '•••••••••'}}) }}
+                                </div>
+                                {{ form_errors(form.plainPassword) }}
+                            </div>
+                        </div>
+
+                        <!-- Nom -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.nom, 'Nom*', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-person text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.nom, {'attr': {'class': 'form-control border-start-0', 'placeholder': 'Nom du responsable'}}) }}
+                                </div>
+                                {{ form_errors(form.nom) }}
+                            </div>
+                        </div>
+
+                        <!-- Prénom -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.prenom, 'Prénom*', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-person text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.prenom, {'attr': {'class': 'form-control border-start-0', 'placeholder': 'Prénom du responsable'}}) }}
+                                </div>
+                                {{ form_errors(form.prenom) }}
+                            </div>
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.telephone, 'Téléphone', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-telephone text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.telephone, {'attr': {'class': 'form-control border-start-0', 'placeholder': '+216 XX XXX XXX'}}) }}
+                                </div>
+                                {{ form_errors(form.telephone) }}
+                            </div>
+                        </div>
+
+                        <!-- Gouvernorat -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.gouvernorat, 'Gouvernorat', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-geo-alt text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.gouvernorat, {'attr': {'class': 'form-select border-start-0'}}) }}
+                                </div>
+                                {{ form_errors(form.gouvernorat) }}
+                            </div>
+                        </div>
+
+                        <!-- Adresse -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                {{ form_label(form.adresse, 'Adresse', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-geo-alt text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.adresse, {'attr': {'class': 'form-control border-start-0', 'placeholder': 'Adresse complète de la société'}}) }}
+                                </div>
+                                {{ form_errors(form.adresse) }}
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="col-12">
+                            <div class="form-group">
+                                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0 align-items-start">
+                                        <i class="bi bi-file-text text-muted mt-2"></i>
+                                    </span>
+                                    {{ form_widget(form.description, {'attr': {'class': 'form-control border-start-0', 'rows': 4, 'placeholder': 'Décrivez les activités de la société...'}}) }}
+                                </div>
+                                {{ form_errors(form.description) }}
+                            </div>
+                        </div>
+
+                        <!-- Site web -->
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.siteWeb, 'Site web', {'label_attr': {'class': 'form-label fw-medium text-muted small mb-1'}}) }}
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-white border-end-0">
+                                        <i class="bi bi-globe text-muted"></i>
+                                    </span>
+                                    {{ form_widget(form.siteWeb, {'attr': {'class': 'form-control border-start-0', 'placeholder': 'https://www.exemple.com'}}) }}
+                                </div>
+                                {{ form_errors(form.siteWeb) }}
+                            </div>
+                        </div>
+
+                        <!-- Vérification -->
+                       
+                    </div>
+
+                    <!-- Champs cachés -->
+                    {{ form_rest(form) }}
+
+                    <!-- Boutons d'action -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a href="{{ path('admin_societe_index') }}" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-x-circle me-1"></i>Annuler
+                                </a>
+                                <button type="submit" class="btn btn-success btn-lg">
+                                    <i class="bi bi-check-circle me-1"></i>Enregistrer la société
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite - Aide et informations -->
+        <div class="col-lg-4">
+            <!-- Informations -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-info-circle me-2"></i>Informations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light border-0">
+                        <h6 class="fw-bold text-primary mb-2">
+                            <i class="bi bi-lightbulb me-1"></i>Conseils
+                        </h6>
+                        <ul class="mb-0 small">
+                            <li>Les champs marqués d'un * sont obligatoires</li>
+                            <li>Utilisez une adresse email professionnelle</li>
+                            <li>Vérifiez les informations avant de valider</li>
+                            <li>Le site web doit commencer par http:// ou https://</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-bar-chart me-2"></i>Statistiques
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="h3 text-primary mb-1">
+                            <i class="bi bi-building"></i>
+                        </div>
+                        <p class="text-muted mb-0">Nouvelle société</p>
+                        <small class="text-muted">En attente de validation</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles personnalisés */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-group-lg .form-control, 
+    .input-group-lg .input-group-text {
+        height: 3.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .input-group-lg .form-select {
+        height: 3.5rem;
+        font-size: 1.1rem;
+    }
+    
+    .card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
+    }
+    
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        font-weight: 600;
+    }
+    
+    .btn {
+        transition: all 0.3s ease !important;
+        border-radius: 8px !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .input-group-lg .form-control, 
+        .input-group-lg .input-group-text {
+            height: 3rem;
+            font-size: 1rem;
+        }
+        
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+<script>
+    // Validation et interactions
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form');
+        const inputs = form.querySelectorAll('input, textarea, select');
+        
+        // Effet de focus
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement?.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement?.classList.remove('focused');
+            });
+        });
+        
+        // Validation HTML5
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            form.classList.add('was-validated');
+        });
+    });
+</script>
 {% endblock %}
