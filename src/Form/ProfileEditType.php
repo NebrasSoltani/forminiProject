@@ -3,6 +3,7 @@
 namespace App\Form;
 
 use App\Entity\User;
+use App\Enum\Gouvernorat;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
@@ -41,8 +42,13 @@ class ProfileEditType extends AbstractType
                 'label' => 'Téléphone',
                 'required' => false,
             ])
-            ->add('governorat', TextType::class, [
+            ->add('gouvernorat', ChoiceType::class, [
                 'label' => 'Gouvernorat',
+                'choices' => array_combine(
+                    array_map(fn(Gouvernorat $g) => $g->name, Gouvernorat::cases()), 
+                    Gouvernorat::cases()
+                ),
+                'placeholder' => 'Choisissez un gouvernorat',
                 'required' => false,
             ])
             ->add('dateNaissance', DateType::class, [

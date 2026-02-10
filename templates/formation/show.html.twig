@@ -150,9 +150,26 @@
             </div>
 
             <div class="mb-4">
-                <h6 class="text-muted"><i class="fa fa-user mr-1"></i> Formateur</h6>
-                <strong>{{ formation.formateur.nom }} {{ formation.formateur.prenom }}</strong><br>
-                <span class="text-muted">{{ formation.formateur.email }}</span>
+                <h6 class="text-muted mb-3"><i class="fa fa-user mr-1"></i> Formateur</h6>
+                <div class="d-flex align-items-center">
+                    <div class="mr-3">
+                        {% if formation.formateur.photo %}
+                            <img src="{{ asset('uploads/photos/' ~ formation.formateur.photo) }}" 
+                                 alt="{{ formation.formateur.prenom ~ ' ' ~ formation.formateur.nom }}"
+                                 class="rounded-circle"
+                                 style="width: 64px; height: 64px; object-fit: cover; border: 3px solid #e9ecef;">
+                        {% else %}
+                            <div class="rounded-circle d-flex align-items-center justify-content-center bg-light" 
+                                 style="width: 64px; height: 64px; border: 3px solid #e9ecef;">
+                                <i class="fa fa-user fa-2x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <strong class="d-block">{{ formation.formateur.prenom }} {{ formation.formateur.nom }}</strong>
+                        <span class="text-muted small">{{ formation.formateur.email }}</span>
+                    </div>
+                </div>
             </div>
 
             <div class="mb-4 text-muted">
