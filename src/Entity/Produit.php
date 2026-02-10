@@ -23,7 +23,7 @@ class Produit
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'La catégorie est obligatoire')]
-    #[Assert\Choice(choices: ['livre', 'cahier', 'stylo', 'materiel', 'autre'])]
+    #[Assert\Choice(choices: ['Informatique', 'Scientifique', 'Accessoires' , 'Supports'])]
     private ?string $categorie = null;
 
     #[ORM\Column(type: Types::TEXT)]
@@ -36,8 +36,9 @@ class Produit
     private ?string $prix = null;
 
     #[ORM\Column]
-    #[Assert\NotBlank]
-    #[Assert\PositiveOrZero]
+    
+    #[Assert\PositiveOrZero(message: 'Le stock ne peut pas être négatif')]
+
     private ?int $stock = 0;
 
     #[ORM\Column(length: 255, nullable: true)]
