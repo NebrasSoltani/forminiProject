@@ -133,8 +133,7 @@ class RegistrationFormType extends AbstractType
                 'choices' => [
                     'Apprenant' => 'apprenant',
                     'Formateur' => 'formateur',
-                    'Société' => 'societe',
-                    'Administrateur' => 'admin',
+                    
                 ],
                 'expanded' => false,
                 'placeholder' => 'Choisissez votre rôle...',
@@ -267,19 +266,7 @@ class RegistrationFormType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control', 'placeholder' => 'https://...']
             ])
-            ->add('logo', FileType::class, [
-                'label' => 'Logo de la société',
-                'mapped' => false,
-                'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '2M',
-                        'mimeTypes' => ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'],
-                        'mimeTypesMessage' => 'Veuillez télécharger une image valide'
-                    ])
-                ],
-                'attr' => ['class' => 'form-control']
-            ])
+            
             
             ->add('plainPassword', RepeatedType::class, [
                 'type' => PasswordType::class,

@@ -158,12 +158,13 @@ class ProfileController extends AbstractController
             }
 
             // Gérer le changement de mot de passe
-            $newPassword = $form->get('newPassword')->getData();
+            $newPassword = $form->get('newPassword')->get('first')->getData();
             if ($newPassword) {
                 $hashedPassword = $passwordHasher->hashPassword($user, $newPassword);
                 $user->setPassword($hashedPassword);
             }
 
+            $em->persist($user);
             $em->flush();
 
             $this->addFlash('success', 'Profil mis à jour avec succès !');

@@ -23,8 +23,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Assert\NotBlank]
-    #[Assert\Email]
+    #[Assert\NotBlank(message: "L'email est obligatoire")]
+    #[Assert\Email(message: "Email invalide")]
     private ?string $email = null;
 
     #[ORM\Column]
@@ -41,7 +41,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: 'Le prénom est obligatoire')]
     private ?string $prenom = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 8)]
     #[Assert\NotBlank(message: 'Le téléphone est obligatoire')]
     private ?string $telephone = null;
 
@@ -49,8 +49,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?Gouvernorat $gouvernorat = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Assert\NotNull(message: 'La date de naissance est obligatoire')]
+    #[Assert\NotBlank(message: "La date de naissance est obligatoire")]
+    #[Assert\LessThan("today", message: "La date doit être dans le passé")]
     private ?\DateTimeInterface $dateNaissance = null;
+
 
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $profession = null;
@@ -65,6 +67,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
+
+    #[ORM\Column(options: ['default' => 0])]
+    private bool $isEmailVerified = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $emailVerificationToken = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $emailVerificationTokenExpiresAt = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $emailVerifiedAt = null;
 
     #[ORM\OneToMany(mappedBy: 'formateur', targetEntity: Formation::class)]
     private Collection $formations;
@@ -183,7 +197,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->dateNaissance;
     }
 
-    public function setDateNaissance(\DateTimeInterface $dateNaissance): static
+    public function setDateNaissance(?\DateTimeInterface $dateNaissance): static
     {
         $this->dateNaissance = $dateNaissance;
         return $this;
@@ -230,6 +244,50 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPhoto(?string $photo): static
     {
         $this->photo = $photo;
+        return $this;
+    }
+
+    public function isEmailVerified(): bool
+    {
+        return $this->isEmailVerified;
+    }
+
+    public function setIsEmailVerified(bool $isEmailVerified): static
+    {
+        $this->isEmailVerified = $isEmailVerified;
+        return $this;
+    }
+
+    public function getEmailVerificationToken(): ?string
+    {
+        return $this->emailVerificationToken;
+    }
+
+    public function setEmailVerificationToken(?string $emailVerificationToken): static
+    {
+        $this->emailVerificationToken = $emailVerificationToken;
+        return $this;
+    }
+
+    public function getEmailVerificationTokenExpiresAt(): ?\DateTimeInterface
+    {
+        return $this->emailVerificationTokenExpiresAt;
+    }
+
+    public function setEmailVerificationTokenExpiresAt(?\DateTimeInterface $emailVerificationTokenExpiresAt): static
+    {
+        $this->emailVerificationTokenExpiresAt = $emailVerificationTokenExpiresAt;
+        return $this;
+    }
+
+    public function getEmailVerifiedAt(): ?\DateTimeInterface
+    {
+        return $this->emailVerifiedAt;
+    }
+
+    public function setEmailVerifiedAt(?\DateTimeInterface $emailVerifiedAt): static
+    {
+        $this->emailVerifiedAt = $emailVerifiedAt;
         return $this;
     }
 
