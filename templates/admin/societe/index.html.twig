@@ -226,6 +226,7 @@
         
         {% set currentPage = page|default(1) %}
         {% set pages = totalPages|default(1) %}
+        {% set params = {q: q, limit: limit} %}
        
         
         <nav aria-label="Pagination">

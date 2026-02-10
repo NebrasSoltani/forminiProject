@@ -4,11 +4,12 @@ namespace App\Controller;
 
 use App\Entity\Commande;
 use App\Entity\CommandeItem;
+use App\Entity\Inscription;
 use App\Entity\Produit;
 use Doctrine\ORM\EntityManagerInterface;
-use Stripe\Webhook;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
+use Stripe\Webhook;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -45,7 +46,14 @@ class PaiementController extends AbstractController
     #[Route('/checkout/{id}', name: 'checkout')]
     public function checkout(Commande $commande, EntityManagerInterface $em)
     {
-        Stripe::setApiKey((string) $_ENV['STRIPE_SECRET_KEY']);
+        $stripeKey = $_ENV['STRIPE_SECRET_KEY'] ?? '';
+        
+        if (empty($stripeKey)) {
+            $this->addFlash('error', '⚠️ Configuration Stripe manquante. Veuillez configurer STRIPE_SECRET_KEY dans le fichier .env');
+            return $this->redirectToRoute('boutique_panier');
+        }
+        
+        Stripe::setApiKey($stripeKey);
 
         $session = Session::create([
             'payment_method_types' => ['card'],
@@ -70,6 +78,103 @@ class PaiementController extends AbstractController
         return $this->redirect($session->url);
     }
 
+    #[Route('/paiement/inscription/{id}', name: 'paiement_inscription')]
+    public function paiementInscription(Inscription $inscription, EntityManagerInterface $em): Response
+    {
+        // Vérifier que l'utilisateur est bien l'apprenant de cette inscription
+        if ($inscription->getApprenant() !== $this->getUser()) {
+            throw $this->createAccessDeniedException('Vous n\'êtes pas autorisé à accéder à cette page.');
+        }
+
+        // Vérifier la configuration Stripe
+        $stripeKey = $_ENV['STRIPE_SECRET_KEY'] ?? '';
+        
+        if (empty($stripeKey)) {
+            $this->addFlash('error', '⚠️ Configuration Stripe manquante. Veuillez configurer STRIPE_SECRET_KEY dans le fichier .env');
+            return $this->redirectToRoute('apprenant_mes_formations');
+        }
+
+        $formation = $inscription->getFormation();
+        $prix = $formation->getPrixPromo() ?? $formation->getPrix();
+
+        // Si la formation est gratuite (prix = 0 ou null)
+        if (!$prix || (float)$prix <= 0) {
+            $inscription->setModePaiement('gratuit');
+            $inscription->setMontantPaye('0.00');
+            $em->flush();
+            
+            $this->addFlash('success', '✅ Inscription confirmée pour la formation gratuite !');
+            return $this->redirectToRoute('apprenant_mes_formations');
+        }
+
+        Stripe::setApiKey($stripeKey);
+
+        try {
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [[
+                    'price_data' => [
+                        'currency' => 'eur',
+                        'product_data' => [
+                            'name' => $formation->getTitre(),
+                            'description' => 'Inscription à la formation',
+                        ],
+                        'unit_amount' => (int) round(((float) $prix) * 100), // en centimes
+                    ],
+                    'quantity' => 1,
+                ]],
+                'mode' => 'payment',
+                'success_url' => $this->generateUrl('payment_inscription_success', ['id' => $inscription->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                'cancel_url' => $this->generateUrl('payment_inscription_cancel', ['id' => $inscription->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+                'metadata' => [
+                    'inscription_id' => (string) $inscription->getId(),
+                ],
+            ]);
+
+            // Stocker l'ID de session Stripe (si vous avez un champ pour cela)
+            // $inscription->setStripeSessionId($session->id);
+            $em->flush();
+
+            return $this->redirect($session->url);
+        } catch (\Exception $e) {
+            $this->addFlash('error', 'Une erreur est survenue lors de la création de la session de paiement : ' . $e->getMessage());
+            return $this->redirectToRoute('apprenant_mes_formations');
+        }
+    }
+
+    #[Route('/paiement/inscription/{id}/success', name: 'payment_inscription_success')]
+    public function inscriptionSuccess(Inscription $inscription, EntityManagerInterface $em): Response
+    {
+        // Vérifier que l'utilisateur est bien l'apprenant
+        if ($inscription->getApprenant() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        // Mettre à jour le statut de paiement
+        if ($inscription->getModePaiement() === 'en_attente') {
+            $inscription->setModePaiement('carte');
+            $formation = $inscription->getFormation();
+            $prix = $formation->getPrixPromo() ?? $formation->getPrix();
+            $inscription->setMontantPaye($prix);
+            $em->flush();
+        }
+
+        $this->addFlash('success', '✅ Paiement réussi ! Votre inscription est confirmée.');
+        return $this->redirectToRoute('apprenant_mes_formations');
+    }
+
+    #[Route('/paiement/inscription/{id}/cancel', name: 'payment_inscription_cancel')]
+    public function inscriptionCancel(Inscription $inscription): Response
+    {
+        // Vérifier que l'utilisateur est bien l'apprenant
+        if ($inscription->getApprenant() !== $this->getUser()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        $this->addFlash('warning', 'Le paiement a été annulé. Vous pouvez réessayer quand vous le souhaitez.');
+        return $this->redirectToRoute('apprenant_mes_formations');
+    }
+
     #[Route('/paiement/panier/checkout', name: 'payment_cart_checkout', methods: ['POST'])]
     public function checkoutPanier(
         Request $request,
@@ -87,6 +192,13 @@ class PaiementController extends AbstractController
         }
 
         $commande = new Commande();
+        $stripeKey = $_ENV['STRIPE_SECRET_KEY'] ?? '';
+        
+        if (empty($stripeKey)) {
+            $this->addFlash('error', '⚠️ Configuration Stripe manquante. Veuillez configurer STRIPE_SECRET_KEY dans le fichier .env');
+            return $this->redirectToRoute('boutique_panier');
+        }
+        
         $commande->setUtilisateur($this->getUser());
         $commande->setStatut('en_attente');
 
@@ -119,7 +231,7 @@ class PaiementController extends AbstractController
         $em->persist($commande);
         $em->flush();
 
-        Stripe::setApiKey((string) $_ENV['STRIPE_SECRET_KEY']);
+        Stripe::setApiKey($stripeKey);
 
         $lineItems = [];
         foreach ($commande->getItems() as $item) {
