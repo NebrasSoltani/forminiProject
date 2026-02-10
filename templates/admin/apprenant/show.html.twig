@@ -1,22 +1,354 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<h1>Détails apprenant</h1>
+<!-- Flash messages -->
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mt-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-{{ type == 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' }} me-2"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
 
-<table border="1">
-    <tr><th>ID</th><td>{{ apprenant.id }}</td></tr>
-    <tr><th>Email</th><td>{{ apprenant.user.email }}</td></tr>
-    <tr><th>Nom</th><td>{{ apprenant.user.nom }}</td></tr>
-    <tr><th>Prénom</th><td>{{ apprenant.user.prenom }}</td></tr>
-    <tr><th>Téléphone</th><td>{{ apprenant.user.telephone }}</td></tr>
-    <tr><th>Gouvernorat</th><td>{{ apprenant.user.gouvernorat ? apprenant.user.gouvernorat.value : '' }}</td></tr>
-    <tr><th>Date naissance</th><td>{{ apprenant.user.dateNaissance ? apprenant.user.dateNaissance|date('Y-m-d') : '' }}</td></tr>
-    <tr><th>Niveau étude</th><td>{{ apprenant.niveauEtude }}</td></tr>
-    <tr><th>Genre</th><td>{{ apprenant.genre }}</td></tr>
-    <tr><th>État civil</th><td>{{ apprenant.etatCivil }}</td></tr>
-    <tr><th>Objectif</th><td>{{ apprenant.objectif }}</td></tr>
-</table>
+<div class="container-fluid py-4">
+    <!-- Header avec actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-primary mb-1">
+                <i class="bi bi-person-badge-fill me-2"></i>Détails de l'apprenant
+            </h1>
+            <p class="text-muted mb-0">
+                <i class="bi bi-info-circle me-2"></i>Informations complètes sur l'apprenant
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_apprenant_edit', {id: apprenant.id}) }}" class="btn btn-warning btn-lg shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i>Modifier
+            </a>
+            <a href="{{ path('admin_apprenant_index') }}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-arrow-left me-1"></i>Retour
+            </a>
+        </div>
+    </div>
 
-<a href="{{ path('admin_apprenant_edit', {id: apprenant.id}) }}">✏️ Modifier</a>
-<a href="{{ path('admin_apprenant_index') }}">⬅️ Retour</a>
+    <!-- Carte principale des informations -->
+    <div class="row">
+        <!-- Colonne gauche - Informations personnelles -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-person me-2"></i>Informations personnelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-hash me-1"></i>ID Apprenant
+                                </label>
+                                <div class="h5 mb-0">
+                                    <span class="badge bg-secondary">{{ apprenant.id }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-envelope me-1"></i>Email
+                                </label>
+                                <div class="h6 mb-0">
+                                    <a href="mailto:{{ apprenant.user.email }}" class="text-decoration-none text-primary">
+                                        {{ apprenant.user.email }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-person me-1"></i>Nom
+                                </label>
+                                <div class="h5 mb-0 fw-bold">{{ apprenant.user.nom }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-person me-1"></i>Prénom
+                                </label>
+                                <div class="h5 mb-0">{{ apprenant.user.prenom }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-telephone me-1"></i>Téléphone
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if apprenant.user.telephone %}
+                                        <a href="tel:{{ apprenant.user.telephone }}" class="text-decoration-none text-success">
+                                            {{ apprenant.user.telephone }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-calendar-date me-1"></i>Date de naissance
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if apprenant.user.dateNaissance %}
+                                        {{ apprenant.user.dateNaissance|date('d/m/Y') }}
+                                        <span class="text-muted small ms-2">
+                                            ({{ apprenant.user.dateNaissance|date('Y')|date_modify('-today')|date('%y ans') }})
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-geo-alt me-1"></i>Gouvernorat
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if apprenant.user.gouvernorat %}
+                                        <span class="badge bg-info text-dark">
+                                            {{ apprenant.user.gouvernorat.value }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-mortarboard me-1"></i>Niveau d'études
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if apprenant.user.niveauEtude %}
+                                        <span class="badge bg-primary">{{ apprenant.user.niveauEtude }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Objectif -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-bullseye me-2"></i>Objectif de formation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="mb-0 fs-5">
+                        {% if apprenant.objectif %}
+                            {{ apprenant.objectif }}
+                        {% else %}
+                            <span class="text-muted">Aucun objectif spécifié</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite - Informations complémentaires -->
+        <div class="col-lg-4">
+            <!-- Statut et genre -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-info-circle me-2"></i>Informations générales
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item mb-4">
+                        <label class="text-muted small fw-medium mb-2">
+                            <i class="bi bi-gender-ambiguous me-1"></i>Genre
+                        </label>
+                        <div class="h5 mb-0">
+                            {% if apprenant.genre %}
+                                <span class="badge bg-{{ apprenant.genre == 'homme' ? 'primary' : (apprenant.genre == 'femme' ? 'danger' : 'secondary') }} rounded-pill px-4 py-2">
+                                    <i class="bi bi-{{ apprenant.genre == 'homme' ? 'gender-male' : (apprenant.genre == 'femme' ? 'gender-female' : 'gender-neuter') }} me-1"></i>
+                                    {{ apprenant.genre|capitalize }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <label class="text-muted small fw-medium mb-2">
+                            <i class="bi bi-heart me-1"></i>État civil
+                        </label>
+                        <div class="h5 mb-0">
+                            {% if apprenant.etatCivil %}
+                                <span class="badge bg-warning text-dark rounded-pill px-4 py-2">
+                                    {{ apprenant.etatCivil|capitalize }}
+                                </span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Résumé rapide -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-file-earmark-text me-2"></i>Résumé
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-hash text-muted me-2"></i>ID</span>
+                            <strong>{{ apprenant.id }}</strong>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-envelope text-muted me-2"></i>Email</span>
+                            <span class="badge bg-primary">{{ apprenant.user.email ? '✓' : '✗' }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-telephone text-muted me-2"></i>Téléphone</span>
+                            <span class="badge bg-{{ apprenant.user.telephone ? 'success' : 'danger' }}">
+                                {{ apprenant.user.telephone ? '✓' : '✗' }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-calendar text-muted me-2"></i>Date naissance</span>
+                            <span class="badge bg-{{ apprenant.user.dateNaissance ? 'info' : 'secondary' }}">
+                                {{ apprenant.user.dateNaissance ? '✓' : '✗' }}
+                            </span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-geo-alt text-muted me-2"></i>Gouvernorat</span>
+                            <span class="badge bg-{{ apprenant.user.gouvernorat ? 'info' : 'secondary' }}">
+                                {{ apprenant.user.gouvernorat ? '✓' : '✗' }}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-lightning me-2"></i>Actions rapides
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('admin_apprenant_edit', {id: apprenant.id}) }}" class="btn btn-warning btn-lg">
+                            <i class="bi bi-pencil-square me-2"></i>Modifier les informations
+                        </a>
+                        <a href="{{ path('admin_apprenant_index') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                        </a>
+                        <a href="mailto:{{ apprenant.user.email }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-envelope-fill me-2"></i>Envoyer un email
+                        </a>
+                        {% if apprenant.user.telephone %}
+                        <a href="tel:{{ apprenant.user.telephone }}" class="btn btn-success btn-lg">
+                            <i class="bi bi-telephone-fill me-2"></i>Appeler
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+<style>
+
+    /* Styles personnalisés */
+    .info-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
+    }
+    
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        font-weight: 600;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.45em 0.85em;
+        color:white;
+    }
+    
+    .btn {
+        transition: all 0.3s ease !important;
+        border-radius: 8px !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    /* Effets hover sur les badges */
+    .badge:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s ease;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .info-item {
+            padding: 8px 0;
+        }
+        
+        .card-header h5 {
+            font-size: 1rem;
+        }
+        
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+        }
+    }
+</style>
 {% endblock %}
