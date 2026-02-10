@@ -1,57 +1,438 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Connexion{% endblock %}
+{% block title %}Connexion - Plateforme{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
+<style>
+:root {
+    --primary: #4361ee;
+    --primary-dark: #3a56d4;
+    --secondary: #7209b7;
+    --success: #4cc9f0;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --gray: #6c757d;
+    --border-radius: 16px;
+    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    --transition: all 0.35s ease;
+}
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.login-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    animation: fadeIn 0.6s ease-out;
+    border: none;
+}
+
+.login-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    padding: 2.2rem 1.8rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-header::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(30deg);
+}
+
+.login-header h1 {
+    color: white;
+    font-weight: 700;
+    font-size: 2.2rem;
+    letter-spacing: -0.5px;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.15rem;
+    margin: 0;
+    position: relative;
+}
+
+.login-body {
+    padding: 2.5rem;
+    background: white;
+}
+
+.form-group {
+    margin-bottom: 1.6rem;
+    position: relative;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.65rem;
+    display: block;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label i {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.input-group {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1.5px solid #e2e8f0;
+    transition: var(--transition);
+}
+
+.input-group:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.input-group-text {
+    background: #f8fafc;
+    border: none;
+    padding: 0 1.2rem;
+    color: var(--primary);
+    font-size: 1.3rem;
+}
+
+.form-control {
+    border: none;
+    padding: 0.95rem 1.2rem;
+    font-size: 1.05rem;
+    height: auto !important;
+    box-shadow: none !important;
+    background: transparent;
+}
+
+.form-control:focus {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+    font-style: italic;
+}
+
+/* Password toggle button */
+.toggle-password {
+    background: #f8fafc;
+    border: none;
+    padding: 0 1.3rem;
+    color: var(--gray);
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    background: #edf2f7;
+    color: var(--primary);
+}
+
+/* Remember me checkbox */
+.form-check {
+    padding-left: 2.1rem;
+    margin-top: 0.3rem;
+}
+
+.form-check-input {
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-top: 0.2rem;
+    margin-left: -2.1rem;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.form-check-input:hover + .form-check-label,
+.form-check-input:focus + .form-check-label {
+    color: var(--primary);
+}
+
+/* Submit button */
+.btn-login {
+    background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+    border: none;
+    padding: 0.95rem;
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+    transition: var(--transition);
+    width: 100%;
+    margin-top: 0.4rem;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.45);
+    background: linear-gradient(120deg, var(--primary-dark), #323c9e);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+/* Alert messages */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem 1.3rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    font-weight: 500;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.alert-success {
+    background: #e6f7ee;
+    color: #1a7f4b;
+    border-left: 4px solid #2ecc71;
+}
+
+.alert-danger {
+    background: #fff5f5;
+    color: #c53030;
+    border-left: 4px solid #e53e3e;
+}
+
+.alert i {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+    position: relative;
+    top: 2px;
+}
+
+/* Already logged in message */
+.logged-in-message {
+    background: #eef7ff;
+    border-radius: 14px;
+    padding: 1.2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    border: 1px solid #bee3f8;
+}
+
+.logged-in-message a {
+    color: var(--secondary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.logged-in-message a:hover {
+    text-decoration: underline;
+    color: #5a0790;
+}
+
+/* Register link */
+.register-link {
+    text-align: center;
+    margin-top: 1.8rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.register-link p {
+    margin: 0;
+    color: #4a5568;
+    font-size: 0.95rem;
+}
+
+.register-link a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-block;
+    position: relative;
+    padding-bottom: 2px;
+}
+
+.register-link a:hover {
+    color: var(--primary-dark);
+}
+
+.register-link a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+}
+
+.register-link a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .login-body {
+        padding: 2rem;
+    }
+    
+    .login-header h1 {
+        font-size: 1.9rem;
+    }
+    
+    .login-header p {
+        font-size: 1.05rem;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<div >
     <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-header">
-                    <h2 class="text-center">Connexion</h2>
+        <div class="col-lg-5 col-md-7">
+            <div class="card login-card">
+                <div class="login-header">
+                    <h1>👋 Bonjour !</h1>
+                    <p>Connectez-vous à votre compte</p>
                 </div>
-                <div class="card-body">
+                <div class="login-body">
                     {% for message in app.flashes('success') %}
-                        <div class="alert alert-success">{{ message }}</div>
+                        <div class="alert alert-success">
+                            <i>✅</i> {{ message }}
+                        </div>
                     {% endfor %}
+                    
                     {% for message in app.flashes('error') %}
-                        <div class="alert alert-danger">{{ message }}</div>
+                        <div class="alert alert-danger">
+                            <i>❌</i> {{ message }}
+                        </div>
                     {% endfor %}
 
                     <form method="post">
                         {% if error %}
-                            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-                        {% endif %}
-
-                        {% if app.user %}
-                            <div class="mb-3">
-                                Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Déconnexion</a>
+                            <div class="alert alert-danger">
+                                <i>⚠️</i> {{ error.messageKey|trans(error.messageData, 'security') }}
                             </div>
                         {% endif %}
 
-                        <div class="mb-3">
-                            <label for="inputEmail" class="form-label">Email</label>
-                            <input type="email" value="{{ last_username }}" name="_username" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
+                        {% if app.user %}
+                            <div class="logged-in-message">
+                                <p>Vous êtes connecté en tant que <strong>{{ app.user.userIdentifier }}</strong></p>
+                                <a href="{{ path('app_logout') }}">→ Déconnexion</a>
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="inputEmail" class="form-label">
+                                <i>📧</i> Email
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input 
+                                    type="email" 
+                                    value="{{ last_username }}" 
+                                    name="_username" 
+                                    id="inputEmail" 
+                                    class="form-control" 
+                                    autocomplete="email" 
+                                    required 
+                                    autofocus
+                                    placeholder="votre@email.com">
+                            </div>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="inputPassword" class="form-label">Mot de passe</label>
-                            <input type="password" name="_password" id="inputPassword" class="form-control" autocomplete="current-password" required>
+                        <div class="form-group">
+                            <label for="inputPassword" class="form-label">
+                                <i>🔒</i> Mot de passe
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input 
+                                    type="password" 
+                                    name="_password" 
+                                    id="inputPassword" 
+                                    class="form-control" 
+                                    autocomplete="current-password" 
+                                    required
+                                    placeholder="••••••••">
+                                <button class="toggle-password" type="button" aria-label="Afficher le mot de passe">👁️</button>
+                            </div>
                         </div>
 
                         <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-                        <div class="mb-3 form-check">
-                            <input type="checkbox" name="_remember_me" class="form-check-input" id="remember_me">
-                            <label class="form-check-label" for="remember_me">Se souvenir de moi</label>
+                        <div class="form-check mb-4">
+                            <input 
+                                type="checkbox" 
+                                name="_remember_me" 
+                                class="form-check-input" 
+                                id="remember_me">
+                            <label class="form-check-label" for="remember_me">
+                                Se souvenir de moi
+                            </label>
                         </div>
 
-                        <div class="d-grid gap-2">
-                            <button class="btn btn-primary btn-lg" type="submit">Se connecter</button>
-                        </div>
+                        <button class="btn btn-login" type="submit">
+                            <span>➡️ Se connecter</span>
+                        </button>
 
-                        <div class="text-center mt-3">
-                            <p>Pas encore de compte ? <a href="{{ path('app_register') }}">S'inscrire</a></p>
+                        <div class="register-link">
+                            <p>Pas encore de compte ? <a href="{{ path('app_register') }}">Créer un compte gratuitement</a></p>
                         </div>
                     </form>
                 </div>
@@ -59,4 +440,59 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    const togglePasswordBtn = document.querySelector('.toggle-password');
+    const passwordInput = document.getElementById('inputPassword');
+    
+    if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', function() {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            this.textContent = isPassword ? '🙈' : '👁️';
+            this.setAttribute('aria-label', isPassword ? 'Cacher le mot de passe' : 'Afficher le mot de passe');
+            
+            // Visual feedback
+            passwordInput.closest('.input-group').classList.add('focus-within');
+            setTimeout(() => {
+                if (!isPassword) {
+                    passwordInput.closest('.input-group').classList.remove('focus-within');
+                }
+            }, 300);
+        });
+        
+        // Add focus effect when typing
+        passwordInput.addEventListener('focus', () => {
+            passwordInput.closest('.input-group').classList.add('focus-within');
+        });
+        
+        passwordInput.addEventListener('blur', () => {
+            if (!passwordInput.value) {
+                passwordInput.closest('.input-group').classList.remove('focus-within');
+            }
+        });
+    }
+    
+    // Email field focus effect
+    const emailInput = document.getElementById('inputEmail');
+    if (emailInput) {
+        emailInput.addEventListener('focus', () => {
+            emailInput.closest('.input-group').classList.add('focus-within');
+        });
+        
+        emailInput.addEventListener('blur', () => {
+            if (!emailInput.value) {
+                emailInput.closest('.input-group').classList.remove('focus-within');
+            }
+        });
+        
+        // Initialize if field has value
+        if (emailInput.value) {
+            emailInput.closest('.input-group').classList.add('focus-within');
+        }
+    }
+});
+</script>
 {% endblock %}

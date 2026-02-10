@@ -111,10 +111,7 @@ class RegistrationController extends AbstractController
                 $apprenant = new Apprenant();
                 $apprenant->setUser($user);
                 
-                // Copier la date de naissance de User vers Apprenant si elle existe
-                if ($user->getDateNaissance()) {
-                    $apprenant->setDateNaissance($user->getDateNaissance());
-                }
+                
                 
                 // Récupérer les données du formulaire
                 if ($form->has('genre') && $form->get('genre')->getData()) {
@@ -155,23 +152,7 @@ class RegistrationController extends AbstractController
                     $societe->setSiteWeb($form->get('siteWeb')->getData());
                 }
                 
-                // Gérer l'upload du logo
-                $logoFile = $form->get('logo')->getData();
-                if ($logoFile) {
-                    $originalFilename = pathinfo($logoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                    $safeFilename = $slugger->slug($originalFilename);
-                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $logoFile->guessExtension();
-
-                    try {
-                        $logoFile->move(
-                            $this->getParameter('kernel.project_dir') . '/public/uploads/logos',
-                            $newFilename
-                        );
-                        $societe->setLogo($newFilename);
-                    } catch (FileException $e) {
-                        $this->addFlash('error', 'Erreur lors de l\'upload du logo');
-                    }
-                }
+               
                 
                 $em->persist($societe);
             }

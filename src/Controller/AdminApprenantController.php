@@ -89,8 +89,7 @@ class AdminApprenantController extends AbstractController
                 $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             }
 
-            $user->setNiveauEtude($apprenant->getNiveauEtude());
-            $apprenant->setDateNaissance($user->getDateNaissance());
+            
 
             $em->persist($user);
             $em->persist($apprenant);
@@ -132,8 +131,7 @@ class AdminApprenantController extends AbstractController
                 $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             }
 
-            $user->setNiveauEtude($apprenant->getNiveauEtude());
-            $apprenant->setDateNaissance($user->getDateNaissance());
+            
 
             $em->flush();
 
