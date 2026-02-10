@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement réussi{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="alert alert-success">
+        Paiement réussi.
+    </div>
+
+    {% if commande is defined and commande %}
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Commande {{ commande.reference }}</h5>
+                <p class="mb-0">Statut: {{ commande.statut }}</p>
+                <p class="mb-0">Total: {{ commande.total }} Dt</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a class="btn btn-primary" href="{{ path('boutique_index') }}">Retour à la boutique</a>
+        <a class="btn btn-outline-secondary" href="{{ path('boutique_panier') }}">Voir panier</a>
+    </div>
+</div>
+{% endblock %}
