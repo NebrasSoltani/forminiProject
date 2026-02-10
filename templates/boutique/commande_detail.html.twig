@@ -91,14 +91,14 @@
                                         </td>
 
                                         <td>
-                                            {{ item.prixUnitaire|number_format(2, ',', ' ') }} €
+                                            {{ item.prixUnitaire|number_format(2, ',', ' ') }} dt
                                         </td>
 
                                         <td>{{ item.quantite }}</td>
 
                                         <td>
                                             <strong>
-                                                {{ item.getSousTotal()|number_format(2, ',', ' ') }} €
+                                                {{ item.getSousTotal()|number_format(2, ',', ' ') }} dt
                                             </strong>
                                         </td>
                                     </tr>
@@ -112,7 +112,7 @@
                                         </td>
                                         <td>
                                             <strong class="text-primary fs-5">
-                                                {{ commande.calculerTotal()|number_format(2, ',', ' ') }} €
+                                                {{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt
                                             </strong>
                                         </td>
                                     </tr>

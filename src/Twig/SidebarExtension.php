@@ -43,6 +43,40 @@ class SidebarExtension extends AbstractExtension
                 ],
                 [
                     'type' => 'divider',
+                    'label' => 'Utilisateurs'
+                ],
+                [
+                    'label' => 'Apprenants',
+                    'icon' => 'users',
+                    'route' => 'admin_apprenant_index',
+                ],
+                [
+                    'label' => 'Ajouter Apprenant',
+                    'icon' => 'user-plus',
+                    'route' => 'admin_apprenant_new',
+                ],
+                [
+                    'label' => 'Formateurs',
+                    'icon' => 'user-check',
+                    'route' => 'admin_formateur_index',
+                ],
+                [
+                    'label' => 'Ajouter Formateur',
+                    'icon' => 'user-plus',
+                    'route' => 'admin_formateur_new',
+                ],
+                [
+                    'label' => 'Sociétés',
+                    'icon' => 'briefcase',
+                    'route' => 'admin_societe_index',
+                ],
+                [
+                    'label' => 'Ajouter Société',
+                    'icon' => 'plus-circle',
+                    'route' => 'admin_societe_new',
+                ],
+                [
+                    'type' => 'divider',
                     'label' => 'Boutique'
                 ],
                 [
@@ -134,6 +168,15 @@ class SidebarExtension extends AbstractExtension
                     'label' => 'Mes Favoris',
                     'icon' => 'heart',
                     'route' => 'apprenant_mes_favoris',
+                ],
+                [
+                    'type' => 'divider',
+                    'label' => 'Événements'
+                ],
+                [
+                    'label' => 'Événements',
+                    'icon' => 'calendar',
+                    'route' => 'apprenant_evenements_index',
                 ],
                 [
                     'type' => 'divider',

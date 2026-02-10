@@ -21,5 +21,11 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
+    App\Service\SendGridEmailSender:
+        arguments:
+            $sendgridApiKey: '%env(string:SENDGRID_API_KEY)%'
+            $sendgridFromEmail: '%env(string:SENDGRID_FROM_EMAIL)%'
+            $sendgridFromName: '%env(default::SENDGRID_FROM_NAME)%'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -49,16 +49,16 @@
         {% for item in commande.items %}
             <tr>
                 <td>{{ item.produit.nom }}</td>
-                <td>{{ item.prixUnitaire }} €</td>
+                <td>{{ item.prixUnitaire }} dt</td>
                 <td>{{ item.quantite }}</td>
-                <td>{{ item.prixUnitaire * item.quantite }} €</td>
+                <td>{{ item.prixUnitaire * item.quantite }} dt</td>
             </tr>
         {% endfor %}
     </tbody>
 </table>
 
 <div class="total">
-    Total : {{ commande.total }} €
+    Total : {{ commande.total }} dt
 </div>
 
 </body>

@@ -40,12 +40,12 @@ class ProfileEditType extends AbstractType
             ])
             ->add('telephone', TelType::class, [
                 'label' => 'Téléphone',
-                'required' => false,
+                'required' => true,
             ])
             ->add('gouvernorat', ChoiceType::class, [
                 'label' => 'Gouvernorat',
                 'choices' => array_combine(
-                    array_map(fn(Gouvernorat $g) => $g->name, Gouvernorat::cases()), 
+                    array_map(fn(Gouvernorat $g) => $g->value, Gouvernorat::cases()), 
                     Gouvernorat::cases()
                 ),
                 'placeholder' => 'Choisissez un gouvernorat',
@@ -54,7 +54,7 @@ class ProfileEditType extends AbstractType
             ->add('dateNaissance', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
-                'required' => false,
+                'required' => true,
             ])
             ->add('profession', TextType::class, [
                 'label' => 'Profession',
