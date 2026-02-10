@@ -1,6 +1,8 @@
 {% extends 'base.html.twig' %}
+{# Hérite du layout principal avec header, footer et styles globaux #}
 
 {% block title %}Boutique - Produits Pédagogiques{% endblock %}
+{# Titre de la page #}
 
 {% block body %}
 <div class="container mt-4">
@@ -12,9 +14,11 @@
         </h1>
         <p class="text-muted">Découvrez nos produits universitaires et matériels d'étude</p>
 
+        {# Boutons Panier et Commandes #}
         <div class="d-flex justify-content-center gap-3 mt-3">
             <a href="{{ path('boutique_panier') }}" class="btn btn-primary rounded-pill px-4 position-relative">
                 🛒 Panier
+                {# Badge indiquant le nombre de produits dans le panier #}
                 {% if panier|length > 0 %}
                     <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
                         {{ panier|length }}
@@ -27,7 +31,6 @@
             </a>
         </div>
     </div>
-
 
     {# ================= RECHERCHE ================= #}
     <div class="text-center mb-4">
@@ -43,15 +46,16 @@
         </form>
     </div>
 
-
     {# ================= FILTRES ================= #}
     <div class="tera-boutique-filters mb-4">
 
+        {# Filtre "Tous" #}
         <a href="{{ path('boutique_index') }}"
            class="tera-filter-pill {{ categorieFilter is null ? 'active' : '' }}">
             Tous
         </a>
 
+        {# Filtre par catégorie #}
         <a href="{{ path('boutique_index', {categorie: 'Informatique'}) }}"
            class="tera-filter-pill {{ categorieFilter == 'Informatique' ? 'active' : '' }}">
             💻 Informatique
@@ -73,7 +77,6 @@
         </a>
     </div>
 
-
     {# ================= PRODUITS ================= #}
     {% if produits is empty %}
         <div class="text-center py-5 text-muted">
@@ -86,6 +89,7 @@
 
                     <div class="card tera-product-card h-100">
 
+                        {# Image produit #}
                         {% if produit.image %}
                             <img src="{{ asset('uploads/produits/' ~ produit.image) }}"
                                  class="tera-product-cover-img"
@@ -96,6 +100,7 @@
                             <h6 class="fw-bold">{{ produit.nom }}</h6>
                             <small class="text-muted mb-2">{{ produit.categorie }}</small>
 
+                            {# Prix et bouton Voir #}
                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <strong class="text-primary">
                                     {{ produit.prix|number_format(2, ',', ' ') }} DT
@@ -115,7 +120,6 @@
         </div>
     {% endif %}
 
-
     {# ================= FLOATING PANIER ================= #}
     {% if panier|length > 0 %}
         <div class="tera-floating-checkout">
@@ -126,7 +130,6 @@
     {% endif %}
 
 </div>
-
 
 {# ================= STYLE ================= #}
 <style>
