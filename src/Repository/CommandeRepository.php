@@ -9,13 +9,22 @@ use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Commande>
+ * 
+ * Repository dédié à l'entité Commande.
+ * Permet de créer des requêtes personnalisées pour récupérer, filtrer ou compter des commandes.
  */
 class CommandeRepository extends ServiceEntityRepository
 {
+    // ===== CONSTRUCTEUR =====
     public function __construct(ManagerRegistry $registry)
     {
+        // On indique au parent que ce repository gère l'entité Commande
         parent::__construct($registry, Commande::class);
     }
+
+    // ===============================================
+    // Méthodes personnalisées pour interroger les commandes
+    // ===============================================
 
     /**
      * Récupère toutes les commandes d'un utilisateur, triées par date décroissante
@@ -25,12 +34,12 @@ class CommandeRepository extends ServiceEntityRepository
      */
     public function findByUser(User $user): array
     {
-        return $this->createQueryBuilder('c')
-            ->where('c.utilisateur = :user')
-            ->setParameter('user', $user)
-            ->orderBy('c.dateCommande', 'DESC')
+        return $this->createQueryBuilder('c') // "c" = alias pour Commande
+            ->where('c.utilisateur = :user') // filtre par utilisateur
+            ->setParameter('user', $user) // injecte l'objet User
+            ->orderBy('c.dateCommande', 'DESC') // tri du plus récent au plus ancien
             ->getQuery()
-            ->getResult();
+            ->getResult(); // renvoie un tableau de Commande
     }
 
     /**
@@ -45,7 +54,7 @@ class CommandeRepository extends ServiceEntityRepository
             ->where('c.reference = :reference')
             ->setParameter('reference', $reference)
             ->getQuery()
-            ->getOneOrNullResult();
+            ->getOneOrNullResult(); // retourne soit une Commande, soit null
     }
 
     /**
@@ -94,7 +103,7 @@ class CommandeRepository extends ServiceEntityRepository
     public function findBetweenDates(\DateTimeInterface $start, \DateTimeInterface $end): array
     {
         return $this->createQueryBuilder('c')
-            ->where('c.dateCommande BETWEEN :start AND :end')
+            ->where('c.dateCommande BETWEEN :start AND :end') // filtre sur une période
             ->setParameters([
                 'start' => $start,
                 'end' => $end,
@@ -114,7 +123,7 @@ class CommandeRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('c')
             ->orderBy('c.dateCommande', 'DESC')
-            ->setMaxResults($limit)
+            ->setMaxResults($limit) // limite le nombre de résultats
             ->getQuery()
             ->getResult();
     }
@@ -127,9 +136,9 @@ class CommandeRepository extends ServiceEntityRepository
     public function countAll(): int
     {
         return (int) $this->createQueryBuilder('c')
-            ->select('COUNT(c.id)')
+            ->select('COUNT(c.id)') // SELECT COUNT(*)
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getSingleScalarResult(); // retourne un entier
     }
 
     /**
