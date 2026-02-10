@@ -24,12 +24,15 @@ class ApprenantAdminType extends AbstractType
         $builder
             ->add('email', EmailType::class, [
                 'property_path' => 'user.email',
+                'required' => true,
             ])
             ->add('nom', TextType::class, [
                 'property_path' => 'user.nom',
+                'required' => true,
             ])
             ->add('prenom', TextType::class, [
                 'property_path' => 'user.prenom',
+                'required' => true,
             ])
             ->add('telephone', TelType::class, [
                 'property_path' => 'user.telephone',
@@ -90,16 +93,15 @@ class ApprenantAdminType extends AbstractType
             ])
             ->add('plainPassword', PasswordType::class, [
                 'mapped' => false,
-                'required' => !$options['is_edit'],
+                'required' => false,
+                'attr' => [
+                    'placeholder' => 'Laissez vide pour ne pas changer le mot de passe',
+                ],
                 'constraints' => [
                     new Length([
                         'min' => 6,
                         'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères',
                         'max' => 4096,
-                    ]),
-                    new Regex([
-                        'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
-                        'message' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre',
                     ]),
                 ],
             ]);
