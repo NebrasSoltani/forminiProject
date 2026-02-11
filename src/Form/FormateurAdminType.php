@@ -28,9 +28,11 @@ class FormateurAdminType extends AbstractType
             ])
             ->add('nom', TextType::class, [
                 'property_path' => 'user.nom',
+                'required' => true,
             ])
             ->add('prenom', TextType::class, [
                 'property_path' => 'user.prenom',
+                'required' => true,
             ])
             ->add('telephone', TelType::class, [
                 'property_path' => 'user.telephone',
