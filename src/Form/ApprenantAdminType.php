@@ -97,13 +97,7 @@ class ApprenantAdminType extends AbstractType
                 'attr' => [
                     'placeholder' => 'Laissez vide pour ne pas changer le mot de passe',
                 ],
-                'constraints' => [
-                    new Length([
-                        'min' => 6,
-                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères',
-                        'max' => 4096,
-                    ]),
-                ],
+                
             ]);
     }
 
