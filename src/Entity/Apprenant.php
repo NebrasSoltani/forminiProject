@@ -19,6 +19,7 @@ class Apprenant
 
     #[ORM\OneToOne(inversedBy: 'apprenant', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\Valid]
     private ?User $user = null;
 
     
@@ -47,7 +48,7 @@ class Apprenant
 
     #[ORM\Column(type: 'json', nullable: true)]
     #[Assert\Count(
-    min: 0,
+    min: 1,
     minMessage: "Choisissez au moins un centre d'intérêt"
     )]
     private ?array $domainesInteret = [];
