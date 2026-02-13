@@ -24,7 +24,7 @@
                 </div>
 
                 <div class="card-body">
-                    {{ form_start(form) }}
+                    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
 
                     {# ===== SECTION 1 : Infos ===== #}
                     <div class="section-card mb-4">

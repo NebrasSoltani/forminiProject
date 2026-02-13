@@ -85,6 +85,20 @@
                                 </small>
                             </div>
 
+                            {# Contenu de la leçon #}
+                            <div class="form-group">
+                                <label for="{{ form.contenu.vars.id }}" class="form-label">
+                                    <i class="fa fa-file-alt text-muted mr-1"></i>
+                                    Contenu de la leçon
+                                </label>
+                                {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': 12, 'placeholder': 'Saisissez le contenu de votre leçon (HTML supporté)...'}}) }}
+                                {{ form_errors(form.contenu) }}
+                                <small class="form-text text-muted">
+                                    <i class="fa fa-code mr-1"></i>
+                                    Vous pouvez utiliser du HTML pour enrichir le contenu (gras, listes, liens, etc.)
+                                </small>
+                            </div>
+
                             {# URL Vidéo #}
                             <div class="form-group">
                                 <label for="{{ form.videoUrl.vars.id }}" class="form-label">
@@ -129,6 +143,22 @@
                                 </div>
                             </div>
 
+                            {# Leçon gratuite #}
+                            <div class="form-group">
+                                <div class="custom-control custom-checkbox">
+                                    {{ form_widget(form.gratuit, {'attr': {'class': 'custom-control-input'}}) }}
+                                    <label class="custom-control-label" for="{{ form.gratuit.vars.id }}">
+                                        <i class="fa fa-unlock text-success mr-1"></i>
+                                        <strong>Leçon gratuite (accessible sans inscription)</strong>
+                                    </label>
+                                </div>
+                                {{ form_errors(form.gratuit) }}
+                                <small class="form-text text-muted ml-4">
+                                    <i class="fa fa-info-circle mr-1"></i>
+                                    Cochez cette case pour rendre cette leçon accessible à tous, même sans inscription
+                                </small>
+                            </div>
+
                             {# Boutons d'action #}
                             <div class="form-actions mt-4 pt-3 border-top">
                                 <div class="d-flex justify-content-between">
@@ -147,51 +177,171 @@
 
             {# Sidebar - Aide et conseils #}
             <div class="col-lg-4">
-                {# Guide de création #}
+                {# Conseils de création de leçons #}
                 <div class="card mb-3">
                     <div class="card-body">
                         <h5 class="card-title mb-3">
                             <i class="fa fa-lightbulb text-warning mr-2"></i>
-                            Conseils
+                            Conseils de création
                         </h5>
                         
                         <div class="tip-item">
                             <div class="tip-icon">
-                                <i class="fa fa-check-circle text-success"></i>
+                                <i class="fa fa-target text-success"></i>
                             </div>
                             <div class="tip-content">
-                                <strong>Titre clair</strong>
-                                <p class="mb-0">Choisissez un titre explicite qui reflète le contenu</p>
+                                <strong>Un objectif par leçon</strong>
+                                <p class="mb-0">Concentrez-vous sur un concept unique et précis à maîtriser</p>
                             </div>
                         </div>
 
                         <div class="tip-item">
                             <div class="tip-icon">
-                                <i class="fa fa-check-circle text-success"></i>
+                                <i class="fa fa-hourglass-half text-info"></i>
                             </div>
                             <div class="tip-content">
-                                <strong>Description détaillée</strong>
-                                <p class="mb-0">Expliquez les objectifs et ce qui sera appris</p>
+                                <strong>Durée optimale</strong>
+                                <p class="mb-0">Gardez vos vidéos entre 5 et 15 minutes pour une attention maximale</p>
                             </div>
                         </div>
 
                         <div class="tip-item">
                             <div class="tip-icon">
-                                <i class="fa fa-check-circle text-success"></i>
+                                <i class="fa fa-book-open text-primary"></i>
                             </div>
                             <div class="tip-content">
-                                <strong>Vidéo de qualité</strong>
-                                <p class="mb-0">Utilisez des vidéos HD avec un bon son</p>
+                                <strong>Structure claire</strong>
+                                <p class="mb-0">Introduction, développement, pratique et résumé dans chaque leçon</p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-hands-helping text-warning"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Pratique immédiate</strong>
+                                <p class="mb-0">Proposez des exercices ou exemples pour appliquer immédiatement</p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-microphone text-danger"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Audio de qualité</strong>
+                                <p class="mb-0">Un son clair est plus important qu'une vidéo parfaite</p>
                             </div>
                         </div>
 
                         <div class="tip-item mb-0">
                             <div class="tip-icon">
-                                <i class="fa fa-check-circle text-success"></i>
+                                <i class="fa fa-link text-info"></i>
                             </div>
                             <div class="tip-content">
-                                <strong>Ordre logique</strong>
-                                <p class="mb-0">Organisez vos leçons de manière progressive</p>
+                                <strong>Transitions fluides</strong>
+                                <p class="mb-0">Créez des liens logiques entre cette leçon et les suivantes</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Bonnes pratiques vidéo #}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fa fa-video text-danger mr-2"></i>
+                            Bonnes pratiques vidéo
+                        </h5>
+                        
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-eye text-primary"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Support visuel efficace</strong>
+                                <p class="mb-0">Utilisez des diapositives, schémas ou screencasts pour illustrer</p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-tachometer-alt text-success"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Rythme adapté</strong>
+                                <p class="mb-0">Parlez clairement en variant le rythme pour maintenir l'intérêt</p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-code text-info"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Exemples concrets</strong>
+                                <p class="mb-0">Montrez des cas réels et des démonstrations pratiques</p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item mb-0">
+                            <div class="tip-icon">
+                                <i class="fa fa-closed-captioning text-warning"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Sous-titres recommandés</strong>
+                                <p class="mb-0">Ajoutez des sous-titres pour une meilleure accessibilité</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {# Contenu et accessibilité #}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fa fa-file-alt text-success mr-2"></i>
+                            Contenu et accessibilité
+                        </h5>
+                        
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-align-left text-primary"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Contenu riche et structuré</strong>
+                                <p class="mb-0">Utilisez des listes, titres, et mises en forme pour faciliter la lecture</p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-code text-info"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>HTML simple et sémantique</strong>
+                                <p class="mb-0">Utilisez &lt;h3&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;strong&gt;, &lt;a&gt; pour structurer</p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item">
+                            <div class="tip-icon">
+                                <i class="fa fa-unlock-alt text-success"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Leçon gratuite stratégique</strong>
+                                <p class="mb-0">Offrez 1-2 leçons gratuites pour attirer et convaincre les apprenants</p>
+                            </div>
+                        </div>
+
+                        <div class="tip-item mb-0">
+                            <div class="tip-icon">
+                                <i class="fa fa-gift text-warning"></i>
+                            </div>
+                            <div class="tip-content">
+                                <strong>Valeur immédiate</strong>
+                                <p class="mb-0">Les leçons gratuites doivent apporter une vraie valeur ajoutée</p>
                             </div>
                         </div>
                     </div>
@@ -411,6 +561,78 @@
     margin: 0 -1.25rem -1.25rem;
     padding: 1.25rem;
     border-radius: 0 0 12px 12px;
+}
+
+/* Custom checkbox */
+.custom-control {
+    position: relative;
+    display: block;
+    min-height: 1.5rem;
+    padding-left: 2.5rem;
+}
+
+.custom-control-input {
+    position: absolute;
+    left: 0;
+    z-index: -1;
+    width: 1.25rem;
+    height: 1.25rem;
+    opacity: 0;
+}
+
+.custom-control-label {
+    position: relative;
+    margin-bottom: 0;
+    vertical-align: top;
+    cursor: pointer;
+}
+
+.custom-control-label::before {
+    position: absolute;
+    top: 0.125rem;
+    left: -2.5rem;
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    pointer-events: none;
+    content: "";
+    background-color: #fff;
+    border: 1px solid #adb5bd;
+    border-radius: 0.25rem;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    color: #fff;
+    border-color: #28a745;
+    background-color: #28a745;
+}
+
+.custom-control-label::after {
+    position: absolute;
+    top: 0.125rem;
+    left: -2.5rem;
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    content: "";
+    background: no-repeat 50% / 50% 50%;
+}
+
+.custom-control-input:checked ~ .custom-control-label::after {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%23fff' d='M6.564.75l-3.59 3.612-1.538-1.55L0 4.26l2.974 2.99L8 2.193z'/%3e%3c/svg%3e");
+}
+
+.custom-control-input:focus ~ .custom-control-label::before {
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+}
+
+.custom-control-input:disabled ~ .custom-control-label {
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+.custom-control-input:disabled ~ .custom-control-label::before {
+    background-color: #e9ecef;
 }
 
 /* Responsive */

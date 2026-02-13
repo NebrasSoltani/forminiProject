@@ -113,15 +113,13 @@
                                     </div>
                                 </div>
                                 <div class="tera-video-frame-large">
-                                    <div class="ratio ratio-21x9">
-                                        <iframe 
-                                            src="{{ lecon.videoUrl|convertYoutubeToEmbed }}?autoplay=0&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=1&cc_load_policy=1" 
-                                            title="{{ lecon.titre }}"
-                                            frameborder="0" 
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                                            allowfullscreen>
-                                        </iframe>
-                                    </div>
+                                    <iframe 
+                                        src="{{ lecon.videoUrl|convertYoutubeToEmbed }}?autoplay=0&controls=1&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&fs=1&cc_load_policy=1" 
+                                        title="{{ lecon.titre }}"
+                                        frameborder="0" 
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                                        allowfullscreen>
+                                    </iframe>
                                 </div>
                             </div>
                             
@@ -477,11 +475,16 @@
 .tera-video-player-container-large {
     position: relative;
     background: #000;
-    min-height: 450px;
+    width: 100%;
+    height: 600px;
 }
 
 .tera-video-frame-large {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     border-radius: 0;
 }
 
@@ -489,6 +492,10 @@
     border: none;
     width: 100%;
     height: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
 /* Wrapper original pour compatibilité */
@@ -521,7 +528,8 @@
     pointer-events: none;
 }
 
-.tera-video-player-container:hover .tera-video-overlay {
+.tera-video-player-container:hover .tera-video-overlay,
+.tera-video-player-container-large:hover .tera-video-overlay {
     opacity: 1;
 }
 
@@ -573,8 +581,21 @@
 }
 
 .tera-video-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 20px 24px;
-    background: linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%);
+    background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.9) 100%);
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+.tera-video-wrapper-large:hover .tera-video-footer {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .tera-video-action-btn {
@@ -833,13 +854,13 @@
     }
     
     .tera-video-player-container-large {
-        min-height: 300px;
+        height: 350px;
     }
 }
 
 @media (min-width: 1400px) {
     .tera-video-player-container-large {
-        min-height: 520px;
+        height: 700px;
     }
     
     .tera-video-wrapper-large {
