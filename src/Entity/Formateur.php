@@ -17,6 +17,8 @@ class Formateur
 
     #[ORM\OneToOne(inversedBy: 'formateur', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\Valid]
+
     private ?User $user = null;
 
     #[ORM\Column(length: 255, nullable: true)]
