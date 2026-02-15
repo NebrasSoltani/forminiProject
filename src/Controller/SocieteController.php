@@ -114,7 +114,9 @@ class SocieteController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $form = $this->createForm(OffreStageType::class, $offre);
+        $form = $this->createForm(OffreStageType::class, $offre, [
+            'is_edit' => true,
+        ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {

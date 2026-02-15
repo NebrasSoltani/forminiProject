@@ -153,8 +153,11 @@ class OffreStageType extends AbstractType
                         'message' => 'Numéro de téléphone invalide (8-20 chiffres)'
                     ])
                 ]
-            ])
-            ->add('statut', ChoiceType::class, [
+            ]);
+        
+        // Le champ statut n'est affiché que lors de l'édition
+        if ($options['is_edit']) {
+            $builder->add('statut', ChoiceType::class, [
                 'label' => 'Statut',
                 'choices' => [
                     'Publiée' => 'publiee',
@@ -162,12 +165,14 @@ class OffreStageType extends AbstractType
                     'Expirée' => 'expiree',
                 ]
             ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => OffreStage::class,
+            'is_edit' => false,
         ]);
     }
 }

@@ -3,15 +3,27 @@
 {% block title %}{{ offre.id ? 'Modifier' : 'Nouvelle' }} Offre{% endblock %}
 
 {% block body %}
-<div class="page-wrapper">
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-10 col-12 mx-auto">
+                {# Flash messages #}
+                {% for type, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title mb-4">{{ offre.id ? 'Modifier l\'offre' : 'Nouvelle offre de stage' }}</h4>
                         
                         {{ form_start(form) }}
+                        
+                        {# Afficher les erreurs globales du formulaire #}
+                        {{ form_errors(form) }}
                         
                         <div class="row">
                             <div class="col-md-8">
@@ -108,7 +120,7 @@
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-8">
+                            <div class="col-md-{% if form.statut is defined %}8{% else %}12{% endif %}">
                                 <div class="mb-3">
                                     {{ form_label(form.competencesRequises) }}
                                     {{ form_widget(form.competencesRequises, {'attr': {'class': 'form-control'}}) }}
@@ -116,6 +128,7 @@
                                 </div>
                             </div>
                             
+                            {% if form.statut is defined %}
                             <div class="col-md-4">
                                 <div class="mb-3">
                                     {{ form_label(form.statut) }}
@@ -123,6 +136,7 @@
                                     {{ form_errors(form.statut) }}
                                 </div>
                             </div>
+                            {% endif %}
                         </div>
                         
                         <h5 class="mt-4 mb-3">Informations de contact</h5>
@@ -153,11 +167,10 @@
                             </button>
                         </div>
                         
-                        {{ form_end(form, {'render_rest': false}) }}
+                        {{ form_end(form) }}
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
