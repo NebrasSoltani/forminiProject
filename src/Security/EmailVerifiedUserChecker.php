@@ -16,7 +16,7 @@ class EmailVerifiedUserChecker implements UserCheckerInterface
         }
 
         if (!$user->isEmailVerified()) {
-            throw new CustomUserMessageAccountStatusException('Veuillez vérifier votre email avant de vous connecter.');
+            throw new CustomUserMessageAccountStatusException('⚠️ Votre email n\'est pas encore vérifié. Consultez votre boîte mail ou demandez un nouveau lien de vérification.');
         }
     }
 

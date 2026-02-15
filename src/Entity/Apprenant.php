@@ -47,7 +47,7 @@ class Apprenant
 
     #[ORM\Column(type: 'json', nullable: true)]
     #[Assert\Count(
-    min: 1,
+    min: 0,
     minMessage: "Choisissez au moins un centre d'intérêt"
     )]
     private ?array $domainesInteret = [];

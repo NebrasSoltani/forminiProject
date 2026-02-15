@@ -3,9 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\Apprenant;
+use App\Entity\Domaine;
 use App\Entity\User;
 use App\Form\ApprenantAdminType;
 use App\Repository\ApprenantRepository;
+use App\Repository\DomaineRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,9 +22,12 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class AdminApprenantController extends AbstractController
 {
     #[Route('/', name: 'admin_apprenant_index', methods: ['GET'])]
-    public function index(Request $request, ApprenantRepository $apprenantRepository): Response
+    public function index(Request $request, ApprenantRepository $apprenantRepository, DomaineRepository $domaineRepository): Response
     {
         $q = trim((string) $request->query->get('q', ''));
+        $genre = $request->query->get('genre', '');
+        $domaineId = $request->query->get('domaine', '');
+        $profession = trim((string) $request->query->get('profession', ''));
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = (int) $request->query->get('limit', 10);
         if ($limit <= 0) {
@@ -34,14 +39,33 @@ class AdminApprenantController extends AbstractController
 
         $qb = $apprenantRepository->createQueryBuilder('a')
             ->join('a.user', 'u')
+            ->leftJoin('a.domaine', 'd')
             ->andWhere('u.roleUtilisateur = :role')
             ->setParameter('role', 'apprenant')
             ->orderBy('u.id', 'DESC');
 
         if ($q !== '') {
             $qb
-                ->andWhere('u.email LIKE :q OR u.nom LIKE :q OR u.prenom LIKE :q')
+                ->andWhere('u.email LIKE :q OR u.nom LIKE :q OR u.prenom LIKE :q OR u.telephone LIKE :q')
                 ->setParameter('q', '%' . $q . '%');
+        }
+
+        if ($genre !== '') {
+            $qb
+                ->andWhere('a.genre = :genre')
+                ->setParameter('genre', $genre);
+        }
+
+        if ($domaineId !== '') {
+            $qb
+                ->andWhere('d.id = :domaineId')
+                ->setParameter('domaineId', (int) $domaineId);
+        }
+
+        if ($profession !== '') {
+            $qb
+                ->andWhere('u.profession LIKE :profession')
+                ->setParameter('profession', '%' . $profession . '%');
         }
 
         $query = $qb->getQuery()
@@ -57,7 +81,11 @@ class AdminApprenantController extends AbstractController
 
         return $this->render('admin/apprenant/index.html.twig', [
             'apprenants' => $paginator,
+            'domaines' => $domaineRepository->findAll(),
             'q' => $q,
+            'genre' => $genre,
+            'domaine' => $domaineId,
+            'profession' => $profession,
             'page' => $page,
             'limit' => $limit,
             'total' => $total,
@@ -131,11 +159,22 @@ class AdminApprenantController extends AbstractController
                 $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             }
 
-            
-
             $em->flush();
 
-            return $this->redirectToRoute('admin_apprenant_index');
+            // Add success flash message
+            $this->addFlash('success', 'Les informations de l\'apprenant ont été mises à jour avec succès !');
+
+            return $this->redirectToRoute('admin_apprenant_show', ['id' => $apprenant->getId()]);
+        }
+
+        // Handle form validation errors
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            
+            $this->addFlash('error', 'Erreur de validation : ' . implode(', ', $errors));
         }
 
         return $this->render('admin/apprenant/edit.html.twig', [

@@ -30,20 +30,22 @@ class ProfileEditType extends AbstractType
                 'label' => 'Nom',
                 'required' => true,
             ])
+
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom',
                 'required' => true,
             ])
+
             ->add('email', EmailType::class, [
                 'label' => 'Email',
                 'required' => true,
             ])
+
             ->add('telephone', TelType::class, [
                 'label' => 'Téléphone',
                 'required' => true,
             ])
 
-            // ✅ Version propre avec Enum Gouvernorat
             ->add('gouvernorat', ChoiceType::class, [
                 'label' => 'Gouvernorat',
                 'choices' => array_combine(
@@ -84,27 +86,32 @@ class ProfileEditType extends AbstractType
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('bio', TextareaType::class, [
                 'label' => 'Biographie',
                 'mapped' => false,
                 'required' => false,
                 'attr' => ['rows' => 4],
             ])
+
             ->add('experienceAnnees', IntegerType::class, [
                 'label' => 'Années d\'expérience',
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('linkedin', UrlType::class, [
                 'label' => 'Profil LinkedIn',
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('portfolio', UrlType::class, [
                 'label' => 'Portfolio',
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('cv', FileType::class, [
                 'label' => 'CV (PDF)',
                 'mapped' => false,
@@ -130,6 +137,7 @@ class ProfileEditType extends AbstractType
                 ],
                 'placeholder' => 'Choisissez...',
             ])
+
             ->add('etatCivil', ChoiceType::class, [
                 'label' => 'État civil',
                 'mapped' => false,
@@ -142,6 +150,7 @@ class ProfileEditType extends AbstractType
                 ],
                 'placeholder' => 'Choisissez...',
             ])
+
             ->add('niveauEtude', ChoiceType::class, [
                 'label' => 'Niveau d\'étude',
                 'mapped' => false,
@@ -155,6 +164,7 @@ class ProfileEditType extends AbstractType
                 ],
                 'placeholder' => 'Choisissez...',
             ])
+
             ->add('objectif', TextareaType::class, [
                 'label' => 'Objectifs',
                 'mapped' => false,
@@ -167,26 +177,31 @@ class ProfileEditType extends AbstractType
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('secteur', TextType::class, [
                 'label' => 'Secteur',
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('descriptionSociete', TextareaType::class, [
                 'label' => 'Description',
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('adresse', TextareaType::class, [
                 'label' => 'Adresse',
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('siteWeb', UrlType::class, [
                 'label' => 'Site web',
                 'mapped' => false,
                 'required' => false,
             ])
+
             ->add('logo', FileType::class, [
                 'label' => 'Logo',
                 'mapped' => false,

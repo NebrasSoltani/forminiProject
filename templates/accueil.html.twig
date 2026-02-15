@@ -71,8 +71,7 @@ https://templatemo.com/tm-565-onix-digital
               <li class="scroll-to-section"><a href="#services">Formations</a></li>
               <li class="scroll-to-section"><a href="#evenements">&#201;v&#233;nements</a></li>
               <li class="scroll-to-section"><a href="#about">À Propos</a></li>
-              <li class="scroll-to-section"><a href="#portfolio">Réussites</a></li>
-              <li class="scroll-to-section"><a href="#video">Nos Programmes</a></li> 
+              <li class="scroll-to-section"><a href="#portfolio">Nos Formateurs</a></li>
               <li class="scroll-to-section"><a href="#contact">Contact</a></li> 
               {% if app.user %}
                 <li class="scroll-to-section dropdown">
@@ -111,7 +110,7 @@ https://templatemo.com/tm-565-onix-digital
               {% else %}
                 <li class="scroll-to-section">
                   <div class="main-red-button-hover">
-                    <a href="{{ path('app_register') }}">Rejoindre Formini</a>
+                    <a href="{{ path('app_login') }}">Rejoindre Formini</a>
                   </div>
                 </li>
               {% endif %}
@@ -437,6 +436,13 @@ https://templatemo.com/tm-565-onix-digital
               </div>
             {% endif %}
           </div>
+        </div>
+      </div>
+      <div class="row mt-5">
+        <div class="col-lg-12 text-center">
+          <a href="{{ path('formateurs_list') }}" class="btn btn-primary btn-lg" style="background: linear-gradient(105deg, #6a85b6 0%, #bac8e0 100%); border: none; padding: 15px 50px; border-radius: 50px; font-size: 18px; font-weight: 600; box-shadow: 0 10px 30px rgba(106, 133, 182, 0.4); transition: all 0.3s ease;">
+            <i class="fa fa-users"></i> Voir Tous les Formateurs
+          </a>
         </div>
       </div>
     </div>
