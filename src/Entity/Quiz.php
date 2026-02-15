@@ -49,12 +49,12 @@ class Quiz
     )]
     private ?int $noteMinimale = 50;
 
-    #[ORM\ManyToOne(targetEntity: Formation::class, inversedBy: 'quizzes')]//un quiz appartient à une formation, et une formation peut avoir plusieurs quiz
+    #[ORM\ManyToOne(targetEntity: Formation::class, inversedBy: 'quizzes')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull(message: 'La formation est obligatoire')]
     private ?Formation $formation = null;
 
-    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['persist', 'remove'], orphanRemoval: true)]//un quiz peut avoir plusieurs questions, et si on supprime le quiz, les questions associées sont aussi supprimées
+    #[ORM\OneToMany(mappedBy: 'quiz', targetEntity: Question::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $questions;
 
     #[ORM\Column]
@@ -151,7 +151,6 @@ class Quiz
     public function removeQuestion(Question $question): self
     {
         if ($this->questions->removeElement($question)) {
-            // set the owning side to null (unless already changed)
             if ($question->getQuiz() === $this) {
                 $question->setQuiz(null);
             }

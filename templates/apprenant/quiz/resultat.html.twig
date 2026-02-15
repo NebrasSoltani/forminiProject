@@ -2,6 +2,455 @@
 
 {% block title %}Résultat - {{ quiz.titre }}{% endblock %}
 
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* ========== CHATBOT CONTAINER ========== */
+    .chatbot-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 420px;
+        max-height: 650px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .chatbot-container.minimized {
+        max-height: 70px;
+    }
+
+    /* ========== CHATBOT HEADER ========== */
+    .chatbot-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 18px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+    }
+
+    .chatbot-header:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #653a8e 100%);
+    }
+
+    .chatbot-header-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .chatbot-avatar {
+        width: 40px;
+        height: 40px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .chatbot-title h4 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .chatbot-title small {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+
+    .chatbot-toggle {
+        font-size: 24px;
+        transition: transform 0.3s ease;
+    }
+
+    .chatbot-container.minimized .chatbot-toggle {
+        transform: rotate(180deg);
+    }
+
+    /* ========== CHATBOT BODY ========== */
+    .chatbot-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        max-height: 480px;
+    }
+
+    .chatbot-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chatbot-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .chatbot-body::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 3px;
+    }
+
+    /* ========== MESSAGES ========== */
+    .chatbot-message {
+        margin-bottom: 16px;
+        animation: slideInUp 0.4s ease;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .bot-message {
+        background: white;
+        padding: 14px 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-left: 4px solid #667eea;
+    }
+
+    .bot-message strong {
+        color: #667eea;
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    .bot-message p {
+        margin: 0;
+        color: #333;
+        line-height: 1.6;
+        font-size: 14px;
+    }
+
+    /* ========== SCORE DISPLAY ========== */
+    .score-display {
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    .score-number {
+        font-size: 48px;
+        font-weight: 700;
+        margin: 10px 0;
+    }
+
+    .score-label {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    /* ========== ERROR CARDS ========== */
+    .error-card {
+        background: white;
+        border: 2px solid #fc8181;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 12px 0;
+        box-shadow: 0 2px 8px rgba(252, 129, 129, 0.1);
+        animation: slideInUp 0.5s ease;
+    }
+
+    .error-card h5 {
+        color: #c53030;
+        margin: 0 0 12px 0;
+        font-size: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .error-badge {
+        background: #c53030;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .question-text {
+        color: #2d3748;
+        font-weight: 500;
+        margin-bottom: 12px;
+        padding: 10px;
+        background: #f7fafc;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    /* ========== ANSWERS ========== */
+    .correct-answer, .user-answer {
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+
+    .correct-answer {
+        background: #f0fff4;
+        border-left: 3px solid #48bb78;
+        color: #22543d;
+    }
+
+    .user-answer {
+        background: #fff5f5;
+        border-left: 3px solid #fc8181;
+        color: #742a2a;
+    }
+
+    .correct-answer strong, .user-answer strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ========== EXPLANATION BOXES ========== */
+    .explanation-box {
+        background: linear-gradient(135deg, #e6f2ff 0%, #f0f4ff 100%);
+        padding: 14px;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-size: 13px;
+        border-left: 3px solid #4299e1;
+    }
+
+    .explanation-box strong {
+        color: #2c5282;
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+    }
+
+    .explanation-box p {
+        margin: 0;
+        color: #2d3748;
+        line-height: 1.6;
+    }
+
+    /* ========== RECOMMENDATIONS ========== */
+    .recommendation {
+        background: white;
+        border-left: 4px solid #4299e1;
+        padding: 16px;
+        margin: 12px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .recommendation h6 {
+        margin: 0 0 10px 0;
+        color: #2c5282;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .recommendation.urgent {
+        border-left-color: #f56565;
+        background: linear-gradient(135deg, #fff5f5 0%, #fffafa 100%);
+    }
+
+    .recommendation.urgent h6 {
+        color: #c53030;
+    }
+
+    .recommendation.attention {
+        border-left-color: #ed8936;
+        background: linear-gradient(135deg, #fffaf0 0%, #fffbf5 100%);
+    }
+
+    .recommendation.attention h6 {
+        color: #c05621;
+    }
+
+    .recommendation.bien {
+        border-left-color: #48bb78;
+        background: linear-gradient(135deg, #f0fff4 0%, #f7fef9 100%);
+    }
+
+    .recommendation.bien h6 {
+        color: #22543d;
+    }
+
+    .recommendation.excellent {
+        border-left-color: #38b2ac;
+        background: linear-gradient(135deg, #e6fffa 0%, #f0fffd 100%);
+    }
+
+    .recommendation.excellent h6 {
+        color: #234e52;
+    }
+
+    .recommendation.conseil {
+        border-left-color: #9f7aea;
+        background: linear-gradient(135deg, #faf5ff 0%, #fcf9ff 100%);
+    }
+
+    .recommendation.conseil h6 {
+        color: #553c9a;
+    }
+
+    .recommendation.pointsForts {
+        border-left-color: #48bb78;
+        background: linear-gradient(135deg, #f0fff4 0%, #f7fef9 100%);
+    }
+
+    .recommendation.pointsForts h6 {
+        color: #22543d;
+    }
+
+    .recommendation p {
+        margin: 0 0 10px 0;
+        color: #4a5568;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .recommendation ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .recommendation ul li {
+        margin-bottom: 6px;
+        color: #2d3748;
+        font-size: 13px;
+    }
+
+    /* ========== POINTS FORTS ========== */
+    .points-forts-box {
+        background: linear-gradient(135deg, #f0fff4 0%, #f7fef9 100%);
+        border: 2px solid #48bb78;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 12px 0;
+    }
+
+    .points-forts-box h5 {
+        color: #22543d;
+        margin: 0 0 10px 0;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .points-forts-box p {
+        margin: 0 0 10px 0;
+        color: #2d3748;
+        font-size: 14px;
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stat-row:last-child {
+        border-bottom: none;
+    }
+
+    /* ========== CHATBOT FOOTER ========== */
+    .chatbot-footer {
+        padding: 16px;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-chatbot {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-rapport {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-rapport:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #653a8e 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    /* ========== FLOATING BUTTON ========== */
+    .chatbot-floating-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        z-index: 999;
+        transition: all 0.3s ease;
+    }
+
+    .chatbot-floating-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+        .chatbot-container {
+            width: 90%;
+            right: 5%;
+            bottom: 10px;
+            max-height: 80vh;
+        }
+
+        .chatbot-body {
+            max-height: calc(80vh - 150px);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block body %}
 <div class="container mt-5">
     <div class="mb-4">
@@ -40,6 +489,13 @@
                 {% endif %}
             </p>
             <p class="text-muted"><small>Quiz passé le {{ resultat.dateTentative|date('d/m/Y à H:i') }}</small></p>
+
+            <!-- Bouton pour ouvrir le chatbot -->
+            <div class="mt-3">
+                <button class="btn btn-primary btn-lg" onclick="openChatbot()">
+                    🤖 Voir l'analyse détaillée avec l'assistant
+                </button>
+            </div>
         </div>
     </div>
 
@@ -100,4 +556,213 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Chatbot Assistant (initialement caché) -->
+<div class="chatbot-container minimized" id="chatbot" style="display: none;">
+    <div class="chatbot-header" onclick="toggleChatbot()">
+        <div class="chatbot-header-content">
+            <div class="chatbot-avatar">🤖</div>
+            <div class="chatbot-title">
+                <h4>Assistant d'apprentissage</h4>
+                <small>Analyse de votre performance</small>
+            </div>
+        </div>
+        <span class="chatbot-toggle">▼</span>
+    </div>
+
+    <div class="chatbot-body" id="chatbot-body">
+        <!-- Score principal -->
+        <div class="score-display">
+            <div class="score-label">Votre score</div>
+            <div class="score-number">{{ resultat.note }}%</div>
+            <div class="score-label">{{ resultat.nombreBonnesReponses }}/{{ resultat.nombreTotalQuestions }} bonnes réponses</div>
+        </div>
+
+        <!-- Message d'introduction -->
+        <div class="chatbot-message bot-message">
+            <strong>👋 Bonjour {{ app.user.prenom }} !</strong>
+            <p>J'ai analysé votre quiz en détail. Voici mon rapport personnalisé pour vous aider à progresser.</p>
+        </div>
+
+        <!-- Analyse des erreurs -->
+        {% if analyse.erreurs|length > 0 %}
+            <div class="chatbot-message bot-message">
+                <strong>❌ Analysons vos {{ analyse.erreurs|length }} erreur(s)</strong>
+                <p>Ne vous inquiétez pas ! Chaque erreur est une opportunité d'apprentissage. Regardons ensemble.</p>
+            </div>
+
+            {% for erreur in analyse.erreurs %}
+                <div class="error-card">
+                    <h5>
+                        <span class="error-badge">Erreur {{ loop.index }}</span>
+                        {{ erreur.points }} point(s)
+                    </h5>
+
+                    <div class="question-text">
+                        <strong>Question :</strong> {{ erreur.question }}
+                    </div>
+
+                    <div class="user-answer">
+                        <strong>❌ Votre réponse</strong>
+                        {{ erreur.reponse_donnee }}
+                    </div>
+
+                    <div class="correct-answer">
+                        <strong>✓ Réponse correcte</strong>
+                        {{ erreur.reponse_correcte }}
+                    </div>
+
+                    {% if erreur.explication_question %}
+                        <div class="explanation-box">
+                            <strong>💡 Explication générale</strong>
+                            <p>{{ erreur.explication_question }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if erreur.explications_detaillees %}
+                        <div class="explanation-box">
+                            <strong>📚 Pour comprendre en profondeur</strong>
+                            <p>{{ erreur.explications_detaillees }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if erreur.explication_reponse_correcte %}
+                        <div class="explanation-box">
+                            <strong>✓ Pourquoi cette réponse ?</strong>
+                            <p>{{ erreur.explication_reponse_correcte }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="points-forts-box">
+                <h5>🎉 Score parfait !</h5>
+                <p>Vous n'avez fait aucune erreur ! Excellent travail ! Vous maîtrisez parfaitement ce sujet.</p>
+            </div>
+        {% endif %}
+
+        <!-- Points forts -->
+        {% if analyse.pointsForts|length > 0 %}
+            <div class="points-forts-box">
+                <h5>✨ Vos points forts</h5>
+                <p>Vous avez brillamment réussi {{ analyse.pointsForts|length }} question(s) !</p>
+                <div class="stat-row">
+                    <span>Questions maîtrisées</span>
+                    <strong>{{ analyse.pointsForts|length }}/{{ resultat.nombreTotalQuestions }}</strong>
+                </div>
+                <div class="stat-row">
+                    <span>Taux de réussite</span>
+                    <strong>{{ resultat.note }}%</strong>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Recommandations personnalisées -->
+        <div class="chatbot-message bot-message">
+            <strong>💪 Mes recommandations pour vous</strong>
+            <p>Voici ce que je vous conseille en fonction de votre performance :</p>
+        </div>
+
+        {% for reco in analyse.recommandations %}
+            <div class="recommendation {{ reco.niveau }}">
+                <h6>{{ reco.niveau|upper }}</h6>
+                <p>{{ reco.message }}</p>
+                {% if reco.actions|length > 0 %}
+                    <ul>
+                        {% for action in reco.actions %}
+                            <li>{{ action }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- Message de conclusion -->
+        <div class="chatbot-message bot-message">
+            <strong>🎯 En résumé</strong>
+            <p>
+                {% if resultat.reussi %}
+                    Bravo ! Vous avez réussi ce quiz avec {{ resultat.note }}%. Continuez sur cette lancée et passez au module suivant ! 🚀
+                {% else %}
+                    Vous avez obtenu {{ resultat.note }}%. Ne vous découragez pas ! Utilisez mes conseils ci-dessus pour réviser et réessayer. Vous allez y arriver ! 💪
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="chatbot-footer">
+        <button class="btn-chatbot btn-rapport" onclick="telechargerRapport()">
+            📄 Télécharger le rapport complet
+        </button>
+    </div>
+</div>
+
+<!-- Bouton flottant pour réouvrir le chatbot -->
+<div class="chatbot-floating-button" id="chatbot-floating" onclick="openChatbot()">
+    🤖
+</div>
+
+<script>
+let chatbotOpened = false;
+
+function openChatbot() {
+    const chatbot = document.getElementById('chatbot');
+    const floatingBtn = document.getElementById('chatbot-floating');
+
+    chatbot.style.display = 'flex';
+    chatbot.classList.remove('minimized');
+    floatingBtn.style.display = 'none';
+    chatbotOpened = true;
+
+    setTimeout(() => {
+        const chatbotBody = document.getElementById('chatbot-body');
+        chatbotBody.scrollTop = 0;
+    }, 100);
+}
+
+function toggleChatbot() {
+    const chatbot = document.getElementById('chatbot');
+    const floatingBtn = document.getElementById('chatbot-floating');
+
+    if (chatbot.classList.contains('minimized')) {
+        chatbot.classList.remove('minimized');
+    } else {
+        chatbot.classList.add('minimized');
+        setTimeout(() => {
+            if (chatbot.classList.contains('minimized')) {
+                chatbot.style.display = 'none';
+                floatingBtn.style.display = 'flex';
+            }
+        }, 2000);
+    }
+}
+
+function telechargerRapport() {
+    const rapport = {{ rapportComplet|json_encode|raw }};
+    const blob = new Blob([rapport], { type: 'text/plain; charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'rapport_quiz_{{ quiz.titre|replace({' ': '_'}) }}_{{ resultat.dateTentative|date("Y-m-d") }}.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    const chatbotBody = document.getElementById('chatbot-body');
+    const message = document.createElement('div');
+    message.className = 'chatbot-message bot-message';
+    message.innerHTML = '<strong>✓ Téléchargement réussi</strong><p>Votre rapport a été téléchargé avec succès. Vous pouvez le consulter à tout moment !</p>';
+    chatbotBody.appendChild(message);
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    {% if not resultat.reussi %}
+        setTimeout(() => {
+            openChatbot();
+        }, 1500);
+    {% endif %}
+});
+</script>
 {% endblock %}
