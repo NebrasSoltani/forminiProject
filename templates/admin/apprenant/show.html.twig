@@ -110,7 +110,7 @@
                                     {% if apprenant.user.dateNaissance %}
                                         {{ apprenant.user.dateNaissance|date('d/m/Y') }}
                                         <span class="text-muted small ms-2">
-                                            ({{ apprenant.user.dateNaissance|date('Y')|date_modify('-today')|date('%y ans') }})
+                                            ({{ "now"|date("Y") - apprenant.user.dateNaissance|date("Y") - ( "now"|date("m-d") < apprenant.user.dateNaissance|date("m-d") ? 1 : 0 ) }} ans)
                                         </span>
                                     {% else %}
                                         <span class="text-muted">-</span>
