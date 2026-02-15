@@ -266,16 +266,17 @@
                                        title="Modifier">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
-                                    <form method="post" 
-                                          action="{{ path('admin_apprenant_delete', {id: apprenant.id}) }}" 
-                                          style="display:inline" 
-                                          onsubmit="return confirm('⚠️ Attention !\n\nÊtes-vous sûr de vouloir supprimer cet apprenant ?\nCette action est irréversible et supprimera toutes les données associées.')"
-                                          class="d-inline">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ apprenant.id) }}">
-                                        <button type="submit" class="btn btn-danger" title="Supprimer">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                            class="btn btn-danger"
+                                            title="Supprimer"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteConfirmationModal"
+                                            data-apprenant-id="{{ apprenant.id }}"
+                                            data-apprenant-name="{{ apprenant.user.prenom ~ ' ' ~ apprenant.user.nom }}"
+                                            data-delete-url="{{ path('admin_apprenant_delete', {id: apprenant.id}) }}"
+                                            data-csrf-token="{{ csrf_token('delete' ~ apprenant.id) }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -346,6 +347,37 @@
         </nav>
     </div>
     {% endif %}
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white border-0">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-0">
+                    ⚠️ <strong>Attention !</strong><br>
+                    Êtes-vous sûr(e) de vouloir supprimer l’apprenant <strong id="apprenantNameInModal"></strong> ?<br>
+                    Cette action est <strong>irréversible</strong> et entraînera la suppression de toutes les données associées.
+                </p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Annuler
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <input type="hidden" name="_token" id="deleteToken">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Oui, supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- CSS personnalisé amélioré -->
@@ -469,6 +501,22 @@
 
 <!-- JavaScript pour améliorations UX -->
 <script>
+    // Gestion de la modale de suppression
+    document.getElementById('deleteConfirmationModal').addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Bouton qui a déclenché la modale
+        const apprenantName = button.getAttribute('data-apprenant-name');
+        const deleteUrl = button.getAttribute('data-delete-url');
+        const csrfToken = button.getAttribute('data-csrf-token');
+
+        // Afficher le nom dans la modale
+        document.getElementById('apprenantNameInModal').textContent = apprenantName;
+
+        // Mettre à jour le formulaire de suppression
+        const form = document.getElementById('deleteForm');
+        form.action = deleteUrl;
+        document.getElementById('deleteToken').value = csrfToken;
+    });
+
     // Fermer les filtres avancés au submit
     document.querySelector('form').addEventListener('submit', function() {
         const advancedFilters = document.getElementById('advancedFilters');
