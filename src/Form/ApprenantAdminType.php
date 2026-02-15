@@ -9,8 +9,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-use Symfony\Component\Validator\Constraints\Length;
-use Symfony\Component\Validator\Constraints\Regex;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -61,7 +59,6 @@ class ApprenantAdminType extends AbstractType
                 'choices' => [
                     'Homme' => 'homme',
                     'Femme' => 'femme',
-                    'Autre' => 'autre',
                 ],
                 'placeholder' => 'Choisissez...',
             ])

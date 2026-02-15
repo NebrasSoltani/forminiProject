@@ -26,7 +26,7 @@ class Apprenant
 
     #[ORM\Column(length: 20, nullable: true)]
     #[Assert\Choice(
-    choices: ['homme', 'femme', 'autre'],
+    choices: ['homme', 'femme'],
     message: "Choisissez un genre valide"
         )]
     private ?string $genre = null;
