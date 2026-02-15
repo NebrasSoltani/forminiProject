@@ -9,11 +9,13 @@ use App\Repository\FormateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/admin/formateurs')]
 #[IsGranted('ROLE_ADMIN')]
@@ -95,7 +97,8 @@ class AdminFormateurController extends AbstractController
     public function new(
         Request $request,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        SluggerInterface $slugger
     ): Response {
         $user = new User();
         $user->setRoleUtilisateur('formateur');
@@ -111,13 +114,57 @@ class AdminFormateurController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('plainPassword')->getData();
-            if ($plainPassword) {
-                $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            
+            // Ensure password is always set for new users
+            if (empty($plainPassword)) {
+                // Generate a default password if none provided
+                $plainPassword = 'ChangeMe123!';
+                $this->addFlash('warning', 'Un mot de passe par défaut a été généré. Le formateur devra le changer lors de sa première connexion.');
+            }
+            
+            $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+
+            // Gérer l'upload de la photo de profil
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
+
+                try {
+                    $photoFile->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/photos',
+                        $newFilename
+                    );
+                    $user->setPhoto($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de la photo');
+                }
+            }
+
+            // Gérer l'upload du CV
+            $cvFile = $form->get('cv')->getData();
+            if ($cvFile) {
+                $originalFilename = pathinfo($cvFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $cvFile->guessExtension();
+
+                try {
+                    $cvFile->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/cv',
+                        $newFilename
+                    );
+                    $formateur->setCv($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload du CV');
+                }
             }
 
             $em->persist($user);
             $em->persist($formateur);
             $em->flush();
+
+            $this->addFlash('success', 'Le formateur a été créé avec succès !');
 
             return $this->redirectToRoute('admin_formateur_index');
         }
@@ -140,7 +187,8 @@ class AdminFormateurController extends AbstractController
         Request $request,
         Formateur $formateur,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        SluggerInterface $slugger
     ): Response {
         $form = $this->createForm(FormateurAdminType::class, $formateur, [
             'is_edit' => true,
@@ -153,6 +201,60 @@ class AdminFormateurController extends AbstractController
             $plainPassword = $form->get('plainPassword')->getData();
             if ($plainPassword) {
                 $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            }
+
+            // Gérer l'upload de la photo de profil
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                // Supprimer l'ancienne photo si elle existe
+                $oldPhoto = $user->getPhoto();
+                if ($oldPhoto) {
+                    $oldPhotoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/photos/' . $oldPhoto;
+                    if (file_exists($oldPhotoPath)) {
+                        unlink($oldPhotoPath);
+                    }
+                }
+
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
+
+                try {
+                    $photoFile->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/photos',
+                        $newFilename
+                    );
+                    $user->setPhoto($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de la photo');
+                }
+            }
+
+            // Gérer l'upload du CV
+            $cvFile = $form->get('cv')->getData();
+            if ($cvFile) {
+                // Supprimer l'ancien CV s'il existe
+                $oldCv = $formateur->getCv();
+                if ($oldCv) {
+                    $oldCvPath = $this->getParameter('kernel.project_dir') . '/public/uploads/cv/' . $oldCv;
+                    if (file_exists($oldCvPath)) {
+                        unlink($oldCvPath);
+                    }
+                }
+
+                $originalFilename = pathinfo($cvFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $cvFile->guessExtension();
+
+                try {
+                    $cvFile->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/cv',
+                        $newFilename
+                    );
+                    $formateur->setCv($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload du CV');
+                }
             }
 
             $em->flush();
