@@ -9,11 +9,13 @@ use App\Repository\SocieteRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\String\Slugger\SluggerInterface;
 
 #[Route('/admin/societes')]
 #[IsGranted('ROLE_ADMIN')]
@@ -69,7 +71,8 @@ class AdminSocieteController extends AbstractController
     public function new(
         Request $request,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        SluggerInterface $slugger
     ): Response {
         $user = new User();
         $user->setRoleUtilisateur('societe');
@@ -85,13 +88,39 @@ class AdminSocieteController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $plainPassword = $form->get('plainPassword')->getData();
-            if ($plainPassword) {
-                $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+            
+            // Ensure password is always set for new users
+            if (empty($plainPassword)) {
+                // Generate a default password if none provided
+                $plainPassword = 'ChangeMe123!';
+                $this->addFlash('warning', 'Un mot de passe par défaut a été généré. La société devra le changer lors de sa première connexion.');
+            }
+            
+            $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+
+            // Gérer l'upload de la photo de profil
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
+
+                try {
+                    $photoFile->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/photos',
+                        $newFilename
+                    );
+                    $user->setPhoto($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de la photo');
+                }
             }
 
             $em->persist($user);
             $em->persist($societe);
             $em->flush();
+
+            $this->addFlash('success', 'La société a été créée avec succès !');
 
             return $this->redirectToRoute('admin_societe_index');
         }
@@ -114,7 +143,8 @@ class AdminSocieteController extends AbstractController
         Request $request,
         Societe $societe,
         EntityManagerInterface $em,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        SluggerInterface $slugger
     ): Response {
         $form = $this->createForm(SocieteAdminType::class, $societe, [
             'is_edit' => true,
@@ -129,9 +159,39 @@ class AdminSocieteController extends AbstractController
                 $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
             }
 
+            // Gérer l'upload de la photo de profil
+            $photoFile = $form->get('photo')->getData();
+            if ($photoFile) {
+                // Supprimer l'ancienne photo si elle existe
+                $oldPhoto = $user->getPhoto();
+                if ($oldPhoto) {
+                    $oldPhotoPath = $this->getParameter('kernel.project_dir') . '/public/uploads/photos/' . $oldPhoto;
+                    if (file_exists($oldPhotoPath)) {
+                        unlink($oldPhotoPath);
+                    }
+                }
+
+                $originalFilename = pathinfo($photoFile->getClientOriginalName(), PATHINFO_FILENAME);
+                $safeFilename = $slugger->slug($originalFilename);
+                $newFilename = $safeFilename . '-' . uniqid() . '.' . $photoFile->guessExtension();
+
+                try {
+                    $photoFile->move(
+                        $this->getParameter('kernel.project_dir') . '/public/uploads/photos',
+                        $newFilename
+                    );
+                    $user->setPhoto($newFilename);
+                } catch (FileException $e) {
+                    $this->addFlash('error', 'Erreur lors de l\'upload de la photo');
+                }
+            }
+
             $em->flush();
 
-            return $this->redirectToRoute('admin_societe_index');
+            // Add success flash message
+            $this->addFlash('success', 'Les informations de la société ont été mises à jour avec succès !');
+
+            return $this->redirectToRoute('admin_societe_show', ['id' => $societe->getId()]);
         }
 
         return $this->render('admin/societe/edit.html.twig', [
