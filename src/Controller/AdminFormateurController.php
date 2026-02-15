@@ -23,6 +23,9 @@ class AdminFormateurController extends AbstractController
     public function index(Request $request, FormateurRepository $formateurRepository): Response
     {
         $q = trim((string) $request->query->get('q', ''));
+        $specialite = $request->query->get('specialite', '');
+        $experienceMin = $request->query->get('experienceMin', '');
+        $experienceMax = $request->query->get('experienceMax', '');
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = (int) $request->query->get('limit', 10);
         if ($limit <= 0) {
@@ -44,6 +47,26 @@ class AdminFormateurController extends AbstractController
                 ->setParameter('q', '%' . $q . '%');
         }
 
+        if ($specialite !== '') {
+            $qb
+                ->andWhere('f.specialite = :specialite')
+                ->setParameter('specialite', $specialite);
+        }
+
+        if ($experienceMin !== '') {
+            $qb
+                ->andWhere('f.experienceAnnees >= :experienceMin')
+                ->setParameter('experienceMin', (int) $experienceMin);
+        }
+
+        if ($experienceMax !== '') {
+            $qb
+                ->andWhere('f.experienceAnnees <= :experienceMax')
+                ->setParameter('experienceMax', (int) $experienceMax);
+        }
+
+       
+
         $query = $qb->getQuery()
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
@@ -58,6 +81,9 @@ class AdminFormateurController extends AbstractController
         return $this->render('admin/formateur/index.html.twig', [
             'formateurs' => $paginator,
             'q' => $q,
+            'specialite' => $specialite,
+            'experienceMin' => $experienceMin,
+            'experienceMax' => $experienceMax,
             'page' => $page,
             'limit' => $limit,
             'total' => $total,
@@ -131,7 +157,20 @@ class AdminFormateurController extends AbstractController
 
             $em->flush();
 
-            return $this->redirectToRoute('admin_formateur_index');
+            // Add success flash message
+            $this->addFlash('success', 'Les informations du formateur ont été mises à jour avec succès !');
+
+            return $this->redirectToRoute('admin_formateur_show', ['id' => $formateur->getId()]);
+        }
+
+        // Handle form validation errors
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $errors = [];
+            foreach ($form->getErrors(true) as $error) {
+                $errors[] = $error->getMessage();
+            }
+            
+            $this->addFlash('error', 'Erreur de validation : ' . implode(', ', $errors));
         }
 
         return $this->render('admin/formateur/edit.html.twig', [
