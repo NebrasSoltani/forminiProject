@@ -68,11 +68,33 @@ class QuestionType extends AbstractType
                 ]
             ])
             ->add('explication', TextareaType::class, [
-                'label' => 'Explication (optionnel)',
+                'label' => 'Explication courte (optionnel)',
                 'required' => false,
-                'attr' => ['class' => 'form-control', 'rows' => 2, 'placeholder' => 'Explication affichée après la réponse'],
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 2,
+                    'placeholder' => 'Explication rapide affichée après la réponse'
+                ],
+                'help' => 'Explication concise visible par l\'apprenant',
                 'constraints' => [
                     new Length(['max' => 500])
+                ]
+            ])
+            // ⭐ NOUVEAU CHAMP POUR LE CHATBOT
+            ->add('explicationsDetaillees', TextareaType::class, [
+                'label' => 'Explications détaillées pour le chatbot (optionnel)',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'rows' => 5,
+                    'placeholder' => 'Explications approfondies pour aider l\'apprenant à comprendre ses erreurs...'
+                ],
+                'help' => '💡 Ces explications seront utilisées par l\'assistant intelligent pour fournir une aide personnalisée à l\'apprenant en cas d\'erreur.',
+                'constraints' => [
+                    new Length([
+                        'max' => 5000,
+                        'maxMessage' => 'Les explications détaillées ne peuvent pas dépasser {{ limit }} caractères'
+                    ])
                 ]
             ]);
     }
