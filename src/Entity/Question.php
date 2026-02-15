@@ -44,17 +44,22 @@ class Question
     #[Assert\PositiveOrZero]
     private ?int $ordre = 1;
 
-    #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: 'questions')]//une question appartient à un quiz, et un quiz peut avoir plusieurs questions
+    #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: 'questions')]
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?Quiz $quiz = null;
 
-    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Reponse::class, cascade: ['persist', 'remove'], orphanRemoval: true)]//une question peut avoir plusieurs réponses, et si on supprime la question, les réponses associées sont aussi supprimées
+    #[ORM\OneToMany(mappedBy: 'question', targetEntity: Reponse::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $reponses;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Assert\Length(max: 3000, maxMessage: 'L\'explication ne peut pas dépasser {{ limit }} caractères.')]
     private ?string $explication = null;
+
+    // ⭐ NOUVEAU CHAMP POUR LE CHATBOT
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 5000, maxMessage: 'Les explications détaillées ne peuvent pas dépasser {{ limit }} caractères.')]
+    private ?string $explicationsDetaillees = null;
 
     public function __construct()
     {
@@ -142,7 +147,6 @@ class Question
     public function removeReponse(Reponse $reponse): self
     {
         if ($this->reponses->removeElement($reponse)) {
-            // set the owning side to null (unless already changed)
             if ($reponse->getQuestion() === $this) {
                 $reponse->setQuestion(null);
             }
@@ -162,7 +166,18 @@ class Question
         return $this;
     }
 
-    // Méthode métier utile
+    // ⭐ GETTER ET SETTER POUR LE NOUVEAU CHAMP
+    public function getExplicationsDetaillees(): ?string
+    {
+        return $this->explicationsDetaillees;
+    }
+
+    public function setExplicationsDetaillees(?string $explicationsDetaillees): self
+    {
+        $this->explicationsDetaillees = $explicationsDetaillees;
+        return $this;
+    }
+
     public function hasAtLeastOneCorrectAnswer(): bool
     {
         if ($this->type === 'texte') {

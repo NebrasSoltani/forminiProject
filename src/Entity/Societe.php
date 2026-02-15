@@ -47,7 +47,7 @@ class Societe
 
 
 
-    
+
 
     public function getId(): ?int
     {
@@ -120,7 +120,7 @@ class Societe
         return $this;
     }
 
-  
 
-  
+
+
 }

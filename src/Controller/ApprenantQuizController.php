@@ -12,6 +12,7 @@ use App\Repository\InscriptionRepository;
 use App\Repository\ProgressionLeconRepository;
 use App\Repository\ResultatQuizRepository;
 use App\Repository\LeconRepository;
+use App\Service\ChatbotAnalyseService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,29 +34,24 @@ class ApprenantQuizController extends AbstractController
         ProgressionLeconRepository $progressionLeconRepository,
         LeconRepository $leconRepository
     ): Response {
-          // Vérifier si la formation existe
         $formation = $formationRepository->find($formationId);
 
         if (!$formation) {
             throw $this->createNotFoundException('Formation non trouvée');
         }
 
-        // Vérifier que l'utilisateur est inscrit à cette formation.
         $inscription = $inscriptionRepository->findOneByApprenantAndFormation($this->getUser(), $formationId);
         if (!$inscription) {
             $this->addFlash('error', 'Vous devez être inscrit à cette formation pour passer les quiz.');
             return $this->redirectToRoute('apprenant_formation_show', ['id' => $formationId]);
         }
 
-        // Récupérer les quiz de la formation
         $quizzes = $quizRepository->findBy(['formation' => $formation]);
 
-        // Vérifier combien de leçons sont terminées
         $totalLecons = $leconRepository->countByFormation($formationId);
         $leconsTerminees = $progressionLeconRepository->countLeconTermineesParFormation($this->getUser(), $formationId);
         $toutesLeconsTerminees = $totalLecons > 0 && $leconsTerminees >= $totalLecons;
 
-        //Rend la vue Twig index.html.twig avec toutes les données nécessaires pour l’affichage.
         return $this->render('apprenant/quiz/index.html.twig', [
             'formation' => $formation,
             'inscription' => $inscription,
@@ -83,14 +79,12 @@ class ApprenantQuizController extends AbstractController
             throw $this->createNotFoundException('Quiz non trouvé');
         }
 
-        // Vérifier que l'utilisateur est inscrit
         $inscription = $inscriptionRepository->findOneByApprenantAndFormation($this->getUser(), $formationId);
         if (!$inscription) {
             $this->addFlash('error', 'Vous devez être inscrit à cette formation.');
             return $this->redirectToRoute('apprenant_formation_show', ['id' => $formationId]);
         }
 
-        // Vérifier que toutes les leçons sont terminées
         $totalLecons = $leconRepository->countByFormation($formationId);
         $toutesLeconsTerminees = $progressionLeconRepository->toutesLeconsTerminees($this->getUser(), $formationId, $totalLecons);
 
@@ -99,8 +93,6 @@ class ApprenantQuizController extends AbstractController
             return $this->redirectToRoute('apprenant_quiz_index', ['formationId' => $formationId]);
         }
 
-        // Récupère les questions du quiz.
-        //Mélanger les questions si nécessaire
         $questions = $quiz->getQuestions()->toArray();
         if ($quiz->isMelanger()) {
             shuffle($questions);
@@ -113,15 +105,13 @@ class ApprenantQuizController extends AbstractController
         ]);
     }
 
-    //Route POST pour soumettre les réponses au quiz.
-
     #[Route('/{quizId}/soumettre', name: 'apprenant_quiz_soumettre', methods: ['POST'])]
     public function soumettre(
-        Request $request, //contient toutes les données envoyées par l’utilisateur
+        Request $request,
         int $formationId,
         int $quizId,
-        FormationRepository $formationRepository,//permet de récupérer les données de la formation
-        QuizRepository $quizRepository,//permet de récupérer les données du quiz
+        FormationRepository $formationRepository,
+        QuizRepository $quizRepository,
         InscriptionRepository $inscriptionRepository,
         EntityManagerInterface $em
     ): Response {
@@ -132,52 +122,46 @@ class ApprenantQuizController extends AbstractController
             throw $this->createNotFoundException('Quiz non trouvé');
         }
 
-        // Vérifier que l'utilisateur est inscrit
-        $inscription = $inscriptionRepository->findOneByApprenantAndFormation($this->getUser(), $formationId);//permet de vérifier que l’apprenant est bien inscrit à la formation avant de soumettre les réponses au quiz
+        $inscription = $inscriptionRepository->findOneByApprenantAndFormation($this->getUser(), $formationId);
         if (!$inscription) {
             throw $this->createAccessDeniedException();
         }
 
-        // Récupérer les réponses
         $reponses = $request->request->all('reponses');
 
-        // Calculer le score
         $nombreBonnesReponses = 0;
-        $detailsReponses = [];//pour stocker les détails de chaque réponse (question, réponse utilisateur, bonne réponse, etc.)
-        $questions = $quiz->getQuestions();//récupère les questions du quiz pour pouvoir les comparer avec les réponses de l’utilisateur
+        $detailsReponses = [];
+        $questions = $quiz->getQuestions();
 
         foreach ($questions as $question) {
             $questionId = $question->getId();
-            $reponseUtilisateur = $reponses[$questionId] ?? null;//récupère la réponse de l’utilisateur pour cette question
+            $reponseUtilisateur = $reponses[$questionId] ?? null;
 
-            // Trouver la bonne réponse
             $bonneReponse = null;
-            foreach ($question->getReponses() as $reponse) {//parcourt les réponses de la question pour trouver celle qui est correcte
+            foreach ($question->getReponses() as $reponse) {
                 if ($reponse->isEstCorrecte()) {
                     $bonneReponse = $reponse;
                     break;
                 }
             }
 
-            $estCorrecte = $bonneReponse && $reponseUtilisateur == $bonneReponse->getId();//compare la réponse de l’utilisateur avec la bonne réponse pour déterminer si elle est correcte
+            $estCorrecte = $bonneReponse && $reponseUtilisateur == $bonneReponse->getId();
             if ($estCorrecte) {
                 $nombreBonnesReponses++;
             }
 
-            $detailsReponses[] = [//stocke les détails de la réponse pour pouvoir les afficher dans le résultat du quiz
+            $detailsReponses[] = [
                 'question_id' => $questionId,
                 'reponse_utilisateur' => $reponseUtilisateur,
                 'reponse_correcte' => $bonneReponse ? $bonneReponse->getId() : null,
-                'correct' => $estCorrecte,//indique si la réponse de l’utilisateur est correcte ou non
+                'correct' => $estCorrecte,
             ];
         }
 
-        // Calculer la note en pourcentage
         $nombreTotalQuestions = count($questions);
         $note = $nombreTotalQuestions > 0 ? ($nombreBonnesReponses / $nombreTotalQuestions) * 100 : 0;
         $reussi = $note >= $quiz->getNoteMinimale();
 
-        // Enregistrer le résultat
         $resultat = new ResultatQuiz();
         $resultat->setApprenant($this->getUser());
         $resultat->setQuiz($quiz);
@@ -204,7 +188,8 @@ class ApprenantQuizController extends AbstractController
         int $resultatId,
         FormationRepository $formationRepository,
         QuizRepository $quizRepository,
-        ResultatQuizRepository $resultatQuizRepository
+        ResultatQuizRepository $resultatQuizRepository,
+        ChatbotAnalyseService $chatbotService
     ): Response {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
@@ -214,14 +199,20 @@ class ApprenantQuizController extends AbstractController
             throw $this->createNotFoundException();
         }
 
+        // ⭐ ANALYSE COMPLÈTE PAR LE CHATBOT
+        $analyse = $chatbotService->analyserResultat($resultat);
+        $rapportComplet = $chatbotService->genererRapportComplet($resultat);
+
         // Décoder les détails des réponses
-        $detailsReponses = json_decode($resultat->getDetailsReponses(), true);//permet de décoder les détails des réponses qui ont été stockés en JSON pour pouvoir les afficher dans la vue Twig du résultat du quiz
+        $detailsReponses = json_decode($resultat->getDetailsReponses(), true);
 
         return $this->render('apprenant/quiz/resultat.html.twig', [
             'formation' => $formation,
             'quiz' => $quiz,
             'resultat' => $resultat,
             'detailsReponses' => $detailsReponses,
+            'analyse' => $analyse,
+            'rapportComplet' => $rapportComplet,
         ]);
     }
 }
