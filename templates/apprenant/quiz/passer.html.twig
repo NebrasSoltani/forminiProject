@@ -49,11 +49,22 @@
             <form method="post" action="{{ path('apprenant_quiz_soumettre', {'formationId': formation.id, 'quizId': quiz.id}) }}" id="quiz-form">
                 {% for question in questions %}
                     <div class="question-card card mb-4 d-none" data-question-index="{{ loop.index0 }}">
-                        <div class="card-header bg-light">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
                             <h5 class="mb-0">Question {{ loop.index }}</h5>
+                            <button type="button" class="btn btn-sm btn-outline-primary voice-btn"
+                                    data-question-id="{{ question.id }}"
+                                    data-answers="{{ question.reponses|length }}"
+                                    title="Dites le numéro de la réponse (1, 2, 3, 4...)">
+                                🎤 Dire le n°
+                            </button>
                         </div>
                         <div class="card-body">
                             <p class="lead fw-bold">{{ question.enonce }}</p>
+
+                            <!-- Affichage du texte reconnu -->
+                            <div class="alert alert-info d-none voice-output" data-question-id="{{ question.id }}" role="alert">
+                                <strong>Vous avez dit :</strong> <span class="voice-text"></span>
+                            </div>
 
                             <div class="mt-4">
                                 {% for reponse in question.reponses %}
@@ -63,9 +74,10 @@
                                                name="reponses[{{ question.id }}]"
                                                id="q{{ question.id }}_r{{ reponse.id }}"
                                                value="{{ reponse.id }}"
+                                               data-answer-number="{{ loop.index }}"
                                                required>
                                         <label class="form-check-label" for="q{{ question.id }}_r{{ reponse.id }}">
-                                            {{ reponse.texte }}
+                                            <strong>{{ loop.index }}.</strong> {{ reponse.texte }}
                                         </label>
                                     </div>
                                 {% endfor %}
@@ -98,6 +110,34 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Configuration reconnaissance vocale
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition;
+    let isListening = false;
+    const supportsVoice = !!SpeechRecognition;
+
+    // Mapping des nombres en français
+    const numberMap = {
+        'un': 1, '1': 1,
+        'deux': 2, '2': 2,
+        'trois': 3, '3': 3,
+        'quatre': 4, '4': 4,
+        'cinq': 5, '5': 5,
+        'six': 6, '6': 6,
+        'sept': 7, '7': 7,
+        'huit': 8, '8': 8,
+        'neuf': 9, '9': 9,
+        'dix': 10, '10': 10
+    };
+
+    if (supportsVoice) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'fr-FR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+    }
+
+    // Navigation quiz
     const questions = document.querySelectorAll('.question-card');
     const totalQuestions = questions.length;
     let currentIndex = 0;
@@ -117,23 +157,24 @@ document.addEventListener('DOMContentLoaded', function () {
         currentNumber.textContent = index + 1;
         pageInfo.textContent = `${index + 1} / ${totalQuestions}`;
 
-        // Mise à jour progression
         const progress = ((index + 1) / totalQuestions) * 100;
         progressBar.style.width = `${progress}%`;
         progressBar.setAttribute('aria-valuenow', progress);
 
-        // Activation/désactivation boutons
         prevBtn.disabled = index === 0;
         nextBtn.classList.toggle('d-none', index === totalQuestions - 1);
         submitBtn.classList.toggle('d-none', index !== totalQuestions - 1);
+
+        // Reset affichage vocal
+        const voiceOutput = questions[index].querySelector('.voice-output');
+        if (voiceOutput) {
+            voiceOutput.classList.add('d-none');
+            voiceOutput.classList.remove('alert-success', 'alert-warning', 'alert-danger');
+            voiceOutput.classList.add('alert-info');
+        }
     }
 
-    function canGoNext() {
-        const currentQuestion = questions[currentIndex];
-        const radios = currentQuestion.querySelectorAll('input[type="radio"]');
-        return Array.from(radios).some(radio => radio.checked);
-    }
-
+    // Événements navigation
     prevBtn.addEventListener('click', () => {
         if (currentIndex > 0) {
             currentIndex--;
@@ -143,22 +184,109 @@ document.addEventListener('DOMContentLoaded', function () {
 
     nextBtn.addEventListener('click', () => {
         if (currentIndex < totalQuestions - 1) {
-            // Option : décommenter pour obliger à répondre avant de passer
-            /*
-            if (!canGoNext()) {
-                alert('Veuillez répondre à la question avant de continuer.');
-                return;
-            }
-            */
-
             currentIndex++;
             showQuestion(currentIndex);
         }
     });
 
-    // Soumission finale
+    // Événements reconnaissance vocale
+    if (supportsVoice) {
+        recognition.onstart = function () {
+            isListening = true;
+            const btn = document.querySelector(`.voice-btn[data-question-id="${questions[currentIndex].querySelector('input[type="radio"]').name.match(/\\d+/)[0]}"]`);
+            if (btn) {
+                btn.classList.add('listening');
+                btn.innerHTML = '🔴 Écoutez...';
+            }
+        };
+
+        recognition.onend = function () {
+            isListening = false;
+            const btn = document.querySelector(`.voice-btn.listening`);
+            if (btn) {
+                btn.classList.remove('listening');
+                btn.innerHTML = '🎤 Dire le n°';
+            }
+        };
+
+        recognition.onerror = function (event) {
+            const messages = {
+                'network': 'Erreur réseau.',
+                'no-speech': 'Aucune parole détectée.',
+                'audio-capture': 'Microphone non accessible.',
+                'not-allowed': 'Permission microphone refusée.'
+            };
+            alert(messages[event.error] || 'Erreur reconnaissance');
+        };
+
+        recognition.onresult = function (event) {
+            let transcript = '';
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                transcript = event.results[i][0].transcript.toLowerCase().trim();
+            }
+
+            const currentQuestion = questions[currentIndex];
+            const voiceOutput = currentQuestion.querySelector('.voice-output');
+            const voiceText = voiceOutput.querySelector('.voice-text');
+
+            voiceText.textContent = transcript;
+            voiceOutput.classList.remove('d-none');
+
+            // Extraire le nombre du texte
+            const extractedNumber = extractNumber(transcript);
+
+            if (extractedNumber) {
+                // Chercher et sélectionner la réponse correspondante
+                const answerRadio = currentQuestion.querySelector(`input[data-answer-number="${extractedNumber}"]`);
+
+                if (answerRadio) {
+                    answerRadio.checked = true;
+                    voiceOutput.classList.remove('alert-info', 'alert-warning', 'alert-danger');
+                    voiceOutput.classList.add('alert-success');
+                    voiceText.textContent = `Réponse ${extractedNumber} sélectionnée ✓`;
+                } else {
+                    voiceOutput.classList.remove('alert-info', 'alert-success', 'alert-danger');
+                    voiceOutput.classList.add('alert-warning');
+                    voiceText.textContent = `Réponse ${extractedNumber} n'existe pas. Max: ${currentQuestion.querySelectorAll('input[type="radio"]').length}`;
+                }
+            } else {
+                voiceOutput.classList.remove('alert-info', 'alert-success', 'alert-warning');
+                voiceOutput.classList.add('alert-danger');
+                voiceText.textContent = `"${transcript}" - Veuillez dire un numéro (1, 2, 3...)`;
+            }
+        };
+    }
+
+    // Extraire le nombre du texte reconnu
+    function extractNumber(text) {
+        for (const [word, number] of Object.entries(numberMap)) {
+            if (text.includes(word)) {
+                return number;
+            }
+        }
+        return null;
+    }
+
+    // Événements boutons voix
+    document.querySelectorAll('.voice-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            if (!supportsVoice) {
+                alert('Reconnaissance vocale non supportée. Utilisez Chrome, Edge ou Firefox.');
+                return;
+            }
+
+            if (isListening) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        });
+    });
+
+    // Soumission formulaire
     document.getElementById('quiz-form').addEventListener('submit', function (e) {
-        // Vérification finale que toutes les questions sont répondues
         let allAnswered = true;
         const formData = new FormData(this);
 
@@ -175,7 +303,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if (!confirm('Confirmez-vous la soumission de votre quiz ? Vous ne pourrez plus modifier vos réponses.')) {
+        if (!confirm('Confirmez-vous la soumission de votre quiz ?')) {
             e.preventDefault();
             return;
         }
@@ -200,6 +328,56 @@ document.addEventListener('DOMContentLoaded', function () {
     .form-check-input:checked + .form-check-label {
         font-weight: bold;
         color: #0d6efd;
+        background: #f0f8ff;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    /* Styles reconnaissance vocale */
+    .voice-btn {
+        transition: all 0.3s ease;
+        font-weight: 600;
+    }
+
+    .voice-btn:hover {
+        transform: scale(1.1);
+        background-color: #e7f3ff;
+    }
+
+    .voice-btn.listening {
+        background-color: #ff6b6b !important;
+        color: white !important;
+        animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    .voice-output {
+        margin: 15px 0;
+        border-left: 4px solid #0d6efd;
+        padding: 10px 15px;
+    }
+
+    .voice-output.alert-success {
+        border-left-color: #198754;
+        background-color: #d1e7dd;
+    }
+
+    .voice-output.alert-warning {
+        border-left-color: #ffc107;
+        background-color: #fff3cd;
+    }
+
+    .voice-output.alert-danger {
+        border-left-color: #dc3545;
+        background-color: #f8d7da;
     }
 </style>
 {% endblock %}
