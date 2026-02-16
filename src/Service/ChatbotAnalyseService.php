@@ -494,7 +494,7 @@ class ChatbotAnalyseService
                 }
 
                 if ($erreur['explications_detaillees']) {
-                    $rapport .= "📚 Pour comprendre en profondeur :\n";
+                    $rapport .= "📚 Pour comprendre ss profondeur :\n";
                     $rapport .= $this->formaterTexte($erreur['explications_detaillees']) . "\n\n";
                 }
 
