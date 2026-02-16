@@ -1,0 +1,1 @@
+C'est une excellente tentative, et je vois que vous maîtrisez l'utilisation de `bin/console`, ce qui est déjà un très bon point ! Cependant, la commande `
