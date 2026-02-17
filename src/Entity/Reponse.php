@@ -47,7 +47,7 @@ class Reponse
         return $this->texte;
     }
 
-    public function setTexte(string $texte): self
+    public function setTexte(?string $texte): self
     {
         $this->texte = $texte;
         return $this;
