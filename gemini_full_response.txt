@@ -1,0 +1,1 @@
+C'est une excellente tentative et je salue votre engagement ! La commande `php bin/console make:entity Nom
