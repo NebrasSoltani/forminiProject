@@ -102,7 +102,7 @@ class Quiz
         return $this->duree;
     }
 
-    public function setDuree(int $duree): self
+    public function setDuree(?int $duree): self
     {
         $this->duree = $duree;
         return $this;
@@ -113,7 +113,7 @@ class Quiz
         return $this->noteMinimale;
     }
 
-    public function setNoteMinimale(int $noteMinimale): self
+    public function setNoteMinimale(?int $noteMinimale): self
     {
         $this->noteMinimale = $noteMinimale;
         return $this;

@@ -21,47 +21,35 @@ class QuizType extends AbstractType
         $builder
             ->add('titre', TextType::class, [
                 'label' => 'Titre du quiz',
-                'attr' => ['class' => 'form-control'],
-                'constraints' => [
-                    new NotBlank(['message' => 'Le titre est obligatoire']),
-                    new Length([
-                        'min' => 3,
-                        'max' => 255,
-                        'minMessage' => 'Le titre doit contenir au moins {{ limit }} caractères',
-                        'maxMessage' => 'Le titre ne peut pas dépasser {{ limit }} caractères'
-                    ])
+                'attr' => [
+                    'class' => 'form-control',
+                    'minlength' => 3,
+                    'maxlength' => 255
                 ]
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
                 'required' => false,
-                'attr' => ['class' => 'form-control', 'rows' => 3],
-                'constraints' => [
-                    new Length(['max' => 1000])
+                'attr' => [
+                    'class' => 'form-control', 
+                    'rows' => 3,
+                    'maxlength' => 1000
                 ]
             ])
             ->add('duree', IntegerType::class, [
                 'label' => 'Durée (en minutes)',
-                'attr' => ['class' => 'form-control', 'min' => 1],
-                'constraints' => [
-                    new NotBlank(['message' => 'La durée est obligatoire']),
-                    new Range([
-                        'min' => 1,
-                        'max' => 300,
-                        'notInRangeMessage' => 'La durée doit être entre {{ min }} et {{ max }} minutes'
-                    ])
+                'attr' => [
+                    'class' => 'form-control', 
+                    'min' => 1,
+                    'max' => 300
                 ]
             ])
             ->add('noteMinimale', IntegerType::class, [
                 'label' => 'Note minimale pour réussir (%)',
-                'attr' => ['class' => 'form-control', 'min' => 0, 'max' => 100],
-                'constraints' => [
-                    new NotBlank(['message' => 'La note minimale est obligatoire']),
-                    new Range([
-                        'min' => 0,
-                        'max' => 100,
-                        'notInRangeMessage' => 'La note minimale doit être entre {{ min }} et {{ max }}'
-                    ])
+                'attr' => [
+                    'class' => 'form-control', 
+                    'min' => 0, 
+                    'max' => 100
                 ]
             ])
             ->add('afficherCorrection', CheckboxType::class, [
