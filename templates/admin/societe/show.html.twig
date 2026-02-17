@@ -1,22 +1,376 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<h1>Détails société</h1>
+<!-- Flash messages -->
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mt-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-{{ type == 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' }} me-2"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
 
-<table border="1">
-    <tr><th>ID</th><td>{{ societe.id }}</td></tr>
-    <tr><th>Nom société</th><td>{{ societe.nomSociete }}</td></tr>
-    <tr><th>Secteur</th><td>{{ societe.secteur }}</td></tr>
-    <tr><th>Email</th><td>{{ societe.user.email }}</td></tr>
-    <tr><th>Téléphone</th><td>{{ societe.user.telephone }}</td></tr>
-    <tr><th>Gouvernorat</th><td>{{ societe.user.gouvernorat ? societe.user.gouvernorat.value : '' }}</td></tr>
-    <tr><th>Date naissance</th><td>{{ societe.user.dateNaissance ? societe.user.dateNaissance|date('Y-m-d') : '' }}</td></tr>
-    <tr><th>Description</th><td>{{ societe.description }}</td></tr>
-    <tr><th>Adresse</th><td>{{ societe.adresse }}</td></tr>
-    <tr><th>Site web</th><td>{{ societe.siteWeb }}</td></tr>
-    <tr><th>Logo</th><td>{{ societe.logo }}</td></tr>
-</table>
+<div class="container-fluid py-4">
+    <!-- Header avec actions -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-primary mb-1">
+                <i class="bi bi-building me-2"></i>Détails de la société
+            </h1>
+            <p class="text-muted mb-0">
+                <i class="bi bi-info-circle me-2"></i>Informations complètes sur la société
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ path('admin_societe_edit', {id: societe.id}) }}" class="btn btn-warning btn-lg shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i>Modifier
+            </a>
+            <a href="{{ path('admin_societe_index') }}" class="btn btn-outline-secondary btn-lg">
+                <i class="bi bi-arrow-left me-1"></i>Retour
+            </a>
+        </div>
+    </div>
 
-<a href="{{ path('admin_societe_edit', {id: societe.id}) }}">✏️ Modifier</a>
-<a href="{{ path('admin_societe_index') }}">⬅️ Retour</a>
+    <!-- Carte principale des informations -->
+    <div class="row">
+        <!-- Colonne gauche - Informations personnelles -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-person me-2"></i>Informations personnelles
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-hash me-1"></i>ID Société
+                                </label>
+                                <div class="h5 mb-0">
+                                    <span class="badge bg-secondary">{{ societe.id }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-envelope me-1"></i>Email
+                                </label>
+                                <div class="h6 mb-0">
+                                    <a href="mailto:{{ societe.user.email }}" class="text-decoration-none text-primary">
+                                        {{ societe.user.email }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-person me-1"></i>Nom
+                                </label>
+                                <div class="h5 mb-0 fw-bold">{{ societe.user.nom }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-person me-1"></i>Prénom
+                                </label>
+                                <div class="h5 mb-0">{{ societe.user.prenom }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-telephone me-1"></i>Téléphone
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if societe.user.telephone %}
+                                        <a href="tel:{{ societe.user.telephone }}" class="text-decoration-none text-success">
+                                            {{ societe.user.telephone }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-calendar-date me-1"></i>Date de naissance
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if societe.user.dateNaissance %}
+                                        {{ societe.user.dateNaissance|date('d/m/Y') }}
+                                        <span class="text-muted small ms-2">
+                                            ({{ date().diff(societe.user.dateNaissance).y }} ans)
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-geo-alt me-1"></i>Gouvernorat
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if societe.user.gouvernorat %}
+                                        <span class="badge bg-info text-dark">
+                                            {{ societe.user.gouvernorat.value }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-briefcase me-1"></i>Profession
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if societe.user.profession %}
+                                        <span class="badge bg-warning text-dark">{{ societe.user.profession }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informations société -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-building me-2"></i>Informations société
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-building me-1"></i>Nom de la société
+                                </label>
+                                <div class="h5 mb-0 fw-bold">{{ societe.nomSociete }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-briefcase me-1"></i>Secteur d'activité
+                                </label>
+                                <div class="h5 mb-0">
+                                    {% if societe.secteur %}
+                                        <span class="badge bg-primary">{{ societe.secteur }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-geo-alt me-1"></i>Adresse
+                                </label>
+                                <div class="h6 mb-0">{{ societe.adresse ?: '-' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-globe me-1"></i>Site web
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if societe.siteWeb %}
+                                        <a href="{{ societe.siteWeb }}" target="_blank" class="text-decoration-none text-primary">
+                                            {{ societe.siteWeb }}
+                                            <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-card-image me-1"></i>Photo
+                                </label>
+                                <div class="h6 mb-0">
+                                    {% if societe.user.photo %}
+                                        <span class="badge bg-info text-dark">
+                                            <i class="bi bi-image me-1"></i>{{ societe.user.photo }}
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">Aucune</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="info-item">
+                                <label class="text-muted small fw-medium mb-1">
+                                    <i class="bi bi-file-text me-1"></i>Description
+                                </label>
+                                <div class="h6 mb-0">{{ societe.description ?: 'Aucune description' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne droite - Informations complémentaires -->
+        <div class="col-lg-4">
+            <!-- Statut et validation -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-info-circle me-2"></i>Statut et validation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-item">
+                        <label class="text-muted small fw-medium mb-2">
+                            <i class="bi bi-calendar-check me-1"></i>Statut du compte
+                        </label>
+                        <div class="h5 mb-1">
+                            <i class="bi bi-person-check-circle text-primary me-2"></i>
+                            {{ societe.user.email }}
+                        </div>
+                        <small class="text-muted">Email vérifié</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-lightning me-2"></i>Actions rapides
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('admin_societe_edit', {id: societe.id}) }}" class="btn btn-warning btn-lg">
+                            <i class="bi bi-pencil-square me-2"></i>Modifier les informations
+                        </a>
+                        <a href="{{ path('admin_societe_index') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                        </a>
+                        <a href="mailto:{{ societe.user.email }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-envelope-fill me-2"></i>Envoyer un email
+                        </a>
+                        {% if societe.user.telephone %}
+                        <a href="tel:{{ societe.user.telephone }}" class="btn btn-success btn-lg">
+                            <i class="bi bi-telephone-fill me-2"></i>Appeler
+                        </a>
+                        {% endif %}
+                        {% if societe.siteWeb %}
+                        <a href="{{ societe.siteWeb }}" target="_blank" class="btn btn-info btn-lg">
+                            <i class="bi bi-globe me-2"></i>Visiter le site
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styles personnalisés */
+    .info-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
+    }
+    
+    .card-header {
+        border-radius: 12px 12px 0 0 !important;
+        font-weight: 600;
+    }
+    
+    .badge {
+        font-weight: 500;
+        padding: 0.45em 0.85em;
+        color:white;
+    }
+    
+    .btn {
+        transition: all 0.3s ease !important;
+        border-radius: 8px !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .info-item {
+            padding: 8px 0;
+        }
+        
+        .card-header h5 {
+            font-size: 1rem;
+        }
+        
+        .btn-lg {
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+        }
+    }
+</style>
 {% endblock %}
