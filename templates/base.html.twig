@@ -40,7 +40,7 @@
             {# ✅ FLASH MESSAGES - Ajouté ici #}
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
-                    <div class="alert alert-{{ label == 'error' ? 'danger' : (label == 'info' ? 'info' : (label == 'success' ? 'success' : 'warning')) }} alert-dismissible fade show" role="alert">
+                    <div class="alert alert-{{ label == 'error' or label == 'danger' ? 'danger' : (label == 'info' ? 'info' : (label == 'success' ? 'success' : 'warning')) }} alert-dismissible fade show" role="alert">
                         <i class="mdi mdi-{{ label == 'error' ? 'alert-circle' : (label == 'success' ? 'check-circle' : 'information') }}"></i>
                         {{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

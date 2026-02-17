@@ -12,7 +12,8 @@
                     <p class="text-muted mb-0">Formation : {{ formation.titre }}</p>
                 </div>
                 <div class="card-body">
-                    {{ form_start(form) }}
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        {{ form_errors(form) }}
                         {{ form_row(form.titre) }}
                         {{ form_row(form.description) }}
 
