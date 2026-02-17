@@ -18,8 +18,7 @@ use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\File;
-use Symfony\Component\Validator\Constraints\Length;
+
 
 class ProfileEditType extends AbstractType
 {
@@ -71,13 +70,7 @@ class ProfileEditType extends AbstractType
                 'label' => 'Photo de profil',
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '2M',
-                        'mimeTypes' => ['image/jpeg','image/jpg','image/png','image/gif'],
-                        'mimeTypesMessage' => 'Veuillez télécharger une image valide',
-                    ])
-                ],
+                
             ])
 
             // ===== Formateur =====
@@ -116,13 +109,7 @@ class ProfileEditType extends AbstractType
                 'label' => 'CV (PDF)',
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '5M',
-                        'mimeTypes' => ['application/pdf'],
-                        'mimeTypesMessage' => 'Veuillez télécharger un PDF',
-                    ])
-                ],
+                
             ])
 
             // ===== Apprenant =====
@@ -133,7 +120,6 @@ class ProfileEditType extends AbstractType
                 'choices' => [
                     'Homme' => 'homme',
                     'Femme' => 'femme',
-                    'Autre' => 'autre',
                 ],
                 'placeholder' => 'Choisissez...',
             ])
@@ -214,10 +200,7 @@ class ProfileEditType extends AbstractType
                 'required' => false,
                 'first_options' => ['label' => 'Nouveau mot de passe'],
                 'second_options' => ['label' => 'Confirmer le mot de passe'],
-                'invalid_message' => 'Les mots de passe doivent correspondre.',
-                'constraints' => [
-                    new Length(['min' => 6]),
-                ],
+                
             ]);
     }
 
