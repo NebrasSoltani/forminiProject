@@ -105,6 +105,11 @@ PROMPT;
         ]);
 
         $statusCode = $response->getStatusCode();
+
+        if ($statusCode === 429) {
+            throw new \RuntimeException("Le quota de l'API Gemini est dépassé. Veuillez réessayer plus tard.");
+        }
+
         if ($statusCode !== 200) {
             $body = $response->getContent(false);
             throw new \RuntimeException("Erreur API Gemini (HTTP {$statusCode}) : {$body}");
