@@ -18,6 +18,7 @@ class Societe
 
     #[ORM\OneToOne(inversedBy: 'societe', cascade: ['persist', 'remove'])]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\Valid]
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
@@ -47,7 +48,7 @@ class Societe
 
 
 
-    
+
 
     public function getId(): ?int
     {
@@ -120,7 +121,7 @@ class Societe
         return $this;
     }
 
-  
 
-  
+
+
 }

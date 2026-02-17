@@ -32,52 +32,19 @@ class RegistrationFormType extends AbstractType
         $builder
             ->add('nom', TextType::class, [
                 'label' => 'Nom',
-                'constraints' => [
-                    new NotBlank(['message' => 'Le nom est obligatoire']),
-                    new Length([
-                        'min' => 2,
-                        'max' => 50,
-                        'minMessage' => 'Le nom doit contenir au moins {{ limit }} caractères',
-                        'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères'
-                    ]),
-                    new Regex([
-                        'pattern' => '/^[a-zA-ZÀ-ÿ\s\-]+$/',
-                        'message' => 'Le nom ne peut contenir que des lettres, espaces et tirets'
-                    ])
-                ]
+                
             ])
             ->add('prenom', TextType::class, [
                 'label' => 'Prénom',
-                'constraints' => [
-                    new NotBlank(['message' => 'Le prénom est obligatoire']),
-                    new Length([
-                        'min' => 2,
-                        'max' => 50,
-                        'minMessage' => 'Le prénom doit contenir au moins {{ limit }} caractères',
-                        'maxMessage' => 'Le prénom ne peut pas dépasser {{ limit }} caractères'
-                    ]),
-                    new Regex([
-                        'pattern' => '/^[a-zA-ZÀ-ÿ\s\-]+$/',
-                        'message' => 'Le prénom ne peut contenir que des lettres, espaces et tirets'
-                    ])
-                ]
+              
             ])
             ->add('telephone', TelType::class, [
                 'label' => 'Téléphone',
-                'constraints' => [
-                    new NotBlank(['message' => 'Le téléphone est obligatoire']),
-                    new Regex([
-                        'pattern' => '/^[0-9\s\+\-\.\(\)]{8,20}$/',
-                        'message' => 'Format de téléphone invalide (8-20 chiffres)'
-                    ])
-                ]
+                
             ])
             ->add('email', EmailType::class, [
                 'label' => 'Email',
-                'constraints' => [
-                    new NotBlank(['message' => 'L\'email est obligatoire']),
-                    new Email(['message' => 'Email invalide'])
-                ]
+               
             ])
              ->add('gouvernorat', ChoiceType::class, [
         'label' => 'Gouvernorat',
@@ -86,46 +53,23 @@ class RegistrationFormType extends AbstractType
             Gouvernorat::cases()  
         ),
         'placeholder' => 'Choisissez un gouvernorat',
-        'constraints' => [
-            new NotBlank(['message' => 'Le gouvernorat est obligatoire'])
-        ],
+        
     ])
 
             ->add('dateNaissance', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de naissance',
-                'constraints' => [
-                    new NotBlank(['message' => 'La date de naissance est obligatoire']),
-                    new LessThan([
-                        'value' => 'today',
-                        'message' => 'La date de naissance doit être dans le passé'
-                    ])
-                ]
+                
             ])
             ->add('profession', TextType::class, [
                 'label' => 'Profession',
-                'constraints' => [
-                    new NotBlank(['message' => 'La profession est obligatoire']),
-                    new Length(['max' => 100])
-                ]
+                
             ])
             ->add('photo', FileType::class, [
                 'label' => 'Photo de profil',
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '2M',
-                        'mimeTypes' => [
-                            'image/jpeg',
-                            'image/jpg',
-                            'image/png',
-                            'image/gif',
-                        ],
-                        'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPG, PNG, GIF)',
-                        'maxSizeMessage' => 'La taille maximale est de 2 Mo'
-                    ])
-                ],
+                
                 'attr' => ['class' => 'form-control']
             ])
             ->add('roleUtilisateur', ChoiceType::class, [
@@ -137,9 +81,7 @@ class RegistrationFormType extends AbstractType
                 ],
                 'expanded' => false,
                 'placeholder' => 'Choisissez votre rôle...',
-                'constraints' => [
-                    new NotBlank(['message' => 'Le rôle est obligatoire'])
-                ],
+                
                 'attr' => ['id' => 'roleUtilisateur']
             ])
             
@@ -178,13 +120,7 @@ class RegistrationFormType extends AbstractType
                 'label' => 'CV (PDF)',
                 'mapped' => false,
                 'required' => false,
-                'constraints' => [
-                    new File([
-                        'maxSize' => '5M',
-                        'mimeTypes' => ['application/pdf'],
-                        'mimeTypesMessage' => 'Veuillez télécharger un fichier PDF'
-                    ])
-                ],
+                
                 'attr' => ['class' => 'form-control']
             ])
             
@@ -274,18 +210,7 @@ class RegistrationFormType extends AbstractType
                 'first_options' => ['label' => 'Mot de passe'],
                 'second_options' => ['label' => 'Confirmer mot de passe'],
                 'invalid_message' => 'Les mots de passe doivent être identiques',
-                'constraints' => [
-                    new NotBlank(['message' => 'Le mot de passe est obligatoire']),
-                    new Length([
-                        'min' => 6,
-                        'max' => 4096,
-                        'minMessage' => 'Le mot de passe doit contenir au moins {{ limit }} caractères'
-                    ]),
-                    new Regex([
-                        'pattern' => '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/',
-                        'message' => 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre'
-                    ])
-                ],
+                
             ]);
     }
 
