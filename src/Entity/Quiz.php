@@ -151,7 +151,6 @@ class Quiz
     public function removeQuestion(Question $question): self
     {
         if ($this->questions->removeElement($question)) {
-            // set the owning side to null (unless already changed)
             if ($question->getQuiz() === $this) {
                 $question->setQuiz(null);
             }

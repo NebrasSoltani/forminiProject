@@ -1,0 +1,163 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Billet - {{ evenement.titre }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .ticket-container {
+        max-width: 800px;
+        margin: 50px auto;
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        background: #fff;
+        padding: 40px;
+        position: relative;
+        overflow: hidden;
+    }
+    .ticket-header {
+        border-bottom: 2px solid #eee;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .ticket-title {
+        color: #e83e8c; /* Primary color hint */
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    .event-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 10px;
+        color: #333;
+    }
+    .event-info {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    .attendee-box {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 30px;
+        border-left: 5px solid #007bff;
+    }
+    .qr-code-section {
+        text-align: center;
+        margin-top: 30px;
+    }
+    .qr-code-img {
+        width: 200px;
+        height: 200px;
+        border: 1px solid #ddd;
+        padding: 10px;
+        background: white;
+    }
+    .ticket-footer {
+        text-align: center;
+        margin-top: 40px;
+        font-size: 0.9rem;
+        color: #999;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .ticket-container, .ticket-container * {
+            visibility: visible;
+        }
+        .ticket-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            border: 2px solid #000;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row mb-3 no-print">
+        <div class="col-12">
+            <a href="{{ path('admin_evenement_participants', {id: evenement.id}) }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <button onclick="window.print()" class="btn btn-primary float-end">
+                <i class="fas fa-print"></i> Imprimer le Billet
+            </button>
+        </div>
+    </div>
+
+    <div class="ticket-container">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="ticket-header">
+                    <span class="ticket-title">Billet Électronique</span>
+                    <span class="badge bg-success">Confirmé</span>
+                </div>
+                
+                <h1 class="event-title">{{ evenement.titre }}</h1>
+                
+                <div class="mb-4">
+                    <p class="event-info">
+                        <i class="fas fa-calendar-alt me-2 text-primary"></i> 
+                        {{ evenement.dateDebut|date('d/m/Y') }} à {{ evenement.dateDebut|date('H:i') }}
+                    </p>
+                    <p class="event-info">
+                        <i class="fas fa-map-marker-alt me-2 text-danger"></i> 
+                        {{ evenement.lieu }}
+                    </p>
+                    <p class="event-info">
+                        <i class="fas fa-tag me-2 text-info"></i> 
+                        {{ evenement.type }}
+                    </p>
+                </div>
+
+                <div class="attendee-box">
+                    <small class="text-uppercase text-muted">Participant</small>
+                    <h3 class="mb-0">{{ user.prenom }} {{ user.nom }}</h3>
+                    <p class="mb-0 text-muted">{{ user.email }}</p>
+                    <p class="mb-0 text-muted">{{ user.telephone }}</p>
+                    {% if user.gouvernorat %}
+                        <p class="mb-0 text-muted">{{ user.gouvernorat.value }} (Gouvernorat)</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="col-md-4 d-flex flex-column align-items-center justify-content-center border-start">
+                <div class="qr-code-section">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ ('https://www.google.com/maps/search/?api=1&query=' ~ evenement.lieu)|url_encode }}" 
+                         alt="QR Code" 
+                         class="qr-code-img">
+                    <p class="mt-2 text-muted small">
+                        <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                        {{ evenement.lieu }}
+                    </p>
+                    <div class="mt-3">
+                        <small class="d-block text-muted">Billet N°</small>
+                        <strong>#{{ '%06d'|format(participation.id) }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ticket-footer">
+            <p>Ce billet est personnel et incessible. Veuillez le présenter à l'entrée de l'événement.</p>
+            <p class="mb-0">&copy; {{ "now"|date("Y") }} EventBlogs. Tous droits réservés.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

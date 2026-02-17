@@ -87,11 +87,9 @@ class OffreStage
     private ?\DateTimeInterface $dateFin = null;
 
     #[ORM\Column(length: 100)]
-    #[Assert\NotBlank(message: 'Le type de stage est obligatoire')]
-    #[Assert\Choice(
-        choices: ['stage_observation', 'stage_application', 'stage_perfectionnement', 'pfe'],
-        message: 'Type de stage invalide'
-    )]
+
+    #[Assert\Choice(choices: ['stage_observation', 'stage_application', 'stage_perfectionnement', 'pfe'])]
+
     private ?string $typeStage = null;
 
     #[ORM\Column(length: 255)]

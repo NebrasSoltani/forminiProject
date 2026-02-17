@@ -466,7 +466,6 @@
 {% endblock %}
 
 {% block body %}
-<div class="page-wrapper">
     <div class="container-fluid">
         <!-- Header -->
         <div class="offer-header">
@@ -699,41 +698,36 @@
                                 </td>
                             </tr>
 
-                            <!-- Modal -->
-                            <div class="modal fade" id="candidatureModal{{ candidature.id }}" tabindex="-1">
-                                <div class="modal-dialog modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">
-                                                <i class="fas fa-user-circle"></i>
-                                                Candidature de {{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}
-                                            </h5>
-                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="modal-section">
-                                                <h6><i class="fas fa-user"></i> Informations du candidat</h6>
-                                                <div class="info-box">
-                                                    <div class="row">
-                                                        <div class="col-md-6">
-                                                            <p class="mb-2"><strong>Nom complet:</strong> {{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}</p>
-                                                            <p class="mb-2"><strong>Email:</strong> {{ candidature.apprenant.email }}</p>
-                                                            <p class="mb-0"><strong>Téléphone:</strong> {{ candidature.apprenant.telephone }}</p>
+                                            {# Modal for candidature details #}
+                                            <div class="modal fade" id="candidatureModal{{ candidature.id }}" tabindex="-1" aria-labelledby="candidatureModalLabel{{ candidature.id }}" aria-hidden="true">
+                                                <div class="modal-dialog modal-lg">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="candidatureModalLabel{{ candidature.id }}">Candidature de {{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                         </div>
-                                                        <div class="col-md-6">
-                                                            {% if candidature.apprenant.profession %}
-                                                                <p class="mb-2"><strong>Profession:</strong> {{ candidature.apprenant.profession }}</p>
-                                                            {% endif %}
-                                                            {% if candidature.apprenant.niveauEtude %}
-                                                                <p class="mb-2"><strong>Niveau:</strong> {{ candidature.apprenant.niveauEtude|replace({'_': ' '})|title }}</p>
-                                                            {% endif %}
-                                                            {% if candidature.apprenant.gouvernorat.value %}
-                                                                <p class="mb-0"><strong>Localisation:</strong> {{ candidature.apprenant.gouvernorat.value }}</p>
-                                                            {% endif %}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                                        <div class="modal-body">
+                                                            <h6><i class="fas fa-user"></i> Informations du candidat</h6>
+                                                            <div class="bg-light p-3 rounded mb-3">
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <p class="mb-2"><strong>Nom complet:</strong> {{ candidature.apprenant.nom }} {{ candidature.apprenant.prenom }}</p>
+                                                                        <p class="mb-2"><strong>Email:</strong> {{ candidature.apprenant.email }}</p>
+                                                                        <p class="mb-0"><strong>Téléphone:</strong> {{ candidature.apprenant.telephone }}</p>
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        {% if candidature.apprenant.profession %}
+                                                                            <p class="mb-2"><strong>Profession:</strong> {{ candidature.apprenant.profession }}</p>
+                                                                        {% endif %}
+                                                                        {% if candidature.apprenant.niveauEtude %}
+                                                                            <p class="mb-2"><strong>Niveau d'études:</strong> {{ candidature.apprenant.niveauEtude|replace({'_': ' '})|title }}</p>
+                                                                        {% endif %}
+                                                                        {% if candidature.apprenant.gouvernorat.value %}
+                                                                            <p class="mb-0"><strong>Localisation:</strong> {{ candidature.apprenant.gouvernorat.value }}</p>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
 
                                             <div class="modal-section">
                                                 <h6><i class="fas fa-envelope"></i> Lettre de motivation</h6>

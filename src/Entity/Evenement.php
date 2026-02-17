@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\EvenementRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -34,11 +36,11 @@ class Evenement
     private ?string $description = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Assert\NotBlank(message: "La date de début est requise")] // ← CHANGÉ DE NotNull À NotBlank
+    #[Assert\NotBlank(message: "La date de début est requise")]
     private ?\DateTimeInterface $dateDebut = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    #[Assert\NotBlank(message: "La date de fin est requise")] // ← CHANGÉ DE NotNull À NotBlank
+    #[Assert\NotBlank(message: "La date de fin est requise")]
     #[Assert\Expression(
         "this.getDateDebut() == null or this.getDateFin() == null or this.getDateDebut() < this.getDateFin()",
         message: "La date de fin doit être après la date de début"
@@ -83,6 +85,41 @@ class Evenement
     )]
     private ?string $type = null;
 
+    #[ORM\OneToMany(mappedBy: 'evenement', targetEntity: ParticipationEvenement::class, cascade: ['remove'], orphanRemoval: true)]
+    private Collection $participations;
+
+    public function __construct()
+    {
+        $this->participations = new ArrayCollection();
+    }
+
+    /**
+     * @return Collection<int, ParticipationEvenement>
+     */
+    public function getParticipations(): Collection
+    {
+        return $this->participations;
+    }
+
+    public function addParticipation(ParticipationEvenement $participation): static
+    {
+        if (!$this->participations->contains($participation)) {
+            $this->participations->add($participation);
+            $participation->setEvenement($this);
+        }
+        return $this;
+    }
+
+    public function removeParticipation(ParticipationEvenement $participation): static
+    {
+        if ($this->participations->removeElement($participation)) {
+            if ($participation->getEvenement() === $this) {
+                $participation->setEvenement(null);
+            }
+        }
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -93,7 +130,8 @@ class Evenement
         return $this->titre;
     }
 
-    public function setTitre(string $titre): static
+    // ✅ CHANGÉ : Accepte ?string au lieu de string
+    public function setTitre(?string $titre): static
     {
         $this->titre = $titre;
         return $this;
@@ -104,7 +142,8 @@ class Evenement
         return $this->description;
     }
 
-    public function setDescription(string $description): static
+    // ✅ CHANGÉ : Accepte ?string au lieu de string
+    public function setDescription(?string $description): static
     {
         $this->description = $description;
         return $this;
@@ -137,7 +176,8 @@ class Evenement
         return $this->lieu;
     }
 
-    public function setLieu(string $lieu): static
+    // ✅ CHANGÉ : Accepte ?string au lieu de string
+    public function setLieu(?string $lieu): static
     {
         $this->lieu = $lieu;
         return $this;
@@ -192,7 +232,8 @@ class Evenement
         return $this->type;
     }
 
-    public function setType(string $type): static
+    // ✅ CHANGÉ : Accepte ?string au lieu de string
+    public function setType(?string $type): static
     {
         $this->type = $type;
         return $this;

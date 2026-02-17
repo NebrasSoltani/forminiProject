@@ -524,9 +524,9 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                {{ form_label(registrationForm.governorat, 'Gouvernorat') }}
-                                {{ form_widget(registrationForm.governorat, {'attr': {'class': 'form-control'}}) }}
-                                {{ form_errors(registrationForm.governorat) }}
+                                {{ form_label(registrationForm.gouvernorat, 'Gouvernorat') }}
+                                {{ form_widget(registrationForm.gouvernorat, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(registrationForm.gouvernorat) }}
                             </div>
                             <div class="col-md-6 mb-3">
                                 {{ form_label(registrationForm.dateNaissance, 'Date de naissance') }}
@@ -574,7 +574,7 @@
                         <div class="text-center mt-3">
                             <p>Vous avez déjà un compte ? <a href="{{ path('app_login') }}">Se connecter</a></p>
                         </div>
-                    {{ form_end(registrationForm) }}
+                    {{ form_end(registrationForm, {'render_rest': false}) }}
                 </div>
             </div>
         </div>

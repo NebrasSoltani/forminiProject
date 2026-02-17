@@ -1,0 +1,538 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<!-- Flash messages -->
+{% for type, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'success' ? 'success' : 'danger' }} alert-dismissible fade show mt-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-{{ type == 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' }} me-2"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-primary">
+            <i class="bi bi-people-fill me-2"></i>Liste des apprenants
+        </h1>
+        <a href="{{ path('admin_apprenant_new') }}" class="btn btn-success btn-lg shadow-sm">
+            <i class="bi bi-plus-circle-dotted me-1"></i>Ajouter un apprenant
+        </a>
+    </div>
+
+    <!-- Barre de recherche et filtres améliorés -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body p-4">
+            <!-- Filtres actifs badges -->
+            {% set hasActiveFilters = q or genre or domaine or profession %}
+            {% if hasActiveFilters %}
+            <div class="mb-4 p-3 bg-light rounded">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="fw-medium text-muted">Filtres actifs :</span>
+                    {% if q %}
+                        <span class="badge bg-primary rounded-pill px-3 py-2">
+                            <i class="bi bi-search me-1"></i>Recherche: "{{ q }}"
+                            <a href="{{ path('admin_apprenant_index', {genre: genre|default(''), domaine: domaine|default(''), profession: profession|default(''), limit: limit|default(10)}) }}" 
+                               class="ms-2 text-white text-decoration-none" 
+                               title="Supprimer ce filtre">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </span>
+                    {% endif %}
+                    {% if genre %}
+                        <span class="badge bg-info rounded-pill px-3 py-2">
+                            <i class="bi bi-gender-{{ genre == 'homme' ? 'male' : (genre == 'femme' ? 'female' : 'neuter') }} me-1"></i>Genre: {{ genre|capitalize }}
+                            <a href="{{ path('admin_apprenant_index', {q: q|default(''), domaine: domaine|default(''), profession: profession|default(''), limit: limit|default(10)}) }}" 
+                               class="ms-2 text-white text-decoration-none" 
+                               title="Supprimer ce filtre">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </span>
+                    {% endif %}
+                    {% if domaine %}
+                        <span class="badge bg-success rounded-pill px-3 py-2">
+                            <i class="bi bi-briefcase me-1"></i>Domaine: {{ domaines|filter(d => d.id == domaine)|first.nom ?? 'Inconnu' }}
+                            <a href="{{ path('admin_apprenant_index', {q: q|default(''), genre: genre|default(''), profession: profession|default(''), limit: limit|default(10)}) }}" 
+                               class="ms-2 text-white text-decoration-none" 
+                               title="Supprimer ce filtre">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </span>
+                    {% endif %}
+                    {% if profession %}
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2">
+                            <i class="bi bi-person-workspace me-1"></i>Profession: "{{ profession }}"
+                            <a href="{{ path('admin_apprenant_index', {q: q|default(''), genre: genre|default(''), domaine: domaine|default(''), limit: limit|default(10)}) }}" 
+                               class="ms-2 text-dark text-decoration-none" 
+                               title="Supprimer ce filtre">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </span>
+                    {% endif %}
+                    <a href="{{ path('admin_apprenant_index') }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bi bi-funnel me-1"></i>Effacer tous les filtres
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Formulaire de recherche principal -->
+            <form method="get" action="{{ path('admin_apprenant_index') }}" class="row g-3">
+                <!-- Recherche rapide -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               name="q" 
+                               value="{{ q|default('') }}" 
+                               class="form-control border-start-0" 
+                               placeholder="Rechercher (email, nom, prénom, téléphone...)"
+                               style="border-left: none;">
+                    </div>
+                </div>
+
+                <!-- Filtres avancés toggle -->
+                <div class="col-md-6 col-lg-8 text-end">
+                    <button type="button" 
+                            class="btn btn-outline-primary d-none d-md-inline-flex align-items-center"
+                            data-bs-toggle="collapse" 
+                            data-bs-target="#advancedFilters"
+                            aria-expanded="{{ hasActiveFilters ? 'true' : 'false' }}"
+                            aria-controls="advancedFilters">
+                        <i class="bi bi-sliders me-1"></i>Filtres avancés
+                        <i class="bi bi-chevron-down ms-1 transition-icon"></i>
+                    </button>
+                    <button type="submit" class="btn btn-primary btn-lg ms-2">
+                        <i class="bi bi-search me-1"></i>Filtrer
+                    </button>
+                </div>
+
+                <!-- Filtres avancés collapsible -->
+                <div class="col-12 collapse {{ hasActiveFilters ? 'show' : '' }}" id="advancedFilters">
+                    <div class="row g-3 mt-2 pt-3 border-top">
+                        <div class="col-md-4 col-lg-3">
+                            <label class="form-label fw-medium text-muted small mb-1">
+                                <i class="bi bi-gender-ambiguous me-1"></i>Genre
+                            </label>
+                            <select name="genre" class="form-select form-select-lg">
+                                <option value="">Tous les genres</option>
+                                <option value="homme" {% if genre == 'homme' %}selected{% endif %}>Homme</option>
+                                <option value="femme" {% if genre == 'femme' %}selected{% endif %}>Femme</option>
+                                <option value="autre" {% if genre == 'autre' %}selected{% endif %}>Autre</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4 col-lg-3">
+                            <label class="form-label fw-medium text-muted small mb-1">
+                                <i class="bi bi-briefcase me-1"></i>Domaine
+                            </label>
+                            <select name="domaine" class="form-select form-select-lg">
+                                <option value="">Tous les domaines</option>
+                                {% for domaine_item in domaines %}
+                                    <option value="{{ domaine_item.id }}" {% if domaine == domaine_item.id %}selected{% endif %}>
+                                        {{ domaine_item.nom }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4 col-lg-3">
+                            <label class="form-label fw-medium text-muted small mb-1">
+                                <i class="bi bi-person-workspace me-1"></i>Profession
+                            </label>
+                            <input type="text" 
+                                   name="profession" 
+                                   value="{{ profession|default('') }}" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="Filtrer par profession...">
+                        </div>
+                        
+                        <div class="col-md-4 col-lg-2">
+                            <label class="form-label fw-medium text-muted small mb-1">
+                                <i class="bi bi-list-ol me-1"></i>Résultats/page
+                            </label>
+                            <select name="limit" class="form-select form-select-lg">
+                                {% set currentLimit = limit|default(10) %}
+                                <option value="10" {% if currentLimit == 10 %}selected{% endif %}>10</option>
+                                <option value="25" {% if currentLimit == 25 %}selected{% endif %}>25</option>
+                                <option value="50" {% if currentLimit == 50 %}selected{% endif %}>50</option>
+                                <option value="100" {% if currentLimit == 100 %}selected{% endif %}>100</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-4 col-lg-1 align-self-end">
+                            <button type="reset" 
+                                    class="btn btn-outline-secondary w-100 h-100"
+                                    onclick="window.location.href='{{ path('admin_apprenant_index') }}'">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="col-12 mt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <p class="mb-0 text-muted">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>{{ total|default(apprenants|length) }}</strong> apprenant(s) trouvé(s)
+                        </p>
+                        <small class="text-muted">
+                            <i class="bi bi-clock me-1"></i>Dernière mise à jour : {{ "now"|date("d/m/Y H:i") }}
+                        </small>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tableau responsive et moderne -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped table-sm mb-0">
+                    <thead class="table-primary">
+                        <tr>
+                            <th class="px-4 py-3 fw-bold">ID</th>
+                            <th class="py-3 fw-bold">Email</th>
+                            <th class="py-3 fw-bold">Nom</th>
+                            <th class="py-3 fw-bold">Prénom</th>
+                            <th class="py-3 fw-bold">Téléphone</th>
+                            <th class="py-3 fw-bold">Genre</th>
+                            <th class="py-3 fw-bold">Profession</th>
+                            <th class="py-3 fw-bold">Domaine</th>
+                            <th class="py-3 fw-bold text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apprenant in apprenants %}
+                        <tr class="align-middle">
+                            <td class="px-4 py-3">
+                                <span class="badge bg-secondary">{{ apprenant.id }}</span>
+                            </td>
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-envelope-fill text-primary me-2"></i>
+                                    <span class="text-break">{{ apprenant.user.email }}</span>
+                                </div>
+                            </td>
+                            <td class="py-3 fw-medium text-nowrap">{{ apprenant.user.nom }}</td>
+                            <td class="py-3 text-nowrap">{{ apprenant.user.prenom }}</td>
+                            <td class="py-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-telephone-fill text-success me-2"></i>
+                                    <span class="text-break">{{ apprenant.user.telephone ?? '-' }}</span>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                {% if apprenant.genre %}
+                                    <span class="badge bg-{{ apprenant.genre == 'homme' ? 'primary' : (apprenant.genre == 'femme' ? 'danger' : 'secondary') }} rounded-pill px-3 py-2">
+                                        <i class="bi bi-{{ apprenant.genre == 'homme' ? 'gender-male' : (apprenant.genre == 'femme' ? 'gender-female' : 'gender-neuter') }} me-1"></i>
+                                        {{ apprenant.genre|capitalize }}
+                                    </span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3">
+                                {% if apprenant.user.profession %}
+                                    <span class="badge bg-warning text-dark">{{ apprenant.user.profession }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3">
+                                {% if apprenant.domaine %}
+                                    <span class="badge bg-info text-dark">{{ apprenant.domaine.nom }}</span>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 text-center">
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ path('admin_apprenant_show', {id: apprenant.id}) }}" 
+                                       class="btn btn-info text-white" 
+                                       title="Voir les détails">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                    <a href="{{ path('admin_apprenant_edit', {id: apprenant.id}) }}" 
+                                       class="btn btn-warning text-white" 
+                                       title="Modifier">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-danger"
+                                            title="Supprimer"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteConfirmationModal"
+                                            data-apprenant-id="{{ apprenant.id }}"
+                                            data-apprenant-name="{{ apprenant.user.prenom ~ ' ' ~ apprenant.user.nom }}"
+                                            data-delete-url="{{ path('admin_apprenant_delete', {id: apprenant.id}) }}"
+                                            data-csrf-token="{{ csrf_token('delete' ~ apprenant.id) }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-inbox fs-1 mb-2 d-block"></i>
+                                    <p class="h5">Aucun apprenant trouvé</p>
+                                    <p class="text-muted">Essayez d'ajuster vos critères de recherche</p>
+                                    <a href="{{ path('admin_apprenant_index') }}" class="btn btn-sm btn-outline-primary mt-2">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Réinitialiser les filtres
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination améliorée -->
+    {% if apprenants|length > 0 %}
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <p class="text-muted mb-0">
+            <i class="bi bi-grid-3x3-gap me-2"></i>
+            Affichage de <strong>{{ (page-1)*limit + 1 }}</strong> à <strong>{{ (page*limit) < total ? page*limit : total }}</strong> sur <strong>{{ total }}</strong> résultats
+        </p>
+        
+        {% set currentPage = page|default(1) %}
+        {% set pages = totalPages|default(1) %}
+        {% set params = { 
+            q: q|default(''), 
+            genre: genre|default(''), 
+            domaine: domaine|default(''), 
+            profession: profession|default(''), 
+            limit: limit|default(10) 
+        } %}
+        
+        <nav aria-label="Pagination">
+            <ul class="pagination mb-0">
+                <li class="page-item {% if currentPage == 1 %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage > 1 %}{{ path('admin_apprenant_index', params|merge({page: (currentPage - 1) })) }}{% else %}#{% endif %}" tabindex="-1">
+                        <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                
+                {% for i in 1..pages %}
+                    {% if i == currentPage or i == 1 or i == pages or (i >= currentPage - 1 and i <= currentPage + 1) %}
+                        <li class="page-item {% if i == currentPage %}active{% endif %}">
+                            <a class="page-link" href="{{ path('admin_apprenant_index', params|merge({page: i})) }}">{{ i }}</a>
+                        </li>
+                    {% elseif i == currentPage - 2 or i == currentPage + 2 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                <li class="page-item {% if currentPage >= pages %}disabled{% endif %}">
+                    <a class="page-link" href="{% if currentPage < pages %}{{ path('admin_apprenant_index', params|merge({page: (currentPage + 1) })) }}{% else %}#{% endif %}">
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white border-0">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-2"></i>
+                <h5 class="modal-title" id="deleteConfirmationModalLabel">Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-0">
+                    ⚠️ <strong>Attention !</strong><br>
+                    Êtes-vous sûr(e) de vouloir supprimer l’apprenant <strong id="apprenantNameInModal"></strong> ?<br>
+                    Cette action est <strong>irréversible</strong> et entraînera la suppression de toutes les données associées.
+                </p>
+            </div>
+            <div class="modal-footer border-0 d-flex justify-content-between">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-1"></i>Annuler
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <input type="hidden" name="_token" id="deleteToken">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i>Oui, supprimer
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CSS personnalisé amélioré -->
+<style>
+    /* Améliorations générales */
+    .btn {
+        transition: all 0.3s ease !important;
+        border-radius: 8px !important;
+    }
+    
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+    }
+    
+    .btn:active {
+        transform: translateY(0);
+    }
+    
+    /* Tableau */
+    .table-hover tbody tr:hover {
+        background-color: rgba(67, 94, 190, 0.05) !important;
+        transform: scale(1.002);
+        transition: all 0.2s ease;
+    }
+    
+    .table thead th {
+        border-bottom: 3px solid #dee2e6;
+        position: sticky;
+        top: 0;
+        background-color: #f8f9fa;
+    }
+    
+    /* Cartes */
+    .card {
+        border-radius: 12px !important;
+        border: none;
+        box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0.75rem 2rem rgba(0,0,0,0.12);
+    }
+    
+    /* Badges filtres */
+    .badge {
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .badge:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Input groups */
+    .input-group-lg .form-control, 
+    .input-group-lg .input-group-text {
+        height: 3.5rem;
+        font-size: 1.1rem;
+    }
+    
+    /* Pagination */
+    .pagination .page-link {
+        color: #435ebe;
+        border-radius: 6px !important;
+        margin: 0 2px;
+        border: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background-color: #435ebe;
+        border-color: #435ebe;
+        color: white;
+    }
+    
+    .pagination .page-link:hover {
+        background-color: #f0f4ff;
+        color: #2c3e8c;
+    }
+    
+    /* Transition icône toggle */
+    .transition-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .collapse.show + .transition-icon {
+        transform: rotate(180deg);
+    }
+    
+    /* Responsive amélioré */
+    @media (max-width: 768px) {
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+        
+        .btn-group-sm > .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .badge {
+            font-size: 0.85rem;
+        }
+    }
+    
+    /* Animation badges */
+    @keyframes badgePulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    .badge.bg-primary, .badge.bg-info, .badge.bg-success, .badge.bg-warning, .badge.bg-danger {
+        animation: badgePulse 2s ease-in-out infinite;
+        animation-delay: calc(var(--animation-delay, 0) * 0.1s);
+        color:white;
+    }
+</style>
+
+<!-- JavaScript pour améliorations UX -->
+<script>
+    // Gestion de la modale de suppression
+    document.getElementById('deleteConfirmationModal').addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Bouton qui a déclenché la modale
+        const apprenantName = button.getAttribute('data-apprenant-name');
+        const deleteUrl = button.getAttribute('data-delete-url');
+        const csrfToken = button.getAttribute('data-csrf-token');
+
+        // Afficher le nom dans la modale
+        document.getElementById('apprenantNameInModal').textContent = apprenantName;
+
+        // Mettre à jour le formulaire de suppression
+        const form = document.getElementById('deleteForm');
+        form.action = deleteUrl;
+        document.getElementById('deleteToken').value = csrfToken;
+    });
+
+    // Fermer les filtres avancés au submit
+    document.querySelector('form').addEventListener('submit', function() {
+        const advancedFilters = document.getElementById('advancedFilters');
+        if (advancedFilters && !advancedFilters.classList.contains('show')) {
+            advancedFilters.classList.add('show');
+        }
+    });
+    
+    // Effet de focus sur les inputs
+    document.querySelectorAll('.form-control, .form-select').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement?.classList.add('focused');
+        });
+        input.addEventListener('blur', function() {
+            this.parentElement?.classList.remove('focused');
+        });
+    });
+</script>
+{% endblock %}

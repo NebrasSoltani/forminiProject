@@ -430,56 +430,21 @@
 {% endblock %}
 
 {% block body %}
-<div class="page-container">
-    <div class="form-card">
-        <!-- Header -->
-        <div class="form-header">
-            <h1>
-                <i class="fas fa-{{ offre.id ? 'edit' : 'briefcase' }}"></i>
-                {{ offre.id ? 'Modifier l\'offre de stage' : 'Publier une nouvelle offre' }}
-            </h1>
-            <p>{{ offre.id ? 'Actualisez les informations de votre offre de stage' : 'Créez une offre attractive pour trouver le candidat idéal' }}</p>
-        </div>
-
-        <!-- Body -->
-        <div class="form-body">
-            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'offreForm'}}) }}
-
-            {# Erreurs globales du formulaire #}
-            {% if form_errors(form) %}
-                <div class="form-errors-global">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>
-                        <strong>Veuillez corriger les erreurs suivantes :</strong>
-                        {{ form_errors(form) }}
-                    </div>
-                </div>
-            {% endif %}
-
-            <!-- Section 1: Informations générales -->
-            <div class="form-section">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-info-circle"></i>
-                    </div>
-                    <h2 class="section-title">Informations générales</h2>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Titre du stage<span class="required-star">*</span>
-                            </label>
-                            <div class="has-error">
-                                {{ form_widget(form.titre, {'attr': {'class': form_errors(form.titre) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'Ex: Développeur Full Stack'}}) }}
-                                {% if form_errors(form.titre) %}
-                                    <i class="fas fa-exclamation-circle input-error-icon"></i>
-                                {% endif %}
-                            </div>
-                            {% if form_errors(form.titre) %}
-                                <div class="form-error-message">
-                                    <i class="fas fa-times-circle"></i>
+<div class="page-wrapper">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-10 col-12 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">{{ offre.id ? 'Modifier l\'offre' : 'Nouvelle offre de stage' }}</h4>
+                        
+                        {{ form_start(form) }}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    {{ form_label(form.titre) }}
+                                    {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
                                     {{ form_errors(form.titre) }}
                                 </div>
                             {% endif %}
@@ -632,50 +597,22 @@
                                     <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.remuneration) }}
                                 </div>
-                            {% endif %}
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Section 3: Compétences -->
-            <div class="form-section">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h2 class="section-title">Compétences & Profil</h2>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Compétences requises
-                            </label>
-                            {{ form_widget(form.competencesRequises, {'attr': {'class': form_errors(form.competencesRequises) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'PHP, Symfony, MySQL, Git, JavaScript...'}}) }}
-                            {% if form_errors(form.competencesRequises) %}
-                                <div class="form-error-message">
-                                    <i class="fas fa-times-circle"></i>
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="mb-3">
+                                    {{ form_label(form.competencesRequises) }}
+                                    {{ form_widget(form.competencesRequises, {'attr': {'class': 'form-control'}}) }}
                                     {{ form_errors(form.competencesRequises) }}
                                 </div>
-                            {% else %}
-                                <div class="form-help">
-                                    <i class="fas fa-tag"></i>
-                                    <span>Séparez les compétences par des virgules</span>
-                                </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Statut<span class="required-star">*</span>
-                            </label>
-                            {{ form_widget(form.statut, {'attr': {'class': form_errors(form.statut) ? 'form-select is-invalid' : 'form-select'}}) }}
-                            {% if form_errors(form.statut) %}
-                                <div class="form-error-message">
-                                    <i class="fas fa-times-circle"></i>
+                            </div>
+                            
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    {{ form_label(form.statut) }}
+                                    {{ form_widget(form.statut, {'attr': {'class': 'form-select'}}) }}
                                     {{ form_errors(form.statut) }}
                                 </div>
                             {% endif %}
@@ -715,43 +652,14 @@
                                     <i class="fas fa-exclamation-circle input-error-icon"></i>
                                 {% endif %}
                             </div>
-                            {% if form_errors(form.profilDemande) %}
-                                <div class="form-error-message">
-                                    <i class="fas fa-times-circle"></i>
-                                    {{ form_errors(form.profilDemande) }}
-                                </div>
-                            {% endif %}
                         </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-
-            <!-- Section 4: Contact -->
-            <div class="form-section">
-                <div class="section-header">
-                    <div class="section-icon">
-                        <i class="fas fa-address-card"></i>
-                    </div>
-                    <h2 class="section-title">Informations de contact</h2>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label class="form-label">
-                                Email de contact<span class="required-star">*</span>
-                            </label>
-                            <div class="input-with-icon has-error">
-                                <i class="fas fa-envelope input-icon"></i>
-                                {{ form_widget(form.contactEmail, {'attr': {'class': form_errors(form.contactEmail) ? 'form-control is-invalid' : 'form-control', 'placeholder': 'recrutement@entreprise.com'}}) }}
-                                {% if form_errors(form.contactEmail) %}
-                                    <i class="fas fa-exclamation-circle input-error-icon" style="right: 1rem;"></i>
-                                {% endif %}
-                            </div>
-                            {% if form_errors(form.contactEmail) %}
-                                <div class="form-error-message">
-                                    <i class="fas fa-times-circle"></i>
+                        
+                        <h5 class="mt-4 mb-3">Informations de contact</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.contactEmail) }}
+                                    {{ form_widget(form.contactEmail, {'attr': {'class': 'form-control'}}) }}
                                     {{ form_errors(form.contactEmail) }}
                                 </div>
                             {% endif %}
@@ -774,25 +682,22 @@
                                     <i class="fas fa-times-circle"></i>
                                     {{ form_errors(form.contactTel) }}
                                 </div>
-                            {% endif %}
+                            </div>
                         </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('societe_offres_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ offre.id ? 'Mettre à jour' : 'Publier' }}
+                            </button>
+                        </div>
+                        
+                        {{ form_end(form) }}
                     </div>
                 </div>
             </div>
-
-            <!-- Actions - TOUJOURS À LA FIN -->
-            <div class="form-actions">
-                <a href="{{ path('societe_offres_index') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i>
-                    Retour à la liste
-                </a>
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="fas fa-{{ offre.id ? 'save' : 'paper-plane' }}"></i>
-                    {{ offre.id ? 'Enregistrer les modifications' : 'Publier l\'offre' }}
-                </button>
-            </div>
-
-            {{ form_end(form) }}
         </div>
     </div>
 </div>

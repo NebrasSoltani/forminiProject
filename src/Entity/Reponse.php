@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\ReponseRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -30,6 +31,11 @@ class Reponse
     #[ORM\JoinColumn(nullable: false)]
     #[Assert\NotNull]
     private ?Question $question = null;
+
+    // ⭐ NOUVEAU CHAMP POUR LE CHATBOT
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Assert\Length(max: 2000, maxMessage: 'L\'explication de la réponse ne peut pas dépasser {{ limit }} caractères.')]
+    private ?string $explicationReponse = null;
 
     public function getId(): ?int
     {
@@ -66,6 +72,18 @@ class Reponse
     public function setQuestion(?Question $question): self
     {
         $this->question = $question;
+        return $this;
+    }
+
+    // ⭐ GETTER ET SETTER POUR LE NOUVEAU CHAMP
+    public function getExplicationReponse(): ?string
+    {
+        return $this->explicationReponse;
+    }
+
+    public function setExplicationReponse(?string $explicationReponse): self
+    {
+        $this->explicationReponse = $explicationReponse;
         return $this;
     }
 }
