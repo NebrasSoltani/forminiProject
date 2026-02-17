@@ -2,329 +2,19 @@
 
 {% block title %}{{ quiz.titre }} - {{ formation.titre }}{% endblock %}
 
-{% block body %}
-<div class="container mt-5 mb-5">
-    <div class="mb-4">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ path('apprenant_mes_formations') }}">Mes Formations</a></li>
-                <li class="breadcrumb-item"><a href="{{ path('apprenant_suivre_formation', {'id': formation.id}) }}">{{ formation.titre }}</a></li>
-                <li class="breadcrumb-item"><a href="{{ path('apprenant_quiz_index', {'formationId': formation.id}) }}">Quiz</a></li>
-                <li class="breadcrumb-item active">{{ quiz.titre }}</li>
-            </ol>
-        </nav>
-    </div>
-
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h3 class="mb-0">🎯 {{ quiz.titre }}</h3>
-            <div>
-                <span class="badge bg-light text-dark">Note minimale : {{ quiz.noteMinimale }}%</span>
-            </div>
-        </div>
-
-        <div class="card-body">
-            {% if quiz.description %}
-                <p class="lead text-muted">{{ quiz.description }}</p>
-            {% endif %}
-
-            <div class="d-flex justify-content-between mb-4 flex-wrap gap-3">
-                <div>
-                    <strong>Durée estimée :</strong> {{ quiz.duree }} min
-                </div>
-                <div>
-                    <strong>Questions :</strong> {{ questions|length }}
-                </div>
-            </div>
-
-            <!-- Barre de progression -->
-            <div class="progress mb-4" style="height: 10px;">
-                <div id="progress-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-            </div>
-
-            <div class="text-center mb-4">
-                <h5>Question <span id="current-question-number">1</span> sur {{ questions|length }}</h5>
-            </div>
-
-            <form method="post" action="{{ path('apprenant_quiz_soumettre', {'formationId': formation.id, 'quizId': quiz.id}) }}" id="quiz-form">
-                {% for question in questions %}
-                    <div class="question-card card mb-4 d-none" data-question-index="{{ loop.index0 }}">
-                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">Question {{ loop.index }}</h5>
-                            <button type="button" class="btn btn-sm btn-outline-primary voice-btn"
-                                    data-question-id="{{ question.id }}"
-                                    data-answers="{{ question.reponses|length }}"
-                                    title="Dites le numéro de la réponse (1, 2, 3, 4...)">
-                                🎤 Dire le n°
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <p class="lead fw-bold">{{ question.enonce }}</p>
-
-                            <!-- Affichage du texte reconnu -->
-                            <div class="alert alert-info d-none voice-output" data-question-id="{{ question.id }}" role="alert">
-                                <strong>Vous avez dit :</strong> <span class="voice-text"></span>
-                            </div>
-
-                            <div class="mt-4">
-                                {% for reponse in question.reponses %}
-                                    <div class="form-check mb-3 fs-5">
-                                        <input class="form-check-input"
-                                               type="radio"
-                                               name="reponses[{{ question.id }}]"
-                                               id="q{{ question.id }}_r{{ reponse.id }}"
-                                               value="{{ reponse.id }}"
-                                               data-answer-number="{{ loop.index }}"
-                                               required>
-                                        <label class="form-check-label" for="q{{ question.id }}_r{{ reponse.id }}">
-                                            <strong>{{ loop.index }}.</strong> {{ reponse.texte }}
-                                        </label>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-
-                <!-- Navigation -->
-                <div class="d-flex justify-content-between align-items-center mt-5">
-                    <button type="button" class="btn btn-outline-secondary btn-lg" id="prev-btn" disabled>
-                        ← Précédent
-                    </button>
-
-                    <div class="d-flex gap-3 align-items-center">
-                        <span id="page-info" class="fw-bold">1 / {{ questions|length }}</span>
-                        <button type="button" class="btn btn-primary btn-lg" id="next-btn">
-                            Suivant →
-                        </button>
-                    </div>
-
-                    <button type="submit" class="btn btn-success btn-lg d-none" id="submit-btn">
-                        Terminer et Soumettre ✓
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Configuration reconnaissance vocale
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition;
-    let isListening = false;
-    const supportsVoice = !!SpeechRecognition;
-
-    // Mapping des nombres en français
-    const numberMap = {
-        'un': 1, '1': 1,
-        'deux': 2, '2': 2,
-        'trois': 3, '3': 3,
-        'quatre': 4, '4': 4,
-        'cinq': 5, '5': 5,
-        'six': 6, '6': 6,
-        'sept': 7, '7': 7,
-        'huit': 8, '8': 8,
-        'neuf': 9, '9': 9,
-        'dix': 10, '10': 10
-    };
-
-    if (supportsVoice) {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'fr-FR';
-        recognition.continuous = false;
-        recognition.interimResults = false;
-    }
-
-    // Navigation quiz
-    const questions = document.querySelectorAll('.question-card');
-    const totalQuestions = questions.length;
-    let currentIndex = 0;
-
-    const prevBtn = document.getElementById('prev-btn');
-    const nextBtn = document.getElementById('next-btn');
-    const submitBtn = document.getElementById('submit-btn');
-    const progressBar = document.getElementById('progress-bar');
-    const currentNumber = document.getElementById('current-question-number');
-    const pageInfo = document.getElementById('page-info');
-
-    function showQuestion(index) {
-        questions.forEach((q, i) => {
-            q.classList.toggle('d-none', i !== index);
-        });
-
-        currentNumber.textContent = index + 1;
-        pageInfo.textContent = `${index + 1} / ${totalQuestions}`;
-
-        const progress = ((index + 1) / totalQuestions) * 100;
-        progressBar.style.width = `${progress}%`;
-        progressBar.setAttribute('aria-valuenow', progress);
-
-        prevBtn.disabled = index === 0;
-        nextBtn.classList.toggle('d-none', index === totalQuestions - 1);
-        submitBtn.classList.toggle('d-none', index !== totalQuestions - 1);
-
-        // Reset affichage vocal
-        const voiceOutput = questions[index].querySelector('.voice-output');
-        if (voiceOutput) {
-            voiceOutput.classList.add('d-none');
-            voiceOutput.classList.remove('alert-success', 'alert-warning', 'alert-danger');
-            voiceOutput.classList.add('alert-info');
-        }
-    }
-
-    // Événements navigation
-    prevBtn.addEventListener('click', () => {
-        if (currentIndex > 0) {
-            currentIndex--;
-            showQuestion(currentIndex);
-        }
-    });
-
-    nextBtn.addEventListener('click', () => {
-        if (currentIndex < totalQuestions - 1) {
-            currentIndex++;
-            showQuestion(currentIndex);
-        }
-    });
-
-    // Événements reconnaissance vocale
-    if (supportsVoice) {
-        recognition.onstart = function () {
-            isListening = true;
-            const btn = document.querySelector(`.voice-btn[data-question-id="${questions[currentIndex].querySelector('input[type="radio"]').name.match(/\\d+/)[0]}"]`);
-            if (btn) {
-                btn.classList.add('listening');
-                btn.innerHTML = '🔴 Écoutez...';
-            }
-        };
-
-        recognition.onend = function () {
-            isListening = false;
-            const btn = document.querySelector(`.voice-btn.listening`);
-            if (btn) {
-                btn.classList.remove('listening');
-                btn.innerHTML = '🎤 Dire le n°';
-            }
-        };
-
-        recognition.onerror = function (event) {
-            const messages = {
-                'network': 'Erreur réseau.',
-                'no-speech': 'Aucune parole détectée.',
-                'audio-capture': 'Microphone non accessible.',
-                'not-allowed': 'Permission microphone refusée.'
-            };
-            alert(messages[event.error] || 'Erreur reconnaissance');
-        };
-
-        recognition.onresult = function (event) {
-            let transcript = '';
-            for (let i = event.resultIndex; i < event.results.length; i++) {
-                transcript = event.results[i][0].transcript.toLowerCase().trim();
-            }
-
-            const currentQuestion = questions[currentIndex];
-            const voiceOutput = currentQuestion.querySelector('.voice-output');
-            const voiceText = voiceOutput.querySelector('.voice-text');
-
-            voiceText.textContent = transcript;
-            voiceOutput.classList.remove('d-none');
-
-            // Extraire le nombre du texte
-            const extractedNumber = extractNumber(transcript);
-
-            if (extractedNumber) {
-                // Chercher et sélectionner la réponse correspondante
-                const answerRadio = currentQuestion.querySelector(`input[data-answer-number="${extractedNumber}"]`);
-
-                if (answerRadio) {
-                    answerRadio.checked = true;
-                    voiceOutput.classList.remove('alert-info', 'alert-warning', 'alert-danger');
-                    voiceOutput.classList.add('alert-success');
-                    voiceText.textContent = `Réponse ${extractedNumber} sélectionnée ✓`;
-                } else {
-                    voiceOutput.classList.remove('alert-info', 'alert-success', 'alert-danger');
-                    voiceOutput.classList.add('alert-warning');
-                    voiceText.textContent = `Réponse ${extractedNumber} n'existe pas. Max: ${currentQuestion.querySelectorAll('input[type="radio"]').length}`;
-                }
-            } else {
-                voiceOutput.classList.remove('alert-info', 'alert-success', 'alert-warning');
-                voiceOutput.classList.add('alert-danger');
-                voiceText.textContent = `"${transcript}" - Veuillez dire un numéro (1, 2, 3...)`;
-            }
-        };
-    }
-
-    // Extraire le nombre du texte reconnu
-    function extractNumber(text) {
-        for (const [word, number] of Object.entries(numberMap)) {
-            if (text.includes(word)) {
-                return number;
-            }
-        }
-        return null;
-    }
-
-    // Événements boutons voix
-    document.querySelectorAll('.voice-btn').forEach(btn => {
-        btn.addEventListener('click', function (e) {
-            e.preventDefault();
-
-            if (!supportsVoice) {
-                alert('Reconnaissance vocale non supportée. Utilisez Chrome, Edge ou Firefox.');
-                return;
-            }
-
-            if (isListening) {
-                recognition.stop();
-            } else {
-                recognition.start();
-            }
-        });
-    });
-
-    // Soumission formulaire
-    document.getElementById('quiz-form').addEventListener('submit', function (e) {
-        let allAnswered = true;
-        const formData = new FormData(this);
-
-        questions.forEach(question => {
-            const questionId = question.querySelector('input[type="radio"]').name;
-            if (!formData.has(questionId)) {
-                allAnswered = false;
-            }
-        });
-
-        if (!allAnswered) {
-            e.preventDefault();
-            alert('Veuillez répondre à toutes les questions avant de soumettre le quiz.');
-            return;
-        }
-
-        if (!confirm('Confirmez-vous la soumission de votre quiz ?')) {
-            e.preventDefault();
-            return;
-        }
-
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = 'Envoi en cours...';
-    });
-
-    // Afficher la première question
-    showQuestion(0);
-});
-</script>
-
+{% block stylesheets %}
+{{ parent() }}
 <style>
     .question-card {
         min-height: 300px;
         transition: all 0.3s ease;
     }
+
     .form-check-label {
         cursor: pointer;
+        transition: all 0.2s;
     }
+
     .form-check-input:checked + .form-check-label {
         font-weight: bold;
         color: #0d6efd;
@@ -333,51 +23,380 @@ document.addEventListener('DOMContentLoaded', function () {
         border-radius: 5px;
     }
 
-    /* Styles reconnaissance vocale */
     .voice-btn {
         transition: all 0.3s ease;
         font-weight: 600;
     }
-
     .voice-btn:hover {
-        transform: scale(1.1);
+        transform: scale(1.05);
         background-color: #e7f3ff;
     }
-
     .voice-btn.listening {
-        background-color: #ff6b6b !important;
+        background-color: #ef4444 !important;
         color: white !important;
+        border-color: #ef4444 !important;
         animation: pulse 1s infinite;
     }
 
     @keyframes pulse {
-        0%, 100% {
-            transform: scale(1);
-        }
-        50% {
-            transform: scale(1.1);
-        }
+        0%, 100% { transform: scale(1); }
+        50%       { transform: scale(1.08); }
     }
 
     .voice-output {
-        margin: 15px 0;
+        margin: 12px 0;
         border-left: 4px solid #0d6efd;
         padding: 10px 15px;
     }
+    .voice-output.alert-success { border-left-color: #198754; }
+    .voice-output.alert-warning { border-left-color: #ffc107; }
+    .voice-output.alert-danger  { border-left-color: #dc3545; }
 
-    .voice-output.alert-success {
-        border-left-color: #198754;
-        background-color: #d1e7dd;
-    }
+    .progress { border-radius: 50px; }
+    .progress-bar { transition: width 0.4s ease; border-radius: 50px; }
 
-    .voice-output.alert-warning {
-        border-left-color: #ffc107;
-        background-color: #fff3cd;
-    }
-
-    .voice-output.alert-danger {
-        border-left-color: #dc3545;
-        background-color: #f8d7da;
-    }
+    #nav-buttons { border-top: 1px solid #e2e8f0; padding-top: 1.5rem; margin-top: 1.5rem; }
 </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4 mb-5" style="max-width: 820px;">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{{ path('apprenant_mes_formations') }}">Mes Formations</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ path('apprenant_suivre_formation', {'id': formation.id}) }}">{{ formation.titre }}</a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{{ path('apprenant_quiz_index', {'formationId': formation.id}) }}">Quiz</a>
+            </li>
+            <li class="breadcrumb-item active">{{ quiz.titre }}</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm">
+
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+            <h3 class="mb-0">🎯 {{ quiz.titre }}</h3>
+            <span class="badge bg-light text-dark fs-6">
+                Note minimale : {{ quiz.noteMinimale }}%
+            </span>
+        </div>
+
+        <div class="card-body px-4 py-4">
+
+            {% if quiz.description %}
+                <p class="lead text-muted mb-3">{{ quiz.description }}</p>
+            {% endif %}
+
+            <div class="d-flex gap-4 mb-4 flex-wrap">
+                <div>
+                    <span class="text-muted">⏱ Durée estimée :</span>
+                    <strong>{{ quiz.duree }} min</strong>
+                </div>
+                <div>
+                    <span class="text-muted">❓ Questions :</span>
+                    <strong>{{ questions|length }}</strong>
+                </div>
+            </div>
+
+            <div class="progress mb-3" style="height: 10px;">
+                <div id="progress-bar"
+                     class="progress-bar bg-success"
+                     role="progressbar"
+                     style="width: 0%;"
+                     aria-valuenow="0"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+            </div>
+
+            <div class="text-center mb-4 text-muted fw-semibold">
+                Question <span id="current-question-number">1</span> sur {{ questions|length }}
+            </div>
+
+            <form method="post"
+                  action="{{ path('apprenant_quiz_soumettre', {'formationId': formation.id, 'quizId': quiz.id}) }}"
+                  id="quiz-form">
+
+                {% for question in questions %}
+                <div class="question-card card mb-0 d-none border-0"
+                     data-question-index="{{ loop.index0 }}">
+
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center py-2 px-3 border-bottom">
+                        <h5 class="mb-0 text-primary">Question {{ loop.index }}</h5>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary voice-btn"
+                                data-question-id="{{ question.id }}"
+                                title="Dites le numéro de la réponse (1, 2, 3...)">
+                            🎤 Dire le n°
+                        </button>
+                    </div>
+
+                    <div class="card-body px-3 py-3">
+                        <p class="fs-5 fw-bold mb-4">{{ question.enonce }}</p>
+
+                        <div class="alert alert-info d-none voice-output"
+                             data-question-id="{{ question.id }}">
+                            <strong>Vous avez dit :</strong>
+                            <span class="voice-text"></span>
+                        </div>
+
+                        <div class="mt-2">
+                            {% for reponse in question.reponses %}
+                            <div class="form-check mb-3 fs-5">
+                                <input class="form-check-input"
+                                       type="radio"
+                                       name="reponses[{{ question.id }}]"
+                                       id="q{{ question.id }}_r{{ reponse.id }}"
+                                       value="{{ reponse.id }}"
+                                       data-answer-number="{{ loop.index }}"
+                                       required>
+                                <label class="form-check-label"
+                                       for="q{{ question.id }}_r{{ reponse.id }}">
+                                    <strong>{{ loop.index }}.</strong> {{ reponse.texte }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div id="nav-buttons" class="d-flex justify-content-between align-items-center">
+
+                    <button type="button" class="btn btn-outline-secondary btn-lg" id="prev-btn" disabled>
+                        ← Précédent
+                    </button>
+
+                    <span id="page-info" class="fw-bold text-muted">
+                        1 / {{ questions|length }}
+                    </span>
+
+                    <button type="button" class="btn btn-primary btn-lg" id="next-btn">
+                        Suivant →
+                    </button>
+
+                    <button type="submit" class="btn btn-success btn-lg d-none" id="submit-btn">
+                        ✓ Terminer et Soumettre
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition  = null;
+    let isListening  = false;
+    const supportsVoice = !!SpeechRecognition;
+
+    const numberMap = {
+        'un': 1,    '1': 1,
+        'deux': 2,  '2': 2,
+        'trois': 3, '3': 3,
+        'quatre': 4,'4': 4,
+        'cinq': 5,  '5': 5,
+        'six': 6,   '6': 6,
+        'sept': 7,  '7': 7,
+        'huit': 8,  '8': 8,
+        'neuf': 9,  '9': 9,
+        'dix': 10,  '10': 10
+    };
+
+    if (supportsVoice) {
+        recognition = new SpeechRecognition();
+        recognition.lang            = 'fr-FR';
+        recognition.continuous      = false;
+        recognition.interimResults  = false;
+
+        recognition.onstart = function () {
+            isListening = true;
+            var btn = document.querySelector('.voice-btn.active-listen');
+            if (btn) {
+                btn.classList.add('listening');
+                btn.innerHTML = '🔴 Écoute...';
+            }
+        };
+
+        recognition.onend = function () {
+            isListening = false;
+            document.querySelectorAll('.voice-btn').forEach(function (b) {
+                b.classList.remove('listening', 'active-listen');
+                b.innerHTML = '🎤 Dire le n°';
+            });
+        };
+
+        recognition.onerror = function (event) {
+            var messages = {
+                'network'       : 'Erreur réseau.',
+                'no-speech'     : 'Aucune parole détectée.',
+                'audio-capture' : 'Microphone non accessible.',
+                'not-allowed'   : 'Permission microphone refusée.'
+            };
+            alert(messages[event.error] || 'Erreur reconnaissance vocale.');
+        };
+
+        recognition.onresult = function (event) {
+            var transcript = '';
+            for (var i = event.resultIndex; i < event.results.length; i++) {
+                transcript = event.results[i][0].transcript.toLowerCase().trim();
+            }
+
+            var currentQuestion = questions[currentIndex];
+            var voiceOutput     = currentQuestion.querySelector('.voice-output');
+            var voiceText       = voiceOutput.querySelector('.voice-text');
+
+            voiceText.textContent = transcript;
+            voiceOutput.classList.remove('d-none', 'alert-success', 'alert-warning', 'alert-danger');
+            voiceOutput.classList.add('alert-info');
+
+            var num = extractNumber(transcript);
+
+            if (num) {
+                var radio = currentQuestion.querySelector('input[data-answer-number="' + num + '"]');
+                if (radio) {
+                    radio.checked = true;
+                    voiceOutput.classList.remove('alert-info');
+                    voiceOutput.classList.add('alert-success');
+                    voiceText.textContent = 'Réponse ' + num + ' sélectionnée ✓';
+                } else {
+                    var max = currentQuestion.querySelectorAll('input[type="radio"]').length;
+                    voiceOutput.classList.remove('alert-info');
+                    voiceOutput.classList.add('alert-warning');
+                    voiceText.textContent = 'Réponse ' + num + ' inexistante. Maximum : ' + max;
+                }
+            } else {
+                voiceOutput.classList.remove('alert-info');
+                voiceOutput.classList.add('alert-danger');
+                voiceText.textContent = '"' + transcript + '" — Veuillez dire un numéro (1, 2, 3…)';
+            }
+        };
+    }
+
+    function extractNumber(text) {
+        for (var word in numberMap) {
+            if (text.indexOf(word) !== -1) {
+                return numberMap[word];
+            }
+        }
+        return null;
+    }
+
+    document.querySelectorAll('.voice-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            if (!supportsVoice) {
+                alert('Reconnaissance vocale non supportée. Utilisez Chrome ou Edge.');
+                return;
+            }
+            if (isListening) {
+                recognition.stop();
+            } else {
+                this.classList.add('active-listen');
+                recognition.start();
+            }
+        });
+    });
+
+    var questions    = document.querySelectorAll('.question-card');
+    var totalQ       = questions.length;
+    var currentIndex = 0;
+
+    var prevBtn     = document.getElementById('prev-btn');
+    var nextBtn     = document.getElementById('next-btn');
+    var submitBtn   = document.getElementById('submit-btn');
+    var progressBar = document.getElementById('progress-bar');
+    var currentNum  = document.getElementById('current-question-number');
+    var pageInfo    = document.getElementById('page-info');
+
+    function showQuestion(index) {
+        questions.forEach(function (q, i) {
+            if (i === index) {
+                q.classList.remove('d-none');
+            } else {
+                q.classList.add('d-none');
+            }
+        });
+
+        currentNum.textContent = index + 1;
+        pageInfo.textContent   = (index + 1) + ' / ' + totalQ;
+
+        var pct = ((index + 1) / totalQ) * 100;
+        progressBar.style.width = pct + '%';
+        progressBar.setAttribute('aria-valuenow', pct);
+
+        prevBtn.disabled = index === 0;
+
+        if (index === totalQ - 1) {
+            nextBtn.classList.add('d-none');
+            submitBtn.classList.remove('d-none');
+        } else {
+            nextBtn.classList.remove('d-none');
+            submitBtn.classList.add('d-none');
+        }
+
+        var vo = questions[index].querySelector('.voice-output');
+        if (vo) {
+            vo.className = 'alert alert-info d-none voice-output';
+        }
+    }
+
+    prevBtn.addEventListener('click', function () {
+        if (currentIndex > 0) {
+            currentIndex--;
+            showQuestion(currentIndex);
+        }
+    });
+
+    nextBtn.addEventListener('click', function () {
+        if (currentIndex < totalQ - 1) {
+            currentIndex++;
+            showQuestion(currentIndex);
+        }
+    });
+
+    document.getElementById('quiz-form').addEventListener('submit', function (e) {
+        var formData    = new FormData(this);
+        var allAnswered = true;
+
+        questions.forEach(function (q) {
+            var input = q.querySelector('input[type="radio"]');
+            if (input && !formData.has(input.name)) {
+                allAnswered = false;
+            }
+        });
+
+        if (!allAnswered) {
+            e.preventDefault();
+            alert('Veuillez répondre à toutes les questions avant de soumettre.');
+            return;
+        }
+
+        if (!confirm('Confirmez-vous la soumission du quiz ?')) {
+            e.preventDefault();
+            return;
+        }
+
+        submitBtn.disabled  = true;
+        submitBtn.innerHTML = '⏳ Envoi en cours…';
+    });
+
+    showQuestion(0);
+});
+</script>
 {% endblock %}

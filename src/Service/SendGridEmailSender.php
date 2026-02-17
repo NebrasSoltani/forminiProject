@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use Symfony\Component\HttpClient\HttpClient;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
@@ -12,18 +13,28 @@ class SendGridEmailSender
     private string $apiKey;
     private string $fromEmail;
     private ?string $fromName;
+    private HttpClientInterface $httpClient;
 
-    public function __construct(string $sendgridApiKey, string $sendgridFromEmail, ?string $sendgridFromName = null)
-    {
+    public function __construct(
+        string $sendgridApiKey,
+        string $sendgridFromEmail,
+        ?string $sendgridFromName = null,
+        ?HttpClientInterface $httpClient = null
+    ) {
         $this->apiKey = $sendgridApiKey;
         $this->fromEmail = $sendgridFromEmail;
         $this->fromName = $sendgridFromName;
+        $this->httpClient = $httpClient ?? HttpClient::create();
     }
 
     public function send(Email $email): void
     {
         if ($this->apiKey === '') {
             throw new TransportException('SENDGRID_API_KEY is not configured.');
+        }
+
+        if (empty($this->apiKey)) {
+            throw new TransportException('❌ SendGrid API Key is empty!');
         }
 
         $from = $email->getFrom();
@@ -50,7 +61,7 @@ class SendGridEmailSender
 
         $personalizations = [
             [
-                'to' => array_map(static fn (Address $a) => ['email' => $a->getAddress(), 'name' => $a->getName()], $to),
+                'to' => array_map(static fn(Address $a) => ['email' => $a->getAddress(), 'name' => $a->getName()], $to),
                 'subject' => $email->getSubject() ?? '',
             ],
         ];
@@ -61,19 +72,25 @@ class SendGridEmailSender
             'content' => $contents,
         ];
 
-        $client = HttpClient::create();
-        $response = $client->request('POST', 'https://api.sendgrid.com/v3/mail/send', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => $payload,
-        ]);
+        try {
+            $response = $this->httpClient->request('POST', 'https://api.sendgrid.com/v3/mail/send', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . trim($this->apiKey),
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $payload,
+                'timeout' => 30,
+            ]);
 
-        $status = $response->getStatusCode();
-        if ($status < 200 || $status >= 300) {
-            $body = $response->getContent(false);
-            throw new TransportException(sprintf('SendGrid API error (%d): %s', $status, $body));
+            $status = $response->getStatusCode();
+            if ($status < 200 || $status >= 300) {
+                $body = $response->getContent(false);
+                throw new TransportException(sprintf('❌ SendGrid API error (%d): %s', $status, $body));
+            }
+        } catch (TransportException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw new TransportException('❌ SendGrid request failed: ' . $e->getMessage(), 0, $e);
         }
     }
 
