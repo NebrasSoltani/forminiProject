@@ -242,4 +242,34 @@ class ApprenantQuizController extends AbstractController
             'rapportComplet' => $rapportComplet,
         ]);
     }
+    #[Route('/{quizId}/resultat/{resultatId}/certificate', name: 'apprenant_quiz_certificate', methods: ['GET'])]
+    public function downloadCertificate(
+        int $formationId,
+        int $quizId,
+        int $resultatId,
+        FormationRepository $formationRepository,
+        QuizRepository $quizRepository,
+        ResultatQuizRepository $resultatQuizRepository,
+        \App\Service\CertificateService $certificateService
+    ): Response {
+        $formation = $formationRepository->find($formationId);
+        $quiz = $quizRepository->find($quizId);
+        $resultat = $resultatQuizRepository->find($resultatId);
+
+        if (!$formation || !$quiz || !$resultat || $resultat->getApprenant() !== $this->getUser()) {
+            throw $this->createNotFoundException();
+        }
+
+        // Check score >= 70
+        if ($resultat->getNote() < 70) {
+            throw $this->createAccessDeniedException("Vous n'avez pas atteint le score requis pour obtenir le certificat.");
+        }
+
+        $pdfContent = $certificateService->generateCertificate($resultat);
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="certificat-' . $quiz->getId() . '.pdf"',
+        ]);
+    }
 }
