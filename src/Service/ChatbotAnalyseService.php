@@ -16,8 +16,8 @@ class ChatbotAnalyseService
     private ReponseRepository $reponseRepository;
     private HttpClientInterface $httpClient;
     private LoggerInterface $logger;
-    private string $geminiApiKey;
     private SendGridEmailSender $emailSender;
+    private string $geminiApiKey;
 
     public function __construct(
         QuestionRepository $questionRepository,
@@ -33,6 +33,72 @@ class ChatbotAnalyseService
         $this->logger = $logger;
         $this->emailSender = $emailSender;
         $this->geminiApiKey = $geminiApiKey;
+    }
+
+    // ... (rest of the file until envoyerEmailFelicitation)
+
+    private function envoyerEmailFelicitation(ResultatQuiz $resultat, float $tauxReussite): void
+    {
+        try {
+            $apprenant = $resultat->getApprenant();
+            $quiz = $resultat->getQuiz();
+
+            if (!$apprenant) {
+                $this->logger->error("❌ EmailFelicitaion: Apprenant non trouvé");
+                return;
+            }
+
+            if (!$quiz) {
+                $this->logger->error("❌ EmailFelicitation: Quiz non trouvé");
+                return;
+            }
+
+            $prenom = $apprenant->getPrenom();
+            $nom = $apprenant->getNom();
+            $email = $apprenant->getEmail();
+            $nomQuiz = $quiz->getTitre();
+            $score = round($tauxReussite, 2);
+            $bonnesReponses = $resultat->getNombreBonnesReponses();
+            $totalQuestions = $resultat->getNombreTotalQuestions();
+
+            $this->logger->info("🔍 Préparation email: Email={$email}, Prenom={$prenom}, Score={$score}%");
+
+            // Vérifier si l'email est valide
+            if (empty($email)) {
+                $this->logger->error("❌ EmailFelicitation: Email de l'apprenant est vide");
+                return;
+            }
+
+            // Créer le contenu HTML de l'email
+            $htmlContent = $this->creerTemplateEmailFelicitation(
+                $prenom,
+                $nomQuiz,
+                $score,
+                $bonnesReponses,
+                $totalQuestions
+            );
+
+            // Créer et envoyer l'email
+            $sujet = "Félicitations ! Vous avez réussi le quiz « {$nomQuiz} »";
+
+            $this->logger->info("📧 Création de l'email: À={$email}, Sujet={$sujet}");
+
+            $emailMessage = $this->emailSender->createEmail(
+                $email,
+                "{$prenom} {$nom}",
+                $sujet,
+                $htmlContent,
+                $this->creerTemplateEmailFelicitationText($prenom, $nomQuiz, $score, $bonnesReponses, $totalQuestions)
+            );
+
+            $this->logger->info("📤 Envoi de l'email via SendGrid...");
+
+            $this->emailSender->send($emailMessage);
+
+            $this->logger->info("✅ Email de félicitation envoyé avec succès à {$email}");
+        } catch (\Exception $e) {
+            $this->logger->error("❌ Erreur lors de l'envoi de l'email: " . $e->getMessage() . " | Trace: " . $e->getTraceAsString());
+        }
     }
 
     /**
@@ -114,8 +180,14 @@ class ChatbotAnalyseService
 
         // Envoyer email de félicitation si taux de réussite >= 80%
         $tauxReussite = ($resultat->getNombreBonnesReponses() / $resultat->getNombreTotalQuestions()) * 100;
+        
+        $this->logger->info("📊 Analyse Quiz terminé: Score={$tauxReussite}%");
+
         if ($tauxReussite >= 80) {
+            $this->logger->info("✅ Score suffisant (>= 80%), tentative d'envoi d'email...");
             $this->envoyerEmailFelicitation($resultat, $tauxReussite);
+        } else {
+            $this->logger->info("⚠️ Score insuffisant pour l'email (< 80%)");
         }
 
         return $analyse;
@@ -616,72 +688,7 @@ class ChatbotAnalyseService
         return implode("\n", $lignes);
     }
 
-    /**
-     * Envoie un email de félicitation si le taux de réussite >= 80%
-     */
-    private function envoyerEmailFelicitation(ResultatQuiz $resultat, float $tauxReussite): void
-    {
-        try {
-            $apprenant = $resultat->getApprenant();
-            $quiz = $resultat->getQuiz();
 
-            if (!$apprenant) {
-                $this->logger->error("❌ EmailFelicitaion: Apprenant non trouvé");
-                return;
-            }
-
-            if (!$quiz) {
-                $this->logger->error("❌ EmailFelicitation: Quiz non trouvé");
-                return;
-            }
-
-            $prenom = $apprenant->getPrenom();
-            $nom = $apprenant->getNom();
-            $email = $apprenant->getEmail();
-            $nomQuiz = $quiz->getTitre();
-            $score = round($tauxReussite, 2);
-            $bonnesReponses = $resultat->getNombreBonnesReponses();
-            $totalQuestions = $resultat->getNombreTotalQuestions();
-
-            $this->logger->info("🔍 Préparation email: Email={$email}, Prenom={$prenom}, Score={$score}%");
-
-            // Vérifier si l'email est valide
-            if (empty($email)) {
-                $this->logger->error("❌ EmailFelicitation: Email de l'apprenant est vide");
-                return;
-            }
-
-            // Créer le contenu HTML de l'email
-            $htmlContent = $this->creerTemplateEmailFelicitation(
-                $prenom,
-                $nomQuiz,
-                $score,
-                $bonnesReponses,
-                $totalQuestions
-            );
-
-            // Créer et envoyer l'email
-            $sujet = "Félicitations ! Vous avez réussi le quiz « {$nomQuiz} »";
-
-            $this->logger->info("📧 Création de l'email: À={$email}, Sujet={$sujet}");
-
-            $emailMessage = $this->emailSender->createEmail(
-                $email,
-                "{$prenom} {$nom}",
-                $sujet,
-                $htmlContent,
-                $this->creerTemplateEmailFelicitationText($prenom, $nomQuiz, $score, $bonnesReponses, $totalQuestions)
-            );
-
-            $this->logger->info("📤 Envoi de l'email via SendGrid...");
-
-            $this->emailSender->send($emailMessage);
-
-            $this->logger->info("✅ Email de félicitation envoyé avec succès à {$email}");
-        } catch (\Exception $e) {
-            $this->logger->error("❌ Erreur lors de l'envoi de l'email: " . $e->getMessage() . " | Trace: " . $e->getTraceAsString());
-        }
-    }
 
     /**
      * Crée le template HTML de l'email de félicitation
