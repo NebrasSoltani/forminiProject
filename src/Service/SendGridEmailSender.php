@@ -72,7 +72,20 @@ class SendGridEmailSender
             'content' => $contents,
         ];
 
+        // Process Attachments
+        foreach ($email->getAttachments() as $attachment) {
+            $payload['attachments'][] = [
+                'content' => base64_encode($attachment->getBody()),
+                'filename' => $attachment->getFilename(),
+                'type' => $attachment->getContentType(),
+                'disposition' => 'attachment',
+            ];
+        }
+
         try {
+            // Log Request
+            \error_log("📤 [SendGrid] Tentative d'envoi à " . ($to[0]->getAddress() ?? 'Inconnu'));
+            
             $response = $this->httpClient->request('POST', 'https://api.sendgrid.com/v3/mail/send', [
                 'headers' => [
                     'Authorization' => 'Bearer ' . trim($this->apiKey),
@@ -83,13 +96,18 @@ class SendGridEmailSender
             ]);
 
             $status = $response->getStatusCode();
+            \error_log("📥 [SendGrid] Réponse HTTP: " . $status);
+
             if ($status < 200 || $status >= 300) {
                 $body = $response->getContent(false);
+                \error_log("❌ [SendGrid] Erreur Body: " . $body);
                 throw new TransportException(sprintf('❌ SendGrid API error (%d): %s', $status, $body));
             }
         } catch (TransportException $e) {
+            \error_log("❌ [SendGrid] TransportException: " . $e->getMessage());
             throw $e;
         } catch (\Exception $e) {
+            \error_log("❌ [SendGrid] Exception: " . $e->getMessage());
             throw new TransportException('❌ SendGrid request failed: ' . $e->getMessage(), 0, $e);
         }
     }
