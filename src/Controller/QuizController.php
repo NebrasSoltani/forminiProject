@@ -67,6 +67,10 @@ class QuizController extends AbstractController
 
             $this->addFlash('success', 'Quiz créé avec succès !');
             return $this->redirectToRoute('quiz_index', ['formationId' => $formationId]);
+        } elseif ($form->isSubmitted()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('quiz/new.html.twig', [
@@ -118,6 +122,10 @@ class QuizController extends AbstractController
 
             $this->addFlash('success', 'Quiz modifié avec succès !');
             return $this->redirectToRoute('quiz_index', ['formationId' => $formationId]);
+        } elseif ($form->isSubmitted()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('quiz/edit.html.twig', [
