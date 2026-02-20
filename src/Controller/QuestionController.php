@@ -95,6 +95,10 @@ class QuestionController extends AbstractController
                 'quizId' => $quizId,
                 'id' => $question->getId()
             ]);
+        } elseif ($form->isSubmitted()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('question/new.html.twig', [
@@ -170,6 +174,10 @@ class QuestionController extends AbstractController
                 'formationId' => $formationId,
                 'quizId' => $quizId
             ]);
+        } elseif ($form->isSubmitted()) {
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('danger', $error->getMessage());
+            }
         }
 
         return $this->render('question/edit.html.twig', [
@@ -242,7 +250,7 @@ class QuestionController extends AbstractController
             throw $this->createAccessDeniedException();
         }
 
-        $texte = $request->request->get('texte');
+        $texte = trim($request->request->get('texte', ''));
         $estCorrecte = $request->request->get('estCorrecte') === '1';
 
         if ($texte) {
@@ -251,10 +259,21 @@ class QuestionController extends AbstractController
             $reponse->setEstCorrecte($estCorrecte);
             $reponse->setQuestion($question);
 
-            $em->persist($reponse);
-            $em->flush();
+            // Validation de la réponse
+            $validator = $this->container->get('validator');
+            $errors = $validator->validate($reponse);
 
-            $this->addFlash('success', 'Réponse ajoutée avec succès !');
+            if (count($errors) > 0) {
+                foreach ($errors as $error) {
+                    $this->addFlash('danger', $error->getMessage());
+                }
+            } else {
+                $em->persist($reponse);
+                $em->flush();
+                $this->addFlash('success', 'Réponse ajoutée avec succès !');
+            }
+        } else {
+            $this->addFlash('danger', 'Le texte de la réponse ne peut pas être vide.');
         }
 
         return $this->redirectToRoute('question_edit', [

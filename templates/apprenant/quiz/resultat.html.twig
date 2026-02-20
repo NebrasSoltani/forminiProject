@@ -550,6 +550,11 @@
                 🔄 Réessayer le quiz
             </a>
         {% else %}
+            {% if resultat.note >= 70 %}
+                <a href="{{ path('apprenant_quiz_certificate', {'formationId': formation.id, 'quizId': quiz.id, 'resultatId': resultat.id}) }}" class="btn btn-warning text-white" target="_blank">
+                    🏆 Télécharger le certificat
+                </a>
+            {% endif %}
             <a href="{{ path('apprenant_suivre_formation', {'id': formation.id}) }}" class="btn btn-success">
                 Continuer la formation →
             </a>
