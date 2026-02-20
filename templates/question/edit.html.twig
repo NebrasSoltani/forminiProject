@@ -11,7 +11,8 @@
                     <h4>Modifier la question</h4>
                 </div>
                 <div class="card-body">
-                    {{ form_start(form) }}
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        {{ form_errors(form) }}
                         {{ form_row(form.enonce) }}
                         
                         <div class="row">
@@ -51,10 +52,10 @@
                     {% endfor %}
 
                     <!-- Formulaire pour ajouter une réponse -->
-                    <form method="post" action="{{ path('question_add_reponse', {'formationId': formation.id, 'quizId': quiz.id, 'id': question.id}) }}" class="mb-4">
+                    <form method="post" action="{{ path('question_add_reponse', {'formationId': formation.id, 'quizId': quiz.id, 'id': question.id}) }}" class="mb-4" novalidate>
                         <div class="mb-2">
                             <label class="form-label">Nouvelle réponse</label>
-                            <input type="text" name="texte" class="form-control" placeholder="Texte de la réponse" required>
+                            <input type="text" name="texte" class="form-control" placeholder="Texte de la réponse" required minlength="1" maxlength="500">
                         </div>
                         <div class="form-check mb-2">
                             <input type="checkbox" name="estCorrecte" value="1" class="form-check-input" id="estCorrecte">
