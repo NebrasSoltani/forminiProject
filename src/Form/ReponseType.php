@@ -18,15 +18,10 @@ class ReponseType extends AbstractType
         $builder
             ->add('texte', TextType::class, [
                 'label' => 'Texte de la réponse',
-                'attr' => ['class' => 'form-control'],
-                'constraints' => [
-                    new NotBlank(['message' => 'Le texte de la réponse est obligatoire']),
-                    new Length([
-                        'min' => 1,
-                        'max' => 500,
-                        'minMessage' => 'La réponse doit contenir au moins {{ limit }} caractère',
-                        'maxMessage' => 'La réponse ne peut pas dépasser {{ limit }} caractères'
-                    ])
+                'attr' => [
+                    'class' => 'form-control',
+                    'minlength' => 1,
+                    'maxlength' => 500
                 ]
             ])
             ->add('estCorrecte', CheckboxType::class, [
