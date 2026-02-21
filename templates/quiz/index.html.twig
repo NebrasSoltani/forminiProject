@@ -24,8 +24,17 @@
         </div>
     {% endfor %}
 
+    {# ══════════════════════════════════════════════════════════════
+       BUNDLE 1 — KnpPaginatorBundle : affichage du nombre total
+       ══════════════════════════════════════════════════════════════ #}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted">
+            <strong>{{ pagination.getTotalItemCount }}</strong> quiz au total
+        </span>
+    </div>
+
     <div class="row">
-        {% if quizzes is empty %}
+        {% if pagination.getTotalItemCount == 0 %}
             <div class="col-12">
                 <div class="alert alert-info text-center">
                     <h5>Aucun quiz pour cette formation</h5>
@@ -33,7 +42,8 @@
                 </div>
             </div>
         {% else %}
-            {% for quiz in quizzes %}
+            {# ── KnpPaginator : on boucle sur pagination au lieu de quizzes ── #}
+            {% for quiz in pagination %}
             <div class="col-md-6 mb-4">
                 <div class="card h-100">
                     <div class="card-header bg-primary text-white">
@@ -72,5 +82,15 @@
             {% endfor %}
         {% endif %}
     </div>
+
+    {# ══════════════════════════════════════════════════════════════
+       BUNDLE 1 — KnpPaginatorBundle : rendu de la navigation
+       ══════════════════════════════════════════════════════════════ #}
+    {% if pagination.getTotalItemCount > 0 %}
+    <div class="d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}
