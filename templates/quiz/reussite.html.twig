@@ -5,24 +5,35 @@
 {% block body %}
 <div class="container py-5">
 
-    <!-- En-tête -->
+    {# En-tête #}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-5 gap-3">
         <div>
             <h1 class="h3 fw-semibold mb-1">Résultats des apprenants</h1>
             <div class="text-muted fs-5">{{ quiz.titre }}</div>
         </div>
 
-        <a href="{{ path('quiz_statistiques', {formationId: formation.id, id: quiz.id}) }}"
-           class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 px-4 py-2">
-            <i class="bi bi-arrow-left"></i>
-            Retour
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ path('quiz_statistiques', {formationId: formation.id, id: quiz.id}) }}"
+               class="btn btn-outline-secondary d-inline-flex align-items-center gap-2 px-4 py-2">
+                <i class="bi bi-arrow-left"></i>
+                Retour
+            </a>
+
+            {# ══════════════════════════════════════════════════════════════
+               BUNDLE 3 — Dompdf : bouton d'export PDF des résultats
+               ══════════════════════════════════════════════════════════════ #}
+            <a href="{{ path('quiz_export_resultats_pdf', {formationId: formation.id, id: quiz.id, filtre: filtre}) }}"
+               class="btn btn-danger d-inline-flex align-items-center gap-2 px-4 py-2">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                📄 Exporter en PDF
+            </a>
+        </div>
     </div>
 
-    <!-- Filtres + Recherche -->
+    {# Filtres + Recherche #}
     <div class="mb-5">
         <div class="row g-3 align-items-center">
-            <!-- Filtres -->
+            {# Filtres #}
             <div class="col-12 col-md-auto">
                 <div class="btn-group flex-wrap" role="group">
                     <a href="{{ path('quiz_reussite', {formationId: formation.id, id: quiz.id, filtre: 'all'}) }}"
@@ -40,7 +51,7 @@
                 </div>
             </div>
 
-            <!-- Barre de recherche -->
+            {# Barre de recherche #}
             <div class="col-12 col-md">
                 <form method="get" class="position-relative">
                     <input type="hidden" name="filtre" value="{{ filtre }}">
@@ -75,7 +86,7 @@
         </div>
     </div>
 
-    <!-- Résultats -->
+    {# Résultats #}
     <div class="card shadow-sm border-0">
         <div class="card-header bg-light border-bottom d-flex justify-content-between align-items-center py-3 px-4">
             <div class="d-flex align-items-center gap-3">
@@ -87,13 +98,14 @@
                 </h5>
             </div>
 
+            {# ── KnpPaginator : affichage du total via la pagination ── #}
             <span class="badge bg-secondary-subtle text-secondary-emphasis px-3 py-2">
-                {{ apprenants|length }} résultat{{ apprenants|length != 1 ? 's' : '' }}
+                {{ totalApprenants }} résultat{{ totalApprenants != 1 ? 's' : '' }}
             </span>
         </div>
 
         <div class="card-body p-0">
-            {% if apprenants is empty %}
+            {% if pagination.getTotalItemCount == 0 %}
                 <div class="p-5 text-center">
                     <div class="mb-4">
                         {% if search is not empty %}
@@ -106,13 +118,13 @@
                     </div>
                     <p class="text-muted mb-0 small">
                         {% if search is not empty %}
-                            Essayez d’autres termes ou <a href="{{ path('quiz_reussite', {formationId: formation.id, id: quiz.id, filtre: filtre}) }}" class="text-primary">effacez la recherche</a>.
+                            Essayez d'autres termes ou <a href="{{ path('quiz_reussite', {formationId: formation.id, id: quiz.id, filtre: filtre}) }}" class="text-primary">effacez la recherche</a>.
                         {% elseif filtre == 'reussi' %}
-                            Aucun apprenant n’a validé ce quiz pour le moment.
+                            Aucun apprenant n'a validé ce quiz pour le moment.
                         {% elseif filtre == 'non-reussi' %}
-                            Tous les participants ont réussi ou aucun résultat n’est disponible.
+                            Tous les participants ont réussi ou aucun résultat n'est disponible.
                         {% else %}
-                            Aucun apprenant n’a encore tenté ce quiz.
+                            Aucun apprenant n'a encore tenté ce quiz.
                         {% endif %}
                     </p>
                 </div>
@@ -127,7 +139,10 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for item in apprenants %}
+                            {# ══════════════════════════════════════════════════
+                               BUNDLE 1 — KnpPaginator : boucle sur pagination
+                               ══════════════════════════════════════════════════ #}
+                            {% for item in pagination %}
                                 {% set user = item.user %}
                                 <tr>
                                     <td class="py-3">
@@ -167,8 +182,17 @@
         </div>
     </div>
 
-    <!-- Bouton retour en bas -->
-    {% if apprenants|length > 10 %}
+    {# ══════════════════════════════════════════════════════════════
+       BUNDLE 1 — KnpPaginatorBundle : rendu de la navigation
+       ══════════════════════════════════════════════════════════════ #}
+    {% if pagination.getTotalItemCount > 0 %}
+    <div class="d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+    {% endif %}
+
+    {# Bouton retour en bas #}
+    {% if totalApprenants > 10 %}
     <div class="text-center mt-5 pt-3">
         <a href="{{ path('quiz_statistiques', {formationId: formation.id, id: quiz.id}) }}"
            class="btn btn-outline-secondary px-5 py-2">
