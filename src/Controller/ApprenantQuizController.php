@@ -70,7 +70,8 @@ class ApprenantQuizController extends AbstractController
         QuizRepository $quizRepository,
         InscriptionRepository $inscriptionRepository,
         ProgressionLeconRepository $progressionLeconRepository,
-        LeconRepository $leconRepository
+        LeconRepository $leconRepository,
+        ResultatQuizRepository $resultatQuizRepository
     ): Response {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
@@ -83,6 +84,21 @@ class ApprenantQuizController extends AbstractController
         if (!$inscription) {
             $this->addFlash('error', 'Vous devez être inscrit à cette formation.');
             return $this->redirectToRoute('apprenant_formation_show', ['id' => $formationId]);
+        }
+
+        // Vérifier si l'apprenant a déjà complété ce quiz
+        $quizAlreadyCompleted = $resultatQuizRepository->hasApprenantCompletedQuiz($this->getUser(), $quiz);
+        if ($quizAlreadyCompleted) {
+            $this->addFlash('warning', 'Vous avez déjà complété ce quiz. Vous ne pouvez le passer qu\'une seule fois.');
+            $resultat = $resultatQuizRepository->findByApprenantAndQuiz($this->getUser(), $quiz);
+            if ($resultat) {
+                return $this->redirectToRoute('apprenant_quiz_resultat', [
+                    'formationId' => $formationId,
+                    'quizId' => $quizId,
+                    'resultatId' => $resultat->getId(),
+                ]);
+            }
+            return $this->redirectToRoute('apprenant_quiz_index', ['formationId' => $formationId]);
         }
 
         $totalLecons = $leconRepository->countByFormation($formationId);
@@ -113,7 +129,8 @@ class ApprenantQuizController extends AbstractController
         FormationRepository $formationRepository,
         QuizRepository $quizRepository,
         InscriptionRepository $inscriptionRepository,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        ChatbotAnalyseService $chatbotService
     ): Response {
         $formation = $formationRepository->find($formationId);
         $quiz = $quizRepository->find($quizId);
@@ -174,6 +191,16 @@ class ApprenantQuizController extends AbstractController
         $em->persist($resultat);
         $em->flush();
 
+        // 🎯 APPELER L'ANALYSE IMMÉDIATEMENT POUR ENVOYER L'EMAIL
+        try {
+            $taux = ($resultat->getNombreBonnesReponses() / $resultat->getNombreTotalQuestions()) * 100;
+            \error_log("🔍 Quiz soumis - Taux: {$taux}% - Appel analyserResultat()");
+            $chatbotService->analyserResultat($resultat);
+            \error_log("✅ Analyse complète");
+        } catch (\Exception $e) {
+            \error_log("❌ Erreur analyse: " . $e->getMessage());
+        }
+
         return $this->redirectToRoute('apprenant_quiz_resultat', [
             'formationId' => $formationId,
             'quizId' => $quizId,
@@ -213,6 +240,36 @@ class ApprenantQuizController extends AbstractController
             'detailsReponses' => $detailsReponses,
             'analyse' => $analyse,
             'rapportComplet' => $rapportComplet,
+        ]);
+    }
+    #[Route('/{quizId}/resultat/{resultatId}/certificate', name: 'apprenant_quiz_certificate', methods: ['GET'])]
+    public function downloadCertificate(
+        int $formationId,
+        int $quizId,
+        int $resultatId,
+        FormationRepository $formationRepository,
+        QuizRepository $quizRepository,
+        ResultatQuizRepository $resultatQuizRepository,
+        \App\Service\CertificateService $certificateService
+    ): Response {
+        $formation = $formationRepository->find($formationId);
+        $quiz = $quizRepository->find($quizId);
+        $resultat = $resultatQuizRepository->find($resultatId);
+
+        if (!$formation || !$quiz || !$resultat || $resultat->getApprenant() !== $this->getUser()) {
+            throw $this->createNotFoundException();
+        }
+
+        // Check score >= 70
+        if ($resultat->getNote() < 70) {
+            throw $this->createAccessDeniedException("Vous n'avez pas atteint le score requis pour obtenir le certificat.");
+        }
+
+        $pdfContent = $certificateService->generateCertificate($resultat);
+
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="certificat-' . $quiz->getId() . '.pdf"',
         ]);
     }
 }

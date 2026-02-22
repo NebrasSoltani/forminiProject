@@ -40,8 +40,8 @@ class Question
     private ?int $points = 1;
 
     #[ORM\Column]
-    #[Assert\NotNull]
-    #[Assert\PositiveOrZero]
+    #[Assert\NotNull(message: 'L\'ordre est obligatoire')]
+    #[Assert\PositiveOrZero(message: 'L\'ordre doit être positif ou zéro')]
     private ?int $ordre = 1;
 
     #[ORM\ManyToOne(targetEntity: Quiz::class, inversedBy: 'questions')]
@@ -98,7 +98,7 @@ class Question
         return $this->points;
     }
 
-    public function setPoints(int $points): self
+    public function setPoints(?int $points): self
     {
         $this->points = $points;
         return $this;
@@ -109,7 +109,7 @@ class Question
         return $this->ordre;
     }
 
-    public function setOrdre(int $ordre): self
+    public function setOrdre(?int $ordre): self
     {
         $this->ordre = $ordre;
         return $this;
