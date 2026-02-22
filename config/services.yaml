@@ -27,18 +27,22 @@ services:
 
     App\Service\SendGridEmailSender:
         arguments:
-            $sendgridApiKey: "%env(string:SENDGRID_API_KEY)%"
-            $sendgridFromEmail: "%env(string:SENDGRID_FROM_EMAIL)%"
-            $sendgridFromName: "%env(default::SENDGRIDFROM_NAME)%"
+            $sendgridApiKey: '%sendgrid_api_key%'
+            $sendgridFromEmail: '%sendgrid_from_email%'
+            $sendgridFromName: '%sendgrid_from_name%'
 
-    # ⭐ Configuration du service ChatbotAnalyseService
+    App\Service\MobileTextAlertsSmsSender:
+        arguments:
+            $mobileTextAlertsApiUrl: '%mobile_text_alerts_api_url%'
+            $mobileTextAlertsApiKey: '%mobile_text_alerts_api_key%'
+            $mobileTextAlertsSender: '%mobile_text_alerts_sender%'
+            $smsDefaultCountryCode: '%sms_default_country_code%'
+            $mobileTextAlertsTemplateId: '%mobile_text_alerts_template_id%'
+
     App\Service\ChatbotAnalyseService:
         arguments:
             $questionRepository: '@App\Repository\QuestionRepository'
             $reponseRepository: '@App\Repository\ReponseRepository'
-            $httpClient: "@http_client"
-            $logger: "@logger"
-            $geminiApiKey: "%env(string:GEMINI_API_KEY)%"
-
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+            $httpClient: '@http_client'
+            $logger: '@logger'
+            $geminiApiKey: '%gemini_api_key%'
