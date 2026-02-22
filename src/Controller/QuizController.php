@@ -360,13 +360,23 @@ class QuizController extends AbstractController
         // Recherche par nom, prénom ou email
         $search = strtolower(trim($request->query->get('search', '')));
 
-        $resultats = $resultatQuizRepository->findBy(['quiz' => $quiz]);
-
+        // On récupère uniquement les résultats enregistrés pour ce quiz
+        $resultats = $resultatQuizRepository->findBy(['quiz' => $quiz], ['dateTentative' => 'DESC']);
+        
         $apprenants = [];
+        // Utiliser un tableau pour ne garder que le dernier résultat par apprenant si nécessaire
+        $seenApprenants = [];
+
         foreach ($resultats as $resultat) {
+            $user = $resultat->getApprenant();
+            if (in_array($user->getId(), $seenApprenants)) continue;
+            
+            $seenApprenants[] = $user->getId();
             $apprenants[] = [
-                'user' => $resultat->getApprenant(),
-                'reussi' => $resultat->isReussi()
+                'user' => $user,
+                'reussi' => $resultat->isReussi(),
+                'note' => $resultat->getNote(),
+                'date' => $resultat->getDateTentative()
             ];
         }
 
@@ -381,9 +391,9 @@ class QuizController extends AbstractController
         if ($search !== '') {
             $apprenants = array_filter($apprenants, function($a) use ($search) {
                 $user = $a['user'];
-                return str_contains(strtolower($user->getNom()), $search)
-                    || str_contains(strtolower($user->getPrenom()), $search)
-                    || str_contains(strtolower($user->getEmail()), $search);
+                return str_contains(strtolower($user->getNom() ?? ''), $search)
+                    || str_contains(strtolower($user->getPrenom() ?? ''), $search)
+                    || str_contains(strtolower($user->getEmail() ?? ''), $search);
             });
         }
 
@@ -487,12 +497,19 @@ class QuizController extends AbstractController
         }
 
         $filtre = $request->query->get('filtre', 'all');
-        $resultats = $resultatQuizRepository->findBy(['quiz' => $quiz]);
-
+        
+        // Uniquement les résultats enregistrés pour ce quiz
+        $resultats = $resultatQuizRepository->findBy(['quiz' => $quiz], ['dateTentative' => 'DESC']);
         $apprenants = [];
+        $seenApprenants = [];
+
         foreach ($resultats as $resultat) {
+            $user = $resultat->getApprenant();
+            if (in_array($user->getId(), $seenApprenants)) continue;
+            
+            $seenApprenants[] = $user->getId();
             $apprenants[] = [
-                'user' => $resultat->getApprenant(),
+                'user' => $user,
                 'reussi' => $resultat->isReussi()
             ];
         }
