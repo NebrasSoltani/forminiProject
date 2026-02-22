@@ -1,0 +1,13 @@
+<html>
+  <body>
+    <p>Bonjour {{ user.getPrenom() ?: user.getUserIdentifier() }},</p>
+
+    <p>Votre inscription à la formation "{{ inscription.getFormation().getTitre() }}" a été confirmée.</p>
+
+    <p>Référence d'inscription: {{ inscription.getId() }}</p>
+
+    <p>Vous pouvez accéder à vos formations depuis votre espace : <a href="{{ path('apprenant_mes_formations') }}">Mes formations</a>.</p>
+
+    <p>Merci,<br/>L'équipe Formini</p>
+  </body>
+</html>

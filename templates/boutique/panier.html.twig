@@ -3,206 +3,188 @@
 {% block title %}Mon Panier{% endblock %}
 
 {% block body %}
-    <div class="container-fluid">
-        <!-- BREADCRUMB -->
-        <div class="tera-breadcrumb mb-4">
-            <div class="container">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item">
-                            <a href="{{ path('accueil') }}">
-                                <i class="bi bi-house-door me-1"></i>Accueil
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item">
-                            <a href="{{ path('boutique_index') }}">
-                                <i class="bi bi-shop me-1"></i>Boutique
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">Mon Panier</li>
-                    </ol>
-                </nav>
-            </div>
-        </div>
-
-        {% for label, messages in app.flashes %}
-            {% for message in messages %}
-                <div class="alert alert-{{ label }} alert-dismissible fade show mx-auto" style="max-width: 1200px;" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endfor %}
-
-        <div class="row">
-            <div class="col-lg-11 col-xl-10 mx-auto">
-                <!-- HEADER -->
-                <div class="tera-page-header mb-4">
-                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="tera-header-icon">
-                                <i class="bi bi-cart3"></i>
-                            </div>
-                            <div>
-                                <h1 class="tera-page-title mb-1">Mon Panier</h1>
-                                <p class="tera-page-subtitle mb-0">
-                                    {% if panier|length > 0 %}
-                                        {{ panier|length }} {% if panier|length > 1 %}articles{% else %}article{% endif %}
-                                    {% else %}
-                                        Aucun article
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-                        <a href="{{ path('boutique_index') }}" class="tera-back-btn">
-                            <i class="bi bi-arrow-left me-2"></i>Continuer mes achats
+<div class="container-fluid">
+    <!-- BREADCRUMB -->
+    <div class="tera-breadcrumb mb-4">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    <li class="breadcrumb-item">
+                        <a href="{{ path('accueil') }}">
+                            <i class="bi bi-house-door me-1"></i>Accueil
                         </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a href="{{ path('boutique_index') }}">
+                            <i class="bi bi-shop me-1"></i>Boutique
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item active">Mon Panier</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ label }} alert-dismissible fade show mx-auto" style="max-width: 1200px;" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-lg-11 col-xl-10 mx-auto">
+            <!-- PAGE HEADER -->
+            <div class="tera-page-header mb-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="tera-header-icon">
+                            <i class="bi bi-cart3"></i>
+                        </div>
+                        <div>
+                            <h1 class="tera-page-title mb-1">Mon Panier</h1>
+                            <p class="tera-page-subtitle mb-0">
+                                {% if panier|length > 0 %}
+                                    {{ panier|length }} {% if panier|length > 1 %}articles{% else %}article{% endif %}
+                                {% else %}
+                                    Aucun article
+                                {% endif %}
+                            </p>
+                        </div>
                     </div>
+                    <a href="{{ path('boutique_index') }}" class="tera-back-btn">
+                        <i class="bi bi-arrow-left me-2"></i>Continuer mes achats
+                    </a>
                 </div>
+            </div>
 
-                {% if panier|length > 0 %}
-                    <div class="row g-4">
-                        <!-- LEFT: CART ITEMS -->
-                        <div class="col-lg-8">
-                            <div class="tera-cart-items">
-                                {% set total = 0 %}
-                                {% for item in panier %}
-                                    {% set sousTotal = item.produit.prix * item.quantite %}
-                                    {% set total = total + sousTotal %}
-                                    
-                                    <div class="tera-cart-item">
-                                        <div class="row g-3 align-items-center">
-                                            <!-- Image -->
-                                            <div class="col-auto">
-                                                <div class="tera-cart-item-image">
-                                                    {% if item.produit.image %}
-                                                        <img src="{{ asset('uploads/produits/' ~ item.produit.image) }}" 
-                                                             alt="{{ item.produit.nom }}">
-                                                    {% else %}
-                                                        <div class="tera-cart-item-placeholder">
-                                                            <i class="bi bi-image"></i>
-                                                        </div>
-                                                    {% endif %}
-                                                </div>
+            {% if panier|length > 0 %}
+                {% set total = 0 %}
+                <div class="row g-4">
+                    <!-- LEFT: CART ITEMS -->
+                    <div class="col-lg-8">
+                        <div class="tera-cart-items">
+                            {% for item in panier %}
+                                {% set sousTotal = item.produit.prix * item.quantite %}
+                                {% set total = total + sousTotal %}
+                                <div class="tera-cart-item">
+                                    <div class="row g-3 align-items-center">
+                                        <!-- IMAGE -->
+                                        <div class="col-auto">
+                                            <div class="tera-cart-item-image">
+                                                {% if item.produit.image %}
+                                                    <img src="{{ asset('uploads/produits/' ~ item.produit.image) }}" alt="{{ item.produit.nom }}">
+                                                {% else %}
+                                                    <div class="tera-cart-item-placeholder">
+                                                        <i class="bi bi-image"></i>
+                                                    </div>
+                                                {% endif %}
                                             </div>
-
-                                            <!-- Details -->
-                                            <div class="col">
-                                                <div class="row g-3 align-items-center">
-                                                    <div class="col-md-5">
-                                                        <h5 class="tera-cart-item-name mb-2">{{ item.produit.nom }}</h5>
-                                                        <span class="tera-cart-item-category">
-                                                            <i class="bi bi-tag me-1"></i>{{ item.produit.categorie }}
-                                                        </span>
+                                        </div>
+                                        <!-- DETAILS -->
+                                        <div class="col">
+                                            <div class="row g-3 align-items-center">
+                                                <div class="col-md-5">
+                                                    <h5 class="tera-cart-item-name mb-2">{{ item.produit.nom }}</h5>
+                                                    <span class="tera-cart-item-category">
+                                                        <i class="bi bi-tag me-1"></i>{{ item.produit.categorie }}
+                                                    </span>
+                                                </div>
+                                                <div class="col-md-2 text-center">
+                                                    <div class="tera-cart-item-price">
+                                                        {{ item.produit.prix|number_format(2, ',', ' ') }} Dt
                                                     </div>
-                                                    
-                                                    <div class="col-md-2 text-center">
-                                                        <div class="tera-cart-item-price">
-                                                            {{ item.produit.prix|number_format(2, ',', ' ') }}<span class="text-muted"> Dt</span>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <form method="post" action="{{ path('boutique_panier_ajouter', {id: item.produit.id}) }}">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart' ~ item.produit.id) }}">
+                                                        <div class="tera-quantity-control">
+                                                            <label class="tera-quantity-label">Quantité</label>
+                                                            <input type="number" name="quantite" value="{{ item.quantite }}" min="1" max="{{ item.produit.stock }}" class="tera-quantity-input-cart" onchange="this.form.submit()">
                                                         </div>
-                                                    </div>
-                                                    
-                                                    <div class="col-md-3">
-                                                        <form method="post" 
-                                                              action="{{ path('boutique_panier_ajouter', {id: item.produit.id}) }}">
-                                                            <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart' ~ item.produit.id) }}">
-                                                            <div class="tera-quantity-control">
-                                                                <label class="tera-quantity-label">Quantité</label>
-                                                                <input type="number" 
-                                                                       name="quantite" 
-                                                                       value="{{ item.quantite }}" 
-                                                                       min="1" 
-                                                                       max="{{ item.produit.stock }}"
-                                                                       class="tera-quantity-input-cart"
-                                                                       onchange="this.form.submit()">
-                                                            </div>
-                                                        </form>
-                                                    </div>
-                                                    
-                                                    <div class="col-md-2 text-end">
-                                                        <div class="tera-cart-item-total mb-2">
-                                                            {{ sousTotal|number_format(2, ',', ' ') }} Dt
-                                                        </div>
-                                                        <a href="{{ path('boutique_panier_retirer', {id: item.produit.id}) }}" 
-                                                           class="tera-remove-btn"
-                                                           onclick="return confirm('Retirer ce produit du panier ?');">
-                                                            <i class="bi bi-trash me-1"></i>Retirer
-                                                        </a>
-                                                    </div>
+                                                    </form>
+                                                </div>
+                                                <div class="col-md-2 text-end">
+                                                    <div class="tera-cart-item-total mb-2">{{ sousTotal|number_format(2, ',', ' ') }} Dt</div>
+                                                    <a href="{{ path('boutique_panier_retirer', {id: item.produit.id}) }}" class="tera-remove-btn" onclick="return confirm('Retirer ce produit du panier ?');">
+                                                        <i class="bi bi-trash me-1"></i>Retirer
+                                                    </a>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-
-                        <!-- RIGHT: SUMMARY -->
-                        <div class="col-lg-4">
-                            <div class="tera-cart-summary">
-                                <h3 class="tera-summary-title mb-4">
-                                    <i class="bi bi-receipt me-2"></i>Récapitulatif
-                                </h3>
-
-                                <div class="tera-summary-details mb-4">
-                                    <div class="tera-summary-row">
-                                        <span>Sous-total</span>
-                                        <span>{{ total|number_format(2, ',', ' ') }} Dt</span>
-                                    </div>
-                                    <div class="tera-summary-row">
-                                        <span>Livraison</span>
-                                        <span class="text-success fw-bold">Gratuite</span>
-                                    </div>
-                                    <hr class="tera-summary-divider">
-                                    <div class="tera-summary-row tera-summary-total">
-                                        <span>Total</span>
-                                        <span>{{ total|number_format(2, ',', ' ') }} Dt</span>
-                                    </div>
                                 </div>
-
-                                <div class="tera-summary-info mb-4">
-                                    <i class="bi bi-truck me-2"></i>
-                                    <div>
-                                        <strong>Livraison rapide</strong>
-                                        <p class="mb-0">Livraison sous 3 à 5 jours ouvrés</p>
-                                    </div>
-                                </div>
-
-                                <div class="tera-summary-info mb-4">
-                                    <i class="bi bi-shield-check me-2"></i>
-                                    <div>
-                                        <strong>Paiement sécurisé</strong>
-                                        <p class="mb-0">Vos données sont protégées</p>
-                                    </div>
-                                </div>
-
-                                <form method="post" action="{{ path('payment_cart_checkout') }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('place_order') }}">
-                                    <button type="submit" 
-                                            class="tera-checkout-btn w-100"
-                                            onclick="return confirm('Confirmer votre commande ?');">
-                                        <i class="bi bi-check-circle me-2"></i>Valider la commande
-                                    </button>
-                                </form>
-                            </div>
+                            {% endfor %}
                         </div>
                     </div>
-                {% else %}
-                    <div class="tera-empty-cart">
-                        <div class="tera-empty-icon">
-                            <i class="bi bi-cart-x"></i>
+
+                    <!-- RIGHT: SUMMARY -->
+                    <div class="col-lg-4">
+                        <div class="tera-cart-summary">
+                            <h3 class="tera-summary-title mb-4">
+                                <i class="bi bi-receipt me-2"></i>Récapitulatif
+                            </h3>
+                            <div class="tera-summary-details mb-4">
+                                <div class="tera-summary-row">
+                                    <span>Sous-total</span>
+                                    <span>{{ total|number_format(2, ',', ' ') }} Dt</span>
+                                </div>
+                                <div class="tera-summary-row">
+                                    <span>Livraison</span>
+                                    <span class="text-success fw-bold">Gratuite</span>
+                                </div>
+                                <hr class="tera-summary-divider">
+                                <div class="tera-summary-row tera-summary-total">
+                                    <span>Total</span>
+                                    <span>{{ total|number_format(2, ',', ' ') }} Dt</span>
+                                </div>
+                            </div>
+
+                            <div class="tera-summary-info mb-4">
+                                <i class="bi bi-truck me-2"></i>
+                                <div>
+                                    <strong>Livraison rapide</strong>
+                                    <p class="mb-0">Livraison sous 3 à 5 jours ouvrés</p>
+                                </div>
+                            </div>
+
+                            <div class="tera-summary-info mb-4">
+                                <i class="bi bi-shield-check me-2"></i>
+                                <div>
+                                    <strong>Paiement sécurisé</strong>
+                                    <p class="mb-0">Vos données sont protégées</p>
+                                </div>
+                            </div>
+
+                            <!-- FORMULAIRE CHECKOUT -->
+                            <form method="post" action="{{ path('payment_cart_checkout') }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('place_order') }}">
+                                <button type="submit" class="tera-checkout-btn w-100" onclick="return confirm('Confirmer votre commande ?');">
+                                    <i class="bi bi-check-circle me-2"></i>Valider la commande
+                                </button>
+                            </form>
                         </div>
-                        <h3 class="tera-empty-title">Votre panier est vide</h3>
-                        <p class="tera-empty-text mb-4">Découvrez nos produits et ajoutez-les à votre panier</p>
-                        <a href="{{ path('boutique_index') }}" class="tera-shop-btn">
-                            <i class="bi bi-shop me-2"></i>Découvrir nos produits
-                        </a>
                     </div>
-                {% endif %}
-            </div>
+                </div>
+            {% else %}
+                <div class="tera-empty-cart">
+                    <div class="tera-empty-icon">
+                        <i class="bi bi-cart-x"></i>
+                    </div>
+                    <h3 class="tera-empty-title">Votre panier est vide</h3>
+                    <p class="tera-empty-text mb-4">Découvrez nos produits et ajoutez-les à votre panier</p>
+                    <a href="{{ path('boutique_index') }}" class="tera-shop-btn">
+                        <i class="bi bi-shop me-2"></i>Découvrir nos produits
+                    </a>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
+
 
 <style>
 /* BREADCRUMB */
