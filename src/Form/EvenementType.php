@@ -84,6 +84,96 @@ class EvenementType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-check-input']
             ])
+            ->add('filieres', ChoiceType::class, [
+                'label' => 'Filières cibles',
+                'multiple' => true,
+                'expanded' => false,
+                'choices' => [
+                    'Informatique' => 'informatique',
+                    'Intelligence Artificielle' => 'ia',
+                    'Data Science' => 'data',
+                    'Développement Web' => 'web',
+                    'Cybersécurité' => 'cybersecurite',
+                    'Marketing Digital' => 'marketing',
+                    'Business' => 'business',
+                    'Design' => 'design',
+                ],
+                'attr' => [
+                    'class' => 'form-control select2',
+                    'data-placeholder' => 'Sélectionnez des filières'
+                ],
+                'required' => false,
+            ])
+            ->add('tags', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
+                'label' => 'Tags (séparés par des virgules)',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Ex: python, startup, innovation'
+                ],
+                'help' => 'Séparez les tags par des virgules'
+            ])
+            ->add('image360', FileType::class, [
+                'label' => 'Image 360° (Equirectangular)',
+                'required' => false,
+                'mapped' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'accept' => 'image/*'
+                ],
+                'constraints' => [
+                    new File([
+                        'maxSize' => '10M',
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                            'image/webp',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez télécharger une image 360 valide (JPG, PNG, WEBP)',
+                    ])
+                ],
+                'help' => 'Téléchargez une image au format equirectangular pour une immersion 360°'
+            ])
+            ->add('urlStreetView', TextType::class, [
+                'label' => 'URL Google Street View (Embed)',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'https://www.google.com/maps/embed?pb=...'
+                ],
+                'help' => 'Collez ici le lien "Intégrer une carte" de Google Street View'
+            ])
+            ->add('live', CheckboxType::class, [
+                'label' => 'Événement en direct (En ligne)',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-check-input'
+                ]
+            ])
+            ->add('streamUrl', TextType::class, [
+                'label' => 'URL du flux vidéo (HLS/.m3u8)',
+                'required' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'https://.../index.m3u8'
+                ],
+                'help' => 'Collez ici l\'URL du flux HLS (fichier .m3u8)'
+            ]);
+
+        $builder->get('tags')
+            ->addModelTransformer(new \Symfony\Component\Form\CallbackTransformer(
+                function ($tagsAsArray): string {
+                    // transform the array to a string
+                    return implode(', ', $tagsAsArray ?? []);
+                },
+                function ($tagsAsString): array {
+                    // transform the string back to an array
+                    if (!$tagsAsString) {
+                        return [];
+                    }
+                    return array_map('trim', explode(',', $tagsAsString));
+                }
+            ));
         ;
     }
 

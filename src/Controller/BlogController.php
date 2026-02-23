@@ -33,6 +33,136 @@ class BlogController extends AbstractController
         ]);
     }
 
+<<<<<<< Updated upstream
+=======
+    #[Route('/statistiques', name: 'admin_blog_statistiques')]
+public function statistiques(BlogRepository $blogRepository, EntityManagerInterface $em): Response
+{
+    $user = $this->getUser();
+    if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
+        $this->addFlash('error', 'Accès réservé aux administrateurs.');
+        return $this->redirectToRoute('accueil');
+    }
+
+    // Statistiques de base
+    $totalBlogs = $blogRepository->count([]);
+    $blogsPublies = $blogRepository->count(['isPublie' => true]);
+    $blogsNonPublies = $blogRepository->count(['isPublie' => false]);
+    
+    // Blogs avec événements
+    $qb = $blogRepository->createQueryBuilder('b')
+        ->select('COUNT(b.id)')
+        ->where('b.evenement IS NOT NULL');
+    $blogsAvecEvenements = $qb->getQuery()->getSingleScalarResult();
+
+    // Moyenne par mois - Utilisation de SQL natif
+    $conn = $em->getConnection();
+    $sql = "SELECT COUNT(DISTINCT DATE_FORMAT(date_publication, '%Y-%m')) as months FROM blog";
+    $stmt = $conn->prepare($sql);
+    $result = $stmt->executeQuery();
+    $nombreMois = $result->fetchOne();
+    $moyenneParMois = $nombreMois > 0 ? round($totalBlogs / $nombreMois, 1) : 0;
+
+    // Blogs par catégorie
+    $qb = $blogRepository->createQueryBuilder('b')
+        ->select('b.categorie, COUNT(b.id) as total')
+        ->groupBy('b.categorie')
+        ->orderBy('total', 'DESC');
+    $blogsByCategory = $qb->getQuery()->getResult();
+
+    // Top 10 auteurs
+    $qb = $blogRepository->createQueryBuilder('b')
+        ->select('CONCAT(u.prenom, \' \', u.nom) as auteur, COUNT(b.id) as total')
+        ->join('b.auteur', 'u')
+        ->groupBy('u.id')
+        ->orderBy('total', 'DESC')
+        ->setMaxResults(10);
+    $blogsByAuthor = $qb->getQuery()->getResult();
+
+    // Évolution par mois (6 derniers mois) - Utilisation de SQL natif
+    $sql = "SELECT DATE_FORMAT(date_publication, '%Y-%m') as mois, COUNT(id) as total 
+            FROM blog 
+            WHERE date_publication >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+            GROUP BY mois 
+            ORDER BY mois ASC";
+    $stmt = $conn->prepare($sql);
+    $result = $stmt->executeQuery();
+    $blogsByMonth = $result->fetchAllAssociative();
+
+    // Formater les noms de mois en français
+    $moisFr = ['01' => 'Janvier', '02' => 'Février', '03' => 'Mars', '04' => 'Avril', 
+               '05' => 'Mai', '06' => 'Juin', '07' => 'Juillet', '08' => 'Août',
+               '09' => 'Septembre', '10' => 'Octobre', '11' => 'Novembre', '12' => 'Décembre'];
+    
+    foreach ($blogsByMonth as &$item) {
+        $parts = explode('-', $item['mois']);
+        if (isset($parts[1]) && isset($moisFr[$parts[1]])) {
+            $item['mois'] = $moisFr[$parts[1]] . ' ' . $parts[0];
+        }
+    }
+
+    // Blogs récents (10 derniers)
+    $blogsRecents = $blogRepository->findBy([], ['datePublication' => 'DESC'], 10);
+
+    return $this->render('admin/blog/statistiques.html.twig', [
+        'totalBlogs' => $totalBlogs,
+        'blogsPublies' => $blogsPublies,
+        'blogsNonPublies' => $blogsNonPublies,
+        'blogsBrouillons' => $blogsNonPublies,
+        'blogsAvecEvenements' => $blogsAvecEvenements,
+        'moyenneParMois' => $moyenneParMois,
+        'blogsByCategory' => $blogsByCategory,
+        'blogsByAuthor' => $blogsByAuthor,
+        'blogsByMonth' => $blogsByMonth,
+        'blogsRecents' => $blogsRecents,
+    ]);
+}
+    #[Route('/export-pdf', name: 'admin_blog_export_pdf')]
+    public function exportPdf(Request $request, BlogRepository $blogRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User || $user->getRoleUtilisateur() !== 'admin') {
+            $this->addFlash('error', 'Accès réservé aux administrateurs.');
+            return $this->redirectToRoute('accueil');
+        }
+
+        // Récupérer les filtres depuis la session ou la requête
+        $filters = $request->query->all();
+        $blogs = $blogRepository->findByFilters($filters);
+
+        // Configuration de Dompdf
+        $pdfOptions = new Options();
+        $pdfOptions->set('defaultFont', 'Arial');
+        $pdfOptions->set('isRemoteEnabled', true);
+
+        $dompdf = new Dompdf($pdfOptions);
+
+        // Générer le contenu HTML
+        $html = $this->renderView('admin/blog/export_pdf.html.twig', [
+            'blogs' => $blogs,
+            'exportDate' => new \DateTime(),
+            'filters' => $filters,
+        ]);
+
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        // Générer le nom du fichier
+        $filename = 'blogs_export_' . date('Y-m-d_H-i-s') . '.pdf';
+
+        // Retourner le PDF en téléchargement
+        return new Response(
+            $dompdf->output(),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]
+        );
+    }
+
+>>>>>>> Stashed changes
     #[Route('/new', name: 'admin_blog_new')]
     public function new(Request $request, EntityManagerInterface $em, SluggerInterface $slugger): Response
     {

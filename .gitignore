@@ -1,5 +1,10 @@
 
 ###> symfony/framework-bundle ###
+<<<<<<< Updated upstream
+=======
+.env.local
+/.env
+>>>>>>> Stashed changes
 /.env.local
 /.env.local.php
 /.env.*.local

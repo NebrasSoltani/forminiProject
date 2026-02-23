@@ -1,0 +1,221 @@
+/* public/css/viewer360.css */
+
+.section-360 {
+    margin: 40px 0;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 15px;
+    text-align: center;
+    border: 1px solid #e1e4e8;
+}
+
+.section-360 h3 {
+    margin-bottom: 20px;
+    color: #2a2a2a;
+    font-weight: 700;
+}
+
+.btn-360 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-360:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+    color: white;
+}
+
+/* Modal Viewer 360 */
+.viewer-360-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.viewer-360-container {
+    position: relative;
+    width: 90%;
+    height: 80%;
+    margin: 5% auto;
+    background-color: #000;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#panorama {
+    width: 100%;
+    height: 100%;
+}
+
+.close-viewer {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #fff;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10001;
+    transition: 0.3s;
+}
+
+.close-viewer:hover {
+    color: #bbb;
+}
+
+/* Live stream styles */
+/* Premium Live stream styles */
+.btn-live {
+    position: relative;
+    padding: 10px 24px;
+    border-radius: 50px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    width: 100%;
+    justify-content: center;
+    border: none;
+    overflow: hidden;
+}
+
+.btn-live.active {
+    background: linear-gradient(45deg, #ff0000, #ff4d4d);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+}
+
+/* Pulsating effect motif */
+.btn-live.active::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 0, 0, 0.4);
+    border-radius: 50px;
+    z-index: -1;
+    animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(255, 0, 0, 0);
+    }
+}
+
+.btn-live.active:hover {
+    transform: scale(1.02);
+    box-shadow: 0 6px 20px rgba(255, 0, 0, 0.5);
+    background: linear-gradient(45deg, #e60000, #ff3333);
+}
+
+.btn-live.disabled {
+    background: #f1f3f5;
+    color: #adb5bd;
+    border: 1px solid #e9ecef;
+    cursor: not-allowed;
+}
+
+.live-dot {
+    width: 12px;
+    height: 12px;
+    background-color: #fff;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 8px #fff;
+}
+
+.live-dot::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    animation: dot-pulse 1.5s infinite;
+}
+
+@keyframes dot-pulse {
+    0% {
+        transform: scale(0.5);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.8);
+        opacity: 0;
+    }
+}
+
+/* Video Wrapper for 16:9 */
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    /* 16:9 aspect ratio */
+    height: 0;
+    background: #000;
+    width: 100%;
+}
+
+.video-wrapper video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .viewer-360-container {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        border-radius: 0;
+    }
+}

@@ -1,0 +1,167 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvel Événement{% endblock %}
+
+{% block body %}
+<div class="page-content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0">Créer un Nouvel Événement</h4>
+                    <div class="page-title-right">
+                        <a href="{{ path('admin_evenement_index') }}" class="btn btn-secondary">
+                            <i class="mdi mdi-arrow-left"></i> Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                            
+                            {# Titre #}
+                            <div class="mb-3">
+                                {{ form_label(form.titre, 'Titre de l\'événement') }}
+                                {{ form_widget(form.titre, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.titre) }}
+                            </div>
+
+                            {# Type et Nombre de places #}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.type, 'Type d\'événement') }}
+                                    {{ form_widget(form.type, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.type) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.nombrePlaces, 'Nombre de places') }}
+                                    {{ form_widget(form.nombrePlaces, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.nombrePlaces) }}
+                                </div>
+                            </div>
+
+                            {# Description #}
+                            <div class="mb-3">
+                                {{ form_label(form.description, 'Description') }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+
+                            {# Dates #}
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.dateDebut, 'Date de début') }}
+                                    {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.dateDebut) }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    {{ form_label(form.dateFin, 'Date de fin') }}
+                                    {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.dateFin) }}
+                                </div>
+                            </div>
+
+                            {# Lieu #}
+                            <div class="mb-3">
+                                {{ form_label(form.lieu, 'Lieu') }}
+                                {{ form_widget(form.lieu, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.lieu) }}
+                            </div>
+
+                            {# Image #}
+                            <div class="mb-3">
+                                {{ form_label(form.image, 'Image de l\'événement') }}
+                                {{ form_widget(form.image, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.image) }}
+                                <small class="text-muted">Formats acceptés: JPG, PNG, GIF, WEBP (Max 5MB)</small>
+                            </div>
+                            
+                            {# 360 View #}
+                            <div class="card bg-light border-0 mb-3">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3"><i class="mdi mdi-vr-cardboard text-primary"></i> Visite Immersive 360°</h5>
+                                    
+                                    <div class="mb-3">
+                                        {{ form_label(form.image360, 'Image 360° (Panoramique)') }}
+                                        {{ form_widget(form.image360, {'attr': {'class': 'form-control'}}) }}
+                                        {{ form_errors(form.image360) }}
+                                        <small class="text-muted">Image complète (équirectangulaire) pour un effet immersif.</small>
+                                    </div>
+
+                                    <div class="mb-0">
+                                        {{ form_label(form.urlStreetView, 'Lien Google Street View') }}
+                                        {{ form_widget(form.urlStreetView, {'attr': {'class': 'form-control', 'placeholder': 'https://www.google.com/maps/embed?pb=...'}}) }}
+                                        {{ form_errors(form.urlStreetView) }}
+                                        <small class="text-muted">Collez le lien "Intégrer une carte" de Google Maps.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Live Stream #}
+                            <div class="card bg-danger border-0 mb-3 text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3 text-white"><i class="fa fa-dot-circle-o"></i> Configuration du Direct (Live)</h5>
+                                    
+                                    <div class="mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ form_widget(form.live, {'attr': {'class': 'form-check-input'}}) }}
+                                            {{ form_label(form.live, 'Activer le Live maintenant', {'label_attr': {'class': 'form-check-label'}}) }}
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-0">
+                                        {{ form_label(form.streamUrl, 'URL du Flux (HLS .m3u8)') }}
+                                        {{ form_widget(form.streamUrl, {'attr': {'class': 'form-control', 'placeholder': 'https://example.com/live/index.m3u8'}}) }}
+                                        {{ form_errors(form.streamUrl) }}
+                                        <small class="text-white-50">L'URL du fichier index.m3u8 de votre serveur de streaming.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {# Statut #}
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form_widget(form.isActif) }}
+                                    {{ form_label(form.isActif) }}
+                                </div>
+                            </div>
+
+                            {# On rend les champs restants avant le bouton #}
+                            {{ form_rest(form) }}
+
+                            <div class="text-end mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg px-4">
+                                    <i class="mdi mdi-content-save me-1"></i> Créer l'Événement
+                                </button>
+                            </div>
+                        {{ form_end(form, {'render_rest': false}) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Conseils</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Titre clair et descriptif</li>
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Description détaillée du programme</li>
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Dates et horaires précis</li>
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Lieu complet ou lien de visioconférence</li>
+                            <li class="mb-2"><i class="mdi mdi-chevron-right text-primary"></i> Image attractive de l'événement</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+{% include 'admin/evenement/_ai_chat.html.twig' %}
+{% endblock %}

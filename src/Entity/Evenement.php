@@ -14,6 +14,12 @@ class Evenement
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
+    private bool $live = false;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $streamUrl = null;
+
     #[ORM\Column(length: 255)]
     private ?string $titre = null;
 
@@ -169,4 +175,138 @@ class Evenement
 
         return $this;
     }
+<<<<<<< Updated upstream
 }
+=======
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $filieres = [];
+
+    #[ORM\Column(type: 'json', nullable: true)]
+    private ?array $tags = [];
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $image360 = null;
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $urlStreetView = null;
+
+    public function getFilieres(): ?array
+    {
+        return $this->filieres;
+    }
+
+    public function setFilieres(?array $filieres): static
+    {
+        $this->filieres = $filieres;
+        return $this;
+    }
+
+    public function getTags(): ?array
+    {
+        return $this->tags;
+    }
+
+    public function setTags(?array $tags): static
+    {
+        $this->tags = $tags;
+        return $this;
+    }
+
+    public function getImage360(): ?string
+    {
+        return $this->image360;
+    }
+
+    public function setImage360(?string $image360): static
+    {
+        $this->image360 = $image360;
+        return $this;
+    }
+
+    public function getUrlStreetView(): ?string
+    {
+        return $this->urlStreetView;
+    }
+
+    public function setUrlStreetView(?string $urlStreetView): static
+    {
+        $this->urlStreetView = $urlStreetView;
+        return $this;
+    }
+
+    public function isLive(): bool
+    {
+        return $this->live;
+    }
+
+    public function setLive(bool $live): static
+    {
+        $this->live = $live;
+        return $this;
+    }
+
+    public function getLive(): bool
+    {
+        return $this->live;
+    }
+
+    public function setIsLive(bool $live): static
+    {
+        $this->live = $live;
+        return $this;
+    }
+
+    public function getStreamUrl(): ?string
+    {
+        return $this->streamUrl;
+    }
+
+    public function setStreamUrl(?string $streamUrl): static
+    {
+        $this->streamUrl = $streamUrl;
+        return $this;
+    }
+
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $resumeAuto = null;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $resumeGeneratedAt = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $liveSummaryData = [];
+
+    public function getResumeAuto(): ?string
+    {
+        return $this->resumeAuto;
+    }
+
+    public function setResumeAuto(?string $resumeAuto): static
+    {
+        $this->resumeAuto = $resumeAuto;
+        return $this;
+    }
+
+    public function getResumeGeneratedAt(): ?\DateTimeInterface
+    {
+        return $this->resumeGeneratedAt;
+    }
+
+    public function setResumeGeneratedAt(?\DateTimeInterface $resumeGeneratedAt): static
+    {
+        $this->resumeGeneratedAt = $resumeGeneratedAt;
+        return $this;
+    }
+
+    public function getLiveSummaryData(): ?array
+    {
+        return $this->liveSummaryData;
+    }
+
+    public function setLiveSummaryData(?array $liveSummaryData): static
+    {
+        $this->liveSummaryData = $liveSummaryData;
+        return $this;
+    }
+}
+>>>>>>> Stashed changes

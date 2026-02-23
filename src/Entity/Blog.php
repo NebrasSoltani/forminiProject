@@ -39,6 +39,16 @@ class Blog
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $resume = null;
 
+<<<<<<< Updated upstream
+=======
+    #[ORM\ManyToOne(targetEntity: Evenement::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Evenement $evenement = null;
+
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private ?array $tags = null;
+
+>>>>>>> Stashed changes
     public function getId(): ?int
     {
         return $this->id;
@@ -53,6 +63,17 @@ class Blog
     {
         $this->titre = $titre;
 
+        return $this;
+    }
+
+    public function getTags(): ?array
+    {
+        return $this->tags;
+    }
+
+    public function setTags(?array $tags): static
+    {
+        $this->tags = $tags;
         return $this;
     }
 
