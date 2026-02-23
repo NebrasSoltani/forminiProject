@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Two-Factor Authentication{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Two-Factor Authentication</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-shield-alt"></i> Verification Required</h5>
+                        <p>Please enter your two-factor authentication code to continue.</p>
+                    </div>
+
+                    {% if authenticationError %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> {{ authenticationError|trans }}
+                        </div>
+                    {% endif %}
+
+                    <form action="{{ checkPath }}" method="post">
+                        {% if displayTrustedOption %}
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" id="trusted" name="{{ trustedParameterName }}" class="form-check-input">
+                                <label for="trusted" class="form-check-label">
+                                    Trust this device for {{ lifetime }} hours
+                                </label>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="_auth_code" class="form-label">Authentication Code</label>
+                            <input type="text" id="_auth_code" name="{{ authCodeParameterName }}" 
+                                   class="form-control form-control-lg text-center" 
+                                   placeholder="000000" maxlength="6" pattern="[0-9]{6}" 
+                                   autocomplete="one-time-code" autofocus required>
+                            <div class="form-text">Enter the 6-digit code from your authenticator app</div>
+                        </div>
+
+                        {% if csrfToken %}
+                            <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrfToken }}">
+                        {% endif %}
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Verify & Login
+                            </button>
+                            <a href="{{ logoutPath }}" class="btn btn-secondary">
+                                <i class="fas fa-sign-out-alt"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+
+                    <div class="mt-4 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i>
+                            Having trouble? Make sure your device's time is synchronized and try again.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const codeInput = document.getElementById('_auth_code');
+    
+    // Auto-focus and select all
+    codeInput.focus();
+    codeInput.select();
+    
+    // Auto-submit when 6 digits are entered
+    codeInput.addEventListener('input', function(e) {
+        const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+        
+        if (value.length === 6) {
+            e.target.value = value;
+            // Small delay to show the last digit before submitting
+            setTimeout(() => {
+                e.target.form.submit();
+            }, 100);
+        } else {
+            e.target.value = value;
+        }
+    });
+    
+    // Handle paste events
+    codeInput.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pastedData = (e.clipboardData || window.clipboardData).getData('text');
+        const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+        e.target.value = digits;
+        
+        if (digits.length === 6) {
+            setTimeout(() => {
+                e.target.form.submit();
+            }, 100);
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Setup Two-Factor Authentication{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Setup Two-Factor Authentication</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5>Step 1: Scan QR Code</h5>
+                        <p>Use your authenticator app (Google Authenticator, Authy, etc.) to scan this QR code:</p>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={{ qrCodeUrl|url_encode }}" 
+                             alt="QR Code for 2FA" class="img-fluid">
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <h5>Step 2: Manual Entry (Alternative)</h5>
+                        <p>If you can't scan the QR code, enter this secret key manually in your authenticator app:</p>
+                        <div class="input-group mb-3">
+                            <input type="text" value="{{ secret }}" readonly class="form-control font-monospace">
+                            <button class="btn btn-outline-secondary" type="button" onclick="copySecret()">Copy</button>
+                        </div>
+                    </div>
+
+                    <form method="post" action="{{ path('app_2fa_enable') }}">
+                        <input type="hidden" name="secret" value="{{ secret }}">
+                        
+                        <div class="alert alert-info">
+                            <h5>Step 3: Verify Code</h5>
+                            <p>Enter the 6-digit code from your authenticator app:</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="code" class="form-label">Verification Code</label>
+                            <input type="text" id="code" name="code" class="form-control" 
+                                   placeholder="000000" maxlength="6" pattern="[0-9]{6}" required>
+                            <div class="form-text">Enter the 6-digit code from your authenticator app</div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Enable Two-Factor Authentication</button>
+                            <a href="{{ path('app_profile_edit') }}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copySecret() {
+    const secretInput = document.querySelector('input[name="secret"]');
+    secretInput.select();
+    document.execCommand('copy');
+    
+    const button = event.target;
+    const originalText = button.textContent;
+    button.textContent = 'Copied!';
+    button.classList.add('btn-success');
+    button.classList.remove('btn-outline-secondary');
+    
+    setTimeout(() => {
+        button.textContent = originalText;
+        button.classList.remove('btn-success');
+        button.classList.add('btn-outline-secondary');
+    }, 2000);
+}
+</script>
+{% endblock %}
