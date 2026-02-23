@@ -182,7 +182,7 @@ class ApprenantQuizController extends AbstractController
         $resultat = new ResultatQuiz();
         $resultat->setApprenant($this->getUser());
         $resultat->setQuiz($quiz);
-        $resultat->setNote(number_format($note, 2));
+        $resultat->setNote(number_format($note, 2, '.', ''));
         $resultat->setNombreBonnesReponses($nombreBonnesReponses);
         $resultat->setNombreTotalQuestions($nombreTotalQuestions);
         $resultat->setReussi($reussi);
