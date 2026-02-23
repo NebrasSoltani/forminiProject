@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultats - {{ quiz.titre }}</title>
+    <style>
+        /* ══════════════════════════════════════════════════════════════
+           BUNDLE 3 — Dompdf : Template PDF pour résultats apprenants
+           ══════════════════════════════════════════════════════════════ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.5;
+            padding: 30px;
+        }
+        .header {
+            background: linear-gradient(135deg, #198754, #20c997);
+            color: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .header h1 { font-size: 22px; margin-bottom: 5px; }
+        .header p { font-size: 13px; opacity: 0.9; }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #198754;
+            border-bottom: 2px solid #198754;
+            padding-bottom: 6px;
+            margin: 20px 0 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #dee2e6;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1e7dd; color: #0f5132; }
+        .badge-danger { background: #f8d7da; color: #842029; }
+        .stats-row {
+            text-align: center;
+            margin: 15px 0 20px;
+        }
+        .stat-box {
+            display: inline-block;
+            width: 22%;
+            text-align: center;
+            padding: 12px;
+            margin: 0 1%;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .stat-box .number { font-size: 24px; font-weight: 700; }
+        .stat-box .label { font-size: 11px; color: #6c757d; margin-top: 4px; }
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            font-size: 11px;
+            color: #6c757d;
+            text-align: center;
+        }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>👥 Résultats des Apprenants</h1>
+        <p><strong>Quiz :</strong> {{ quiz.titre }} | <strong>Formation :</strong> {{ formation.titre }}</p>
+        <p><strong>Filtre :</strong>
+            {% if filtre == 'reussi' %}Réussis uniquement
+            {% elseif filtre == 'non-reussi' %}Non réussis uniquement
+            {% else %}Tous les participants{% endif %}
+            | <strong>Exporté le :</strong> {{ dateExport|date('d/m/Y à H:i') }}
+        </p>
+    </div>
+
+    {% set totalApprenants = apprenants|length %}
+    {% set reussis = apprenants|filter(a => a.reussi)|length %}
+    {% set echoues = totalApprenants - reussis %}
+
+    <div class="stats-row">
+        <div class="stat-box">
+            <div class="number" style="color: #0d6efd;">{{ totalApprenants }}</div>
+            <div class="label">Total</div>
+        </div>
+        <div class="stat-box">
+            <div class="number" style="color: #198754;">{{ reussis }}</div>
+            <div class="label">Réussis</div>
+        </div>
+        <div class="stat-box">
+            <div class="number" style="color: #dc3545;">{{ echoues }}</div>
+            <div class="label">Échoués</div>
+        </div>
+        <div class="stat-box">
+            <div class="number" style="color: #0d6efd;">
+                {{ totalApprenants > 0 ? ((reussis / totalApprenants) * 100)|round(1) : 0 }}%
+            </div>
+            <div class="label">Taux de réussite</div>
+        </div>
+    </div>
+
+    <div class="section-title">📋 Liste des Apprenants ({{ totalApprenants }})</div>
+
+    {% if apprenants is empty %}
+        <p style="text-align: center; padding: 20px; color: #6c757d;">
+            Aucun résultat trouvé pour ce filtre.
+        </p>
+    {% else %}
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th style="width: 30%;">Nom</th>
+                    <th style="width: 20%;">Prénom</th>
+                    <th style="width: 30%;">Email</th>
+                    <th style="width: 15%; text-align: center;">Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in apprenants %}
+                    {% set user = item.user %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><strong>{{ user.nom|upper }}</strong></td>
+                        <td>{{ user.prenom }}</td>
+                        <td>{{ user.email }}</td>
+                        <td style="text-align: center;">
+                            {% if item.reussi %}
+                                <span class="badge badge-success">✅ Réussi</span>
+                            {% else %}
+                                <span class="badge badge-danger">❌ Échoué</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+    <div class="footer">
+        <p>Document généré automatiquement par <strong>Formini</strong> — {{ dateExport|date('d/m/Y à H:i') }}</p>
+        <p>© {{ dateExport|date('Y') }} Formini • Export PDF (Bundle Dompdf)</p>
+    </div>
+</body>
+</html>
