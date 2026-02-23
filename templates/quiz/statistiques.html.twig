@@ -5,7 +5,7 @@
 {% block body %}
 <div class="container py-5">
 
-    <!-- En-tête + boutons d’action -->
+    {# En-tête + boutons d'action #}
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
         <div>
             <h1 class="h2 mb-1 fw-semibold">Statistiques du quiz</h1>
@@ -24,12 +24,21 @@
                 <i class="bi bi-people-fill"></i>
                 Voir les apprenants réussis
             </a>
+
+            {# ══════════════════════════════════════════════════════════════
+               BUNDLE 3 — Dompdf : bouton d'export PDF des statistiques
+               ══════════════════════════════════════════════════════════════ #}
+            <a href="{{ path('quiz_export_statistiques_pdf', {formationId: formation.id, id: quiz.id}) }}"
+               class="btn btn-danger d-inline-flex align-items-center gap-2 px-4">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                📄 Exporter en PDF
+            </a>
         </div>
     </div>
 
     <div class="row g-4">
 
-        <!-- Colonne gauche - Résumé -->
+        {# Colonne gauche - Résumé #}
         <div class="col-lg-5 col-xl-4">
             <div class="card shadow border-0 h-100">
                 <div class="card-header bg-gradient text-white d-flex align-items-center gap-3 py-3"
@@ -90,11 +99,17 @@
             </div>
         </div>
 
-        <!-- Colonne droite - Graphiques -->
+        {# ══════════════════════════════════════════════════════════════
+           BUNDLE 2 — Symfony UX Chart.js : graphiques rendus via PHP
+           Les objets Chart sont créés dans QuizController::statistiques()
+           et rendus ici avec render_chart() au lieu de JS inline
+           ══════════════════════════════════════════════════════════════ #}
+
+        {# Colonne droite - Graphiques #}
         <div class="col-lg-7 col-xl-8">
             <div class="row g-4">
 
-                <!-- Taux de réussite principal -->
+                {# Taux de réussite principal — BUNDLE 2 Chart.js UX #}
                 <div class="col-12">
                     <div class="card shadow border-0">
                         <div class="card-body text-center p-4">
@@ -103,34 +118,34 @@
                                 Taux de réussite global
                             </h5>
                             <div class="bg-light rounded-3 p-3" style="height: 360px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);">
-                                <canvas id="tauxReussiteChart"></canvas>
+                                {{ render_chart(chartReussite, {'style': 'width:100%; height:100%;'}) }}
                             </div>
                             <div class="mt-3 text-muted small">
-                                Pourcentage de bonnes réponses sur l’ensemble des tentatives
+                                Pourcentage de bonnes réponses sur l'ensemble des tentatives
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Questions -->
+                {# Questions — BUNDLE 2 Chart.js UX #}
                 <div class="col-md-6">
                     <div class="card shadow border-0 h-100">
                         <div class="card-body text-center p-4">
                             <h5 class="card-title mb-4 fw-medium">Questions</h5>
                             <div style="height: 290px;">
-                                <canvas id="questionsChart"></canvas>
+                                {{ render_chart(chartQuestions, {'style': 'width:100%; height:100%;'}) }}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Réponses -->
+                {# Réponses — BUNDLE 2 Chart.js UX #}
                 <div class="col-md-6">
                     <div class="card shadow border-0 h-100">
                         <div class="card-body text-center p-4">
                             <h5 class="card-title mb-4 fw-medium">Réponses</h5>
                             <div style="height: 290px;">
-                                <canvas id="reponsesChart"></canvas>
+                                {{ render_chart(chartReponses, {'style': 'width:100%; height:100%;'}) }}
                             </div>
                         </div>
                     </div>
@@ -142,110 +157,13 @@
     </div>
 </div>
 
-<!-- Dépendances -->
+{# Dépendances #}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 
-<script>
-// Configuration Chart.js globale
-Chart.defaults.font.family = "'Segoe UI', system-ui, sans-serif";
-Chart.defaults.plugins.legend.labels.usePointStyle = true;
-Chart.defaults.plugins.legend.labels.padding = 20;
+{# ══════════════════════════════════════════════════════════════
+   BUNDLE 2 — Symfony UX Chart.js : plus besoin de JS inline !
+   Le JavaScript de Chart.js est automatiquement géré par
+   le bundle via Stimulus. On a supprimé tout le <script> inline.
+   ══════════════════════════════════════════════════════════════ #}
 
-document.addEventListener('DOMContentLoaded', () => {
-
-    const total = {{ totalReponses }};
-    const bonnes = {{ bonnesReponses }};
-    const taux = total > 0 ? ((bonnes / total) * 100).toFixed(1) : 0;
-
-    // Taux de réussite - doughnut principal
-    new Chart(document.getElementById('tauxReussiteChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Réussite', 'Échec'],
-            datasets: [{
-                data: [bonnes, total - bonnes],
-                backgroundColor: ['#198754', '#dc3545'],
-                borderWidth: 4,
-                borderColor: '#ffffff',
-                hoverOffset: 24
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '68%',
-            animation: { duration: 1600, easing: 'easeOutCubic' },
-            plugins: {
-                legend: { position: 'bottom', labels: { font: { size: 14 } } },
-                title: {
-                    display: true,
-                    text: taux + '% de réussite',
-                    font: { size: 24, weight: '600' },
-                    padding: { top: 10, bottom: 20 }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const val = ctx.raw;
-                            const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                            return ` ${ctx.label} : ${val} (${pct}%)`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // Questions valides / invalides
-    new Chart(document.getElementById('questionsChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Valides', 'Invalides'],
-            datasets: [{
-                data: [{{ questionsValides }}, {{ questionsInvalides }}],
-                backgroundColor: ['#2e7d32', '#c62828'],
-                borderWidth: 2,
-                borderColor: '#fff'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutout: '62%',
-            plugins: {
-                legend: { position: 'bottom' },
-                title: { display: true, text: 'État des questions', font: { size: 17 } }
-            }
-        }
-    });
-
-    // Réponses total / bonnes
-    new Chart(document.getElementById('reponsesChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Total', 'Bonnes'],
-            datasets: [{
-                data: [total, bonnes],
-                backgroundColor: ['rgba(33, 150, 243, 0.65)', 'rgba(76, 175, 80, 0.65)'],
-                borderColor: ['#2196f3', '#4caf50'],
-                borderWidth: 2,
-                borderRadius: 8,
-                categoryPercentage: 0.55
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                title: { display: true, text: 'Réponses', font: { size: 17 } }
-            },
-            scales: {
-                y: { beginAtZero: true, ticks: { stepSize: 1 } }
-            }
-        }
-    });
-});
-</script>
 {% endblock %}

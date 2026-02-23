@@ -20,15 +20,11 @@ class QuestionType extends AbstractType
         $builder
             ->add('enonce', TextareaType::class, [
                 'label' => 'Énoncé de la question',
-                'attr' => ['class' => 'form-control', 'rows' => 3],
-                'constraints' => [
-                    new NotBlank(['message' => 'L\'énoncé est obligatoire']),
-                    new Length([
-                        'min' => 5,
-                        'max' => 1000,
-                        'minMessage' => 'L\'énoncé doit contenir au moins {{ limit }} caractères',
-                        'maxMessage' => 'L\'énoncé ne peut pas dépasser {{ limit }} caractères'
-                    ])
+                'attr' => [
+                    'class' => 'form-control', 
+                    'rows' => 3,
+                    'minlength' => 5,
+                    'maxlength' => 1000
                 ]
             ])
             ->add('type', ChoiceType::class, [
@@ -38,33 +34,22 @@ class QuestionType extends AbstractType
                     'Vrai/Faux' => 'vrai_faux',
                     'Texte libre' => 'texte',
                 ],
-                'attr' => ['class' => 'form-control'],
-                'constraints' => [
-                    new NotBlank(['message' => 'Le type de question est obligatoire'])
-                ]
+                'attr' => ['class' => 'form-control']
             ])
             ->add('points', IntegerType::class, [
                 'label' => 'Points',
-                'attr' => ['class' => 'form-control', 'min' => 1],
-                'constraints' => [
-                    new NotBlank(['message' => 'Les points sont obligatoires']),
-                    new Range([
-                        'min' => 1,
-                        'max' => 100,
-                        'notInRangeMessage' => 'Les points doivent être entre {{ min }} et {{ max }}'
-                    ])
+                'attr' => [
+                    'class' => 'form-control', 
+                    'min' => 1,
+                    'max' => 100
                 ]
             ])
             ->add('ordre', IntegerType::class, [
                 'label' => 'Ordre',
-                'attr' => ['class' => 'form-control', 'min' => 1],
-                'constraints' => [
-                    new NotBlank(['message' => 'L\'ordre est obligatoire']),
-                    new Range([
-                        'min' => 1,
-                        'max' => 1000,
-                        'notInRangeMessage' => 'L\'ordre doit être entre {{ min }} et {{ max }}'
-                    ])
+                'attr' => [
+                    'class' => 'form-control', 
+                    'min' => 1,
+                    'max' => 1000
                 ]
             ])
             ->add('explication', TextareaType::class, [
@@ -75,10 +60,7 @@ class QuestionType extends AbstractType
                     'rows' => 2,
                     'placeholder' => 'Explication rapide affichée après la réponse'
                 ],
-                'help' => 'Explication concise visible par l\'apprenant',
-                'constraints' => [
-                    new Length(['max' => 500])
-                ]
+                'help' => 'Explication concise visible par l\'apprenant'
             ])
             // ⭐ NOUVEAU CHAMP POUR LE CHATBOT
             ->add('explicationsDetaillees', TextareaType::class, [
@@ -89,13 +71,7 @@ class QuestionType extends AbstractType
                     'rows' => 5,
                     'placeholder' => 'Explications approfondies pour aider l\'apprenant à comprendre ses erreurs...'
                 ],
-                'help' => '💡 Ces explications seront utilisées par l\'assistant intelligent pour fournir une aide personnalisée à l\'apprenant en cas d\'erreur.',
-                'constraints' => [
-                    new Length([
-                        'max' => 5000,
-                        'maxMessage' => 'Les explications détaillées ne peuvent pas dépasser {{ limit }} caractères'
-                    ])
-                ]
+                'help' => '💡 Ces explications seront utilisées par l\'assistant intelligent pour fournir une aide personnalisée à l\'apprenant en cas d\'erreur.'
             ]);
     }
 
