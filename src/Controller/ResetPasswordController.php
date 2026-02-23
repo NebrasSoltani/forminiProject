@@ -62,6 +62,8 @@ class ResetPasswordController extends AbstractController
 
         try {
             $resetToken = $this->resetPasswordHelper->generateResetToken($user);
+            error_log("🔑 [ResetPassword] Token generated for user " . $user->getEmail() . ": " . $resetToken->getToken());
+            error_log("⏰ [ResetPassword] Token expires at: " . $resetToken->getExpiresAt()->format('Y-m-d H:i:s'));
         } catch (ResetPasswordExceptionInterface $e) {
             // If you want to tell the user why a reset email was not sent, uncomment
             // the lines below and change the redirect to 'app_forgot_password_request'.
@@ -120,19 +122,25 @@ class ResetPasswordController extends AbstractController
         if ($token) {
             // We store the token in session and remove it from the URL, to avoid the URL being
             // loaded in a browser and potentially leaking the token to 3rd party JavaScript.
+            error_log("🔄 [ResetPassword] Storing token in session: " . substr($token, 0, 10) . "...");
             $this->storeTokenInSession($token);
 
             return $this->redirectToRoute('app_reset_password');
         }
 
         $token = $this->getTokenFromSession();
+        error_log("📤 [ResetPassword] Retrieved token from session: " . ($token ? substr($token, 0, 10) . "..." : "NULL"));
         if (null === $token) {
             throw $this->createNotFoundException('No reset password token found in the URL or in the session.');
         }
 
         try {
+            // Debug: Log the token being validated
+            error_log("🔍 [ResetPassword] Validating token: " . substr($token, 0, 10) . "...");
             $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);
+            error_log("✅ [ResetPassword] Token validated successfully for user: " . $user->getEmail());
         } catch (ResetPasswordExceptionInterface $e) {
+            error_log("❌ [ResetPassword] Token validation failed: " . $e->getReason());
             $this->addFlash('reset_password_error', sprintf(
                 'There was a problem validating your reset request - %s',
                 $e->getReason()

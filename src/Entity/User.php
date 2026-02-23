@@ -162,6 +162,62 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
 
 
+    #[ORM\Column(length: 100, nullable: true)]
+
+    private ?string $googleId = null;
+
+
+
+    #[ORM\Column(length: 100, nullable: true)]
+
+    private ?string $githubId = null;
+
+
+
+    #[ORM\Column(length: 100, nullable: true)]
+
+    private ?string $linkedinId = null;
+
+
+
+    #[ORM\Column(length: 20, nullable: true)]
+
+    #[Assert\Choice(choices: ['google', 'github', 'linkedin'], message: 'OAuth provider invalide')]
+
+    private ?string $oauthProvider = null;
+
+
+
+    #[ORM\Column(length: 255, nullable: true)]
+
+    private ?string $avatarUrl = null;
+
+
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+
+    private ?string $googleAuthenticatorSecret = null;
+
+
+
+    #[ORM\Column(type: 'json', nullable: true)]
+
+    private ?array $backupCodes = null;
+
+
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+
+    private bool $emailAuthEnabled = false;
+
+
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+
+    private bool $googleAuthEnabled = false;
+
+
+
     #[ORM\OneToMany(mappedBy: 'formateur', targetEntity: Formation::class)]
 
     private Collection $formations;
@@ -946,5 +1002,266 @@ public function setGouvernorat(?Gouvernorat $gouvernorat): static
 
 }
 
+
+
+public function getGoogleId(): ?string
+
+{
+
+    return $this->googleId;
+
 }
 
+
+
+public function setGoogleId(?string $googleId): static
+
+{
+
+    $this->googleId = $googleId;
+
+    return $this;
+
+}
+
+
+
+public function getGithubId(): ?string
+
+{
+
+    return $this->githubId;
+
+}
+
+
+
+public function setGithubId(?string $githubId): static
+
+{
+
+    $this->githubId = $githubId;
+
+    return $this;
+
+}
+
+
+
+public function getLinkedinId(): ?string
+
+{
+
+    return $this->linkedinId;
+
+}
+
+
+
+public function setLinkedinId(?string $linkedinId): static
+
+{
+
+    $this->linkedinId = $linkedinId;
+
+    return $this;
+
+}
+
+
+
+public function getOauthProvider(): ?string
+
+{
+
+    return $this->oauthProvider;
+
+}
+
+
+
+public function setOauthProvider(?string $oauthProvider): static
+
+{
+
+    $this->oauthProvider = $oauthProvider;
+
+    return $this;
+
+}
+
+
+
+public function getAvatarUrl(): ?string
+
+{
+
+    return $this->avatarUrl;
+
+}
+
+
+
+public function setAvatarUrl(?string $avatarUrl): static
+
+{
+
+    $this->avatarUrl = $avatarUrl;
+
+    return $this;
+
+}
+
+
+
+public function isEmailAuthEnabled(): bool
+
+{
+
+    return $this->emailAuthEnabled;
+
+}
+
+
+
+public function setEmailAuthEnabled(bool $emailAuthEnabled): static
+
+{
+
+    $this->emailAuthEnabled = $emailAuthEnabled;
+
+    return $this;
+
+}
+
+
+
+public function getEmailAuthRecipient(): string
+
+{
+
+    return $this->email;
+
+}
+
+
+
+public function isGoogleAuthEnabled(): bool
+
+{
+
+    return $this->googleAuthEnabled;
+
+}
+
+
+
+public function setGoogleAuthEnabled(bool $googleAuthEnabled): static
+
+{
+
+    $this->googleAuthEnabled = $googleAuthEnabled;
+
+    return $this;
+
+}
+
+
+
+public function isGoogleAuthenticatorEnabled(): bool
+
+{
+
+    return $this->googleAuthEnabled && !empty($this->googleAuthenticatorSecret);
+
+}
+
+
+
+public function setGoogleAuthenticatorEnabled(bool $googleAuthEnabled): static
+
+{
+
+    $this->googleAuthEnabled = $googleAuthEnabled;
+
+    return $this;
+
+}
+
+
+
+public function getGoogleAuthenticatorSecret(): ?string
+
+{
+
+    return $this->googleAuthenticatorSecret;
+
+}
+
+
+
+public function setGoogleAuthenticatorSecret(?string $googleAuthenticatorSecret): static
+
+{
+
+    $this->googleAuthenticatorSecret = $googleAuthenticatorSecret;
+
+    return $this;
+
+}
+
+
+
+public function getBackupCodes(): ?array
+
+{
+
+    return $this->backupCodes;
+
+}
+
+
+
+public function setBackupCodes(?array $backupCodes): static
+
+{
+
+    $this->backupCodes = $backupCodes;
+
+    return $this;
+
+}
+
+
+
+public function isBackupCode(string $code): bool
+
+{
+
+    if (empty($this->backupCodes)) {
+
+        return false;
+
+    }
+
+
+
+    $key = array_search($code, $this->backupCodes);
+
+    if ($key !== false) {
+
+        unset($this->backupCodes[$key]);
+
+        $this->backupCodes = array_values($this->backupCodes);
+
+        return true;
+
+    }
+
+
+
+    return false;
+
+}
+
+}
