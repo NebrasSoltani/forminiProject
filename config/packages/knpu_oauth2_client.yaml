@@ -1,0 +1,26 @@
+knpu_oauth2_client:
+    clients:
+        google:
+            type: google
+            client_id: '%env(GOOGLE_CLIENT_ID)%'
+            client_secret: '%env(GOOGLE_CLIENT_SECRET)%'
+            redirect_route: oauth_google_check
+            redirect_params: {}
+            use_state: true
+            
+        github:
+            type: github
+            client_id: '%env(GITHUB_CLIENT_ID)%'
+            client_secret: '%env(GITHUB_CLIENT_SECRET)%'
+            redirect_route: oauth_github_check
+            redirect_params: {}
+            use_state: true
+            
+        linkedin:
+            type: generic
+            provider_class: League\OAuth2\Client\Provider\LinkedIn
+            client_id: '%env(LINKEDIN_CLIENT_ID)%'
+            client_secret: '%env(LINKEDIN_CLIENT_SECRET)%'
+            redirect_route: oauth_linkedin_check
+            redirect_params: {}
+            use_state: true

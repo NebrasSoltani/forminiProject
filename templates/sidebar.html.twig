@@ -202,6 +202,15 @@
                                     <i data-feather="user" class="svg-icon mr-2 ml-1"></i>
                                     Mon Profil
                                 </a>
+                                <a class="dropdown-item" href="{{ path('app_2fa_setup') }}">
+                                    <i data-feather="shield" class="svg-icon mr-2 ml-1"></i>
+                                    Authentification 2FA
+                                    {% if app.user and app.user.isGoogleAuthenticatorEnabled() %}
+                                        <span class="badge badge-success float-right">Activé</span>
+                                    {% else %}
+                                        <span class="badge badge-warning float-right">Désactivé</span>
+                                    {% endif %}
+                                </a>
                                 <div class="dropdown-divider"></div>
                                 <a class="dropdown-item" href="{{ path('app_logout') }}">
                                     <i data-feather="power" class="svg-icon mr-2 ml-1"></i>

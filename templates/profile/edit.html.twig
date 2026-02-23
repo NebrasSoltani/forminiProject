@@ -300,6 +300,47 @@
                                 </div>
                             </div>
 
+                            <hr class="my-4">
+                            <h5 class="mb-3">Authentification à deux facteurs (2FA)</h5>
+                            <p class="text-muted small">Ajoutez une couche de sécurité supplémentaire à votre compte.</p>
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">
+                                                        <i class="fas fa-shield-alt"></i>
+                                                        Statut de l'authentification à deux facteurs
+                                                    </h6>
+                                                    <p class="mb-0">
+                                                        {% if app.user.isGoogleAuthenticatorEnabled() %}
+                                                            <span class="badge bg-success">Activé</span>
+                                                            <span class="text-success ms-2">Votre compte est protégé par 2FA</span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning">Désactivé</span>
+                                                            <span class="text-warning ms-2">Nous vous recommandons d'activer la 2FA</span>
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    {% if app.user.isGoogleAuthenticatorEnabled() %}
+                                                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#disable2FAModal">
+                                                            <i class="fas fa-times"></i> Désactiver
+                                                        </button>
+                                                    {% else %}
+                                                        <a href="{{ path('app_2fa_setup') }}" class="btn btn-primary">
+                                                            <i class="fas fa-plus"></i> Activer
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="text-end mt-4">
                                 <button type="submit" class="btn btn-primary btn-lg">
                                     <i class="fas fa-save"></i> Enregistrer les modifications
@@ -311,6 +352,42 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Disable 2FA Modal -->
+<div class="modal fade" id="disable2FAModal" tabindex="-1" aria-labelledby="disable2FAModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="disable2FAModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> Désactiver l'authentification à deux facteurs
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" action="{{ path('app_2fa_disable') }}">
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-shield-alt"></i>
+                        <strong>Attention :</strong> La désactivation de l'authentification à deux facteurs réduira la sécurité de votre compte.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="disablePassword" class="form-label">Veuillez confirmer votre mot de passe pour continuer :</label>
+                        <input type="password" id="disablePassword" name="password" class="form-control" required>
+                        <div class="form-text">Cette mesure de sécurité protège votre compte contre les modifications non autorisées.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-shield-alt"></i> Désactiver la 2FA
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
