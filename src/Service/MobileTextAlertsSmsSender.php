@@ -40,6 +40,7 @@ class MobileTextAlertsSmsSender
 
         $client = HttpClient::create();
         if ($this->templateId !== null && $this->templateId > 0) {
+            // Best-effort check only: some accounts return 404 here but still allow send endpoint.
             $this->assertTemplateExists($client, $this->templateId);
         }
 
@@ -63,19 +64,83 @@ class MobileTextAlertsSmsSender
         ]);
 
         $status = $response->getStatusCode();
-        if ($status < 200 || $status >= 300) {
-            throw new TransportException(sprintf(
-                'Mobile Text Alerts API error (%d): %s',
-                $status,
-                $response->getContent(false)
-            ));
+        if ($status >= 200 && $status < 300) {
+            return;
         }
+
+        $errorBody = $response->getContent(false);
+
+        // Unverified MTA accounts can only send template messages.
+        // If no template is configured, try to auto-detect one and retry once.
+        if (
+            $status === 403
+            && $this->templateId === null
+            && str_contains($errorBody, 'only can send template messages')
+        ) {
+            $autoTemplateId = $this->discoverGlobalTemplateId($client);
+            if ($autoTemplateId !== null) {
+                $retryPayload = [
+                    'subscribers' => [$to],
+                    'templateId' => $autoTemplateId,
+                ];
+
+                $retryResponse = $client->request('POST', $this->apiUrl, [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->apiKey,
+                        'Content-Type' => 'application/json',
+                        'Accept' => 'application/json',
+                    ],
+                    'json' => $retryPayload,
+                ]);
+
+                $retryStatus = $retryResponse->getStatusCode();
+                if ($retryStatus >= 200 && $retryStatus < 300) {
+                    return;
+                }
+
+                throw new TransportException(sprintf(
+                    'Mobile Text Alerts API error (%d) after template retry: %s',
+                    $retryStatus,
+                    $retryResponse->getContent(false)
+                ));
+            }
+
+            throw new TransportException(
+                'Mobile Text Alerts account requires a template. Configure MOBILE_TEXT_ALERTS_TEMPLATE_ID in .env.'
+            );
+        }
+
+        throw new TransportException(sprintf(
+            'Mobile Text Alerts API error (%d): %s',
+            $status,
+            $errorBody
+        ));
     }
 
-    private function assertTemplateExists($client, int $templateId): void
+    private function assertTemplateExists($client, int $templateId): bool
     {
         $host = parse_url($this->apiUrl, PHP_URL_SCHEME) . '://' . parse_url($this->apiUrl, PHP_URL_HOST);
         $url = rtrim((string) $host, '/') . '/v3/controlled-templates/' . $templateId;
+
+        try {
+            $response = $client->request('GET', $url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            $status = $response->getStatusCode();
+            return $status >= 200 && $status < 300;
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
+    private function discoverGlobalTemplateId($client): ?int
+    {
+        $host = parse_url($this->apiUrl, PHP_URL_SCHEME) . '://' . parse_url($this->apiUrl, PHP_URL_HOST);
+        $url = rtrim((string) $host, '/') . '/v3/controlled-templates/global';
 
         $response = $client->request('GET', $url, [
             'headers' => [
@@ -86,12 +151,27 @@ class MobileTextAlertsSmsSender
 
         $status = $response->getStatusCode();
         if ($status < 200 || $status >= 300) {
-            throw new TransportException(sprintf(
-                'Mobile Text Alerts template check failed (%d): %s',
-                $status,
-                $response->getContent(false)
-            ));
+            return null;
         }
+
+        $data = json_decode($response->getContent(false), true);
+        if (!is_array($data)) {
+            return null;
+        }
+
+        $rows = $data['data']['rows'] ?? $data['data'] ?? [];
+        if (!is_array($rows)) {
+            return null;
+        }
+
+        foreach ($rows as $row) {
+            $id = $row['id'] ?? null;
+            if (is_numeric($id)) {
+                return (int) $id;
+            }
+        }
+
+        return null;
     }
 
     private function normalizePhone(string $phone): ?string

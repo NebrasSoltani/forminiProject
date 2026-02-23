@@ -6,8 +6,10 @@ namespace App\Controller;
 use App\Entity\Produit;
 use App\Entity\Commande;
 use App\Entity\CommandeItem;
+use App\Entity\User;
 use App\Repository\ProduitRepository;
 use App\Repository\CommandeRepository;
+use App\Service\AIProductSuggestionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -100,11 +102,21 @@ class BoutiqueController extends AbstractController
        DETAIL PRODUIT
     ====================================================== */
     #[Route('/produit/{id}', name: 'boutique_produit_show', methods: ['GET'])]
-    public function show(Produit $produit): Response
+    public function show(
+        Produit $produit,
+        AIProductSuggestionService $aiProductSuggestionService
+    ): Response
     {
+        $connectedUser = $this->getUser();
+        $suggestions = $aiProductSuggestionService->suggestForProduct(
+            $produit,
+            $connectedUser instanceof User ? $connectedUser : null
+        );
+
         // Symfony récupère automatiquement le produit via l'id
         return $this->render('boutique/show.html.twig', [
             'produit' => $produit,
+            'suggestions' => $suggestions,
         ]);
     }
 
@@ -310,3 +322,6 @@ class BoutiqueController extends AbstractController
         ]);
     }
 }
+
+
+

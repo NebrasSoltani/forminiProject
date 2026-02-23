@@ -6,7 +6,7 @@ use App\Entity\Commande;
 use App\Entity\CommandeItem;
 use App\Entity\Inscription;
 use App\Entity\Produit;
-use App\Service\MobileTextAlertsSmsSender;
+use App\Service\CallMeBotWhatsappSender;
 use App\Service\SendGridEmailSender;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -127,7 +127,7 @@ class PaiementController extends AbstractController
         int $id,
         EntityManagerInterface $em,
         SendGridEmailSender $sendGrid,
-        MobileTextAlertsSmsSender $smsSender,
+        CallMeBotWhatsappSender $smsSender,
         LoggerInterface $logger
     ): Response {
         $user = $this->getUser();
@@ -173,13 +173,13 @@ class PaiementController extends AbstractController
                         (float) $commande->getTotal()
                     )
                 );
-                $logger->info('Order SMS sent via Mobile Text Alerts to ' . $user->getTelephone());
+                $logger->info('Order WhatsApp sent via CallMeBot to ' . $user->getTelephone());
                 $smsSent = true;
             } else {
                 $logger->warning('Order SMS skipped: missing user phone number.');
             }
         } catch (\Throwable $e) {
-            $logger->error('Order SMS failed via Mobile Text Alerts: ' . $e->getMessage());
+            $logger->error('Order WhatsApp failed via CallMeBot: ' . $e->getMessage());
         }
 
         if ($emailSent && $smsSent) {
@@ -251,7 +251,7 @@ class PaiementController extends AbstractController
         int $id,
         EntityManagerInterface $em,
         SendGridEmailSender $sendGrid,
-        MobileTextAlertsSmsSender $smsSender,
+        CallMeBotWhatsappSender $smsSender,
         LoggerInterface $logger
     ): Response {
         $user = $this->getUser();
@@ -296,13 +296,13 @@ class PaiementController extends AbstractController
                         $inscription->getFormation()->getTitre()
                     )
                 );
-                $logger->info('Inscription SMS sent via Mobile Text Alerts to ' . $user->getTelephone());
+                $logger->info('Inscription WhatsApp sent via CallMeBot to ' . $user->getTelephone());
                 $smsSent = true;
             } else {
                 $logger->warning('Inscription SMS skipped: missing user phone number.');
             }
         } catch (\Throwable $e) {
-            $logger->error('Inscription SMS failed via Mobile Text Alerts: ' . $e->getMessage());
+            $logger->error('Inscription WhatsApp failed via CallMeBot: ' . $e->getMessage());
         }
 
         if ($emailSent && $smsSent) {

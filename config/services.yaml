@@ -10,14 +10,19 @@ parameters:
     mobile_text_alerts_sender: '%env(default::MOBILE_TEXT_ALERTS_SENDER)%'
     mobile_text_alerts_template_id: '%env(default::MOBILE_TEXT_ALERTS_TEMPLATE_ID)%'
     sms_default_country_code: '%env(default::SMS_DEFAULT_COUNTRY_CODE)%'
+    twilio_account_sid: '%env(default::TWILIO_ACCOUNT_SID)%'
+    twilio_auth_token: '%env(default::TWILIO_AUTH_TOKEN)%'
+    twilio_from_number: '%env(default::TWILIO_FROM_NUMBER)%'
+    twilio_api_key_sid: '%env(default::TWILIO_API_KEY_SID)%'
+    twilio_api_key_secret: '%env(default::TWILIO_API_KEY_SECRET)%'
+    callmebot_api_key: '%env(default::CALLMEBOT_API_KEY)%'
     gemini_api_key: '%env(GEMINI_API_KEY)%'
 
 services:
     _defaults:
-        autowire: true      # injecte automatiquement les dépendances
-        autoconfigure: true # configure automatiquement les services
+        autowire: true
+        autoconfigure: true
 
-    # rend toutes les classes de src/ disponibles comme services
     App\:
         resource: "../src/"
         exclude:
@@ -30,6 +35,7 @@ services:
             $sendgridApiKey: '%sendgrid_api_key%'
             $sendgridFromEmail: '%sendgrid_from_email%'
             $sendgridFromName: '%sendgrid_from_name%'
+            $httpClient: '@http_client'
 
     App\Service\MobileTextAlertsSmsSender:
         arguments:
@@ -39,10 +45,35 @@ services:
             $smsDefaultCountryCode: '%sms_default_country_code%'
             $mobileTextAlertsTemplateId: '%mobile_text_alerts_template_id%'
 
+    App\Service\TwilioSmsSender:
+        arguments:
+            $twilioAccountSid: '%twilio_account_sid%'
+            $twilioAuthToken: '%twilio_auth_token%'
+            $twilioFromNumber: '%twilio_from_number%'
+            $smsDefaultCountryCode: '%sms_default_country_code%'
+            $twilioApiKeySid: '%twilio_api_key_sid%'
+            $twilioApiKeySecret: '%twilio_api_key_secret%'
+
+    App\Service\CallMeBotWhatsappSender:
+        arguments:
+            $callmebotApiKey: '%callmebot_api_key%'
+            $smsDefaultCountryCode: '%sms_default_country_code%'
+
     App\Service\ChatbotAnalyseService:
         arguments:
             $questionRepository: '@App\Repository\QuestionRepository'
             $reponseRepository: '@App\Repository\ReponseRepository'
             $httpClient: '@http_client'
             $logger: '@logger'
-            $geminiApiKey: '%gemini_api_key%'
+            $geminiApiKey: '%env(GEMINI_API_KEY)%'
+            $emailSender: '@App\Service\SendGridEmailSender'
+
+    App\Service\GeminiService:
+        arguments:
+            $httpClient: '@http_client'
+            $apiKey: '%env(GEMINI_API_KEY)%'
+
+    App\Service\AIProductSuggestionService:
+        arguments:
+            $httpClient: '@http_client'
+            $geminiApiKey: '%env(default::GEMINI_API_KEY)%'

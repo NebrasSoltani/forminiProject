@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Entity\Produit;
 use App\Form\ProduitType;
 use App\Repository\ProduitRepository;
+use Doctrine\DBAL\Exception\ForeignKeyConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -167,11 +168,25 @@ class ProduitController extends AbstractController
     #[Route('/{id}/delete', name: 'produit_delete', methods: ['POST'])]
     public function delete(Request $request, Produit $produit, EntityManagerInterface $em): Response
     {
-        // Vérification du token CSRF pour sécurité (CSRF = Cross-Site Request Forgery)
-        if ($this->isCsrfTokenValid('delete'.$produit->getId(), $request->request->get('_token'))) {
-            $em->remove($produit); // suppression
-            $em->flush();           // exécution en BDD
-            $this->addFlash('success', 'Produit supprimé avec succès!');
+        if ($this->isCsrfTokenValid('delete' . $produit->getId(), $request->request->get('_token'))) {
+            if ($produit->getCommandeItems()->count() > 0) {
+                $produit->setStatut('inactif');
+                $produit->setStock(0);
+                $em->flush();
+                $this->addFlash('warning', 'Ce produit est deja utilise dans des commandes. Il a ete desactive (inactif) au lieu d etre supprime.');
+                return $this->redirectToRoute('produit_index');
+            }
+
+            try {
+                $em->remove($produit);
+                $em->flush();
+                $this->addFlash('success', 'Produit supprime avec succes!');
+            } catch (ForeignKeyConstraintViolationException) {
+                $produit->setStatut('inactif');
+                $produit->setStock(0);
+                $em->flush();
+                $this->addFlash('warning', 'Produit lie a des commandes: il a ete desactive (inactif) au lieu d etre supprime.');
+            }
         }
 
         return $this->redirectToRoute('produit_index');

@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Inscription;
-use App\Service\MobileTextAlertsSmsSender;
+use App\Service\CallMeBotWhatsappSender;
 use App\Service\SendGridEmailSender;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
@@ -22,7 +22,7 @@ class StripeWebhookController extends AbstractController
         Request $request,
         EntityManagerInterface $em,
         SendGridEmailSender $sendGrid,
-        MobileTextAlertsSmsSender $smsSender,
+        CallMeBotWhatsappSender $smsSender,
         Environment $twig,
         LoggerInterface $logger
     ): Response {
@@ -88,12 +88,12 @@ class StripeWebhookController extends AbstractController
                                     $inscription->getFormation()->getTitre()
                                 )
                             );
-                            $logger->info('Webhook: SMS sent via Mobile Text Alerts to ' . $user->getTelephone());
+                            $logger->info('Webhook: WhatsApp sent via CallMeBot to ' . $user->getTelephone());
                         } else {
                             $logger->warning('Webhook: SMS skipped, missing phone number.');
                         }
                     } catch (\Throwable $e) {
-                        $logger->error('Webhook: SMS send failed via Mobile Text Alerts: ' . $e->getMessage());
+                        $logger->error('Webhook: WhatsApp send failed via CallMeBot: ' . $e->getMessage());
                     }
                 }
             }
