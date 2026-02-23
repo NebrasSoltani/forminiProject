@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Statistiques - {{ quiz.titre }}</title>
+    <style>
+        /* ══════════════════════════════════════════════════════════════
+           BUNDLE 3 — Dompdf : Template PDF pour statistiques du quiz
+           ══════════════════════════════════════════════════════════════ */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.5;
+            padding: 30px;
+        }
+        .header {
+            background: linear-gradient(135deg, #0d6efd, #4e73df);
+            color: #fff;
+            padding: 25px 30px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .header h1 { font-size: 22px; margin-bottom: 5px; }
+        .header p { font-size: 13px; opacity: 0.9; }
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0d6efd;
+            border-bottom: 2px solid #0d6efd;
+            padding-bottom: 6px;
+            margin: 20px 0 12px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table th, table td {
+            border: 1px solid #dee2e6;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-success { background: #d1e7dd; color: #0f5132; }
+        .badge-danger { background: #f8d7da; color: #842029; }
+        .badge-warning { background: #fff3cd; color: #664d03; }
+        .progress-container {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 24px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #198754;
+            border-radius: 10px;
+            text-align: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 12px;
+            line-height: 24px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #dee2e6;
+            font-size: 11px;
+            color: #6c757d;
+            text-align: center;
+        }
+        .stat-box {
+            display: inline-block;
+            width: 30%;
+            text-align: center;
+            padding: 15px;
+            margin: 5px 1%;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+        }
+        .stat-box .number { font-size: 28px; font-weight: 700; color: #0d6efd; }
+        .stat-box .label { font-size: 11px; color: #6c757d; margin-top: 4px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Statistiques du Quiz</h1>
+        <p><strong>Quiz :</strong> {{ quiz.titre }} | <strong>Formation :</strong> {{ formation.titre }}</p>
+        <p><strong>Exporté le :</strong> {{ dateExport|date('d/m/Y à H:i') }}</p>
+    </div>
+
+    <div class="section-title">📋 Résumé Global</div>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+        <div class="stat-box">
+            <div class="number">{{ totalQuestions }}</div>
+            <div class="label">Questions</div>
+        </div>
+        <div class="stat-box">
+            <div class="number">{{ totalReponses }}</div>
+            <div class="label">Réponses</div>
+        </div>
+        <div class="stat-box">
+            <div class="number">{{ bonnesReponses }}</div>
+            <div class="label">Bonnes Réponses</div>
+        </div>
+    </div>
+
+    <div class="section-title">📈 Détails</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Indicateur</th>
+                <th>Valeur</th>
+                <th>Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Total questions</td>
+                <td><strong>{{ totalQuestions }}</strong></td>
+                <td>—</td>
+            </tr>
+            <tr>
+                <td>Total réponses</td>
+                <td><strong>{{ totalReponses }}</strong></td>
+                <td>—</td>
+            </tr>
+            <tr>
+                <td>Bonnes réponses</td>
+                <td><strong>{{ bonnesReponses }}</strong></td>
+                <td><span class="badge badge-success">✅</span></td>
+            </tr>
+            <tr>
+                <td>Questions valides</td>
+                <td><strong>{{ questionsValides }}</strong></td>
+                <td><span class="badge badge-success">OK</span></td>
+            </tr>
+            <tr>
+                <td>Questions invalides</td>
+                <td><strong>{{ questionsInvalides }}</strong></td>
+                <td>
+                    {% if questionsInvalides > 0 %}
+                        <span class="badge badge-danger">⚠️</span>
+                    {% else %}
+                        <span class="badge badge-success">OK</span>
+                    {% endif %}
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="section-title">📊 Taux de validité</div>
+
+    <div class="progress-container">
+        <div class="progress-bar" style="width: {{ pourcentageValide }}%;">
+            {{ pourcentageValide }}%
+        </div>
+    </div>
+
+    {% set performance = (bonnesReponses / (totalReponses > 0 ? totalReponses : 1)) * 100 %}
+    <p style="text-align: center; margin-top: 12px;">
+        <strong>Performance globale :</strong>
+        {% if performance >= 80 %}
+            <span class="badge badge-success">Excellent ({{ performance|round(1) }}%)</span>
+        {% elseif performance >= 50 %}
+            <span class="badge badge-warning">Moyen ({{ performance|round(1) }}%)</span>
+        {% else %}
+            <span class="badge badge-danger">À travailler ({{ performance|round(1) }}%)</span>
+        {% endif %}
+    </p>
+
+    <div class="section-title">ℹ️ Informations du Quiz</div>
+
+    <table>
+        <tr>
+            <th>Durée</th>
+            <td>{{ quiz.duree }} minutes</td>
+        </tr>
+        <tr>
+            <th>Note minimale</th>
+            <td>{{ quiz.noteMinimale }}%</td>
+        </tr>
+        <tr>
+            <th>Correction affichée</th>
+            <td>{{ quiz.afficherCorrection ? 'Oui' : 'Non' }}</td>
+        </tr>
+        <tr>
+            <th>Questions mélangées</th>
+            <td>{{ quiz.melanger ? 'Oui' : 'Non' }}</td>
+        </tr>
+    </table>
+
+    <div class="footer">
+        <p>Document généré automatiquement par <strong>Formini</strong> — {{ dateExport|date('d/m/Y à H:i') }}</p>
+        <p>© {{ dateExport|date('Y') }} Formini • Export PDF (Bundle Dompdf)</p>
+    </div>
+</body>
+</html>
