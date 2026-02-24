@@ -40,6 +40,15 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    
+    # ⭐ Google Two-Factor Authentication Provider
+    scheb_two_factor.security.google.authenticator:
+        class: Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Google\GoogleAuthenticator
+        arguments:
+            $leeway: 1
+        tags:
+            - { name: "scheb_two_factor.provider", alias: "google" }
+
 # ⭐ NOUVEAU — GeminiService
     App\Service\GeminiService:
         arguments:
