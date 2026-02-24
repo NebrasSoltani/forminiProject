@@ -73,7 +73,7 @@ services:
             $httpClient: '@http_client'
             $apiKey: '%env(GEMINI_API_KEY)%'
 
-    App\Service\AIProductSuggestionService:
-        arguments:
-            $httpClient: '@http_client'
-            $geminiApiKey: '%env(default::GEMINI_API_KEY)%'
+    # Extension Twig pour le sélecteur de langue
+    App\Twig\LanguageExtension:
+        tags:
+            - { name: twig.extension }

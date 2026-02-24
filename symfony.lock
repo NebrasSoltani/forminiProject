@@ -62,6 +62,15 @@
             "./bin/phpunit"
         ]
     },
+    "stof/doctrine-extensions-bundle": {
+        "version": "1.15",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "1.2",
+            "ref": "e805aba9eff5372e2d149a9ff56566769e22819d"
+        }
+    },
     "stripe/stripe-php": {
         "version": "19.3",
         "recipe": {
@@ -292,9 +301,6 @@
             "./templates/base.html.twig"
         ]
     },
-    "symfony/ux-chartjs": {
-        "version": "v2.32.0"
-    },
     "symfony/ux-turbo": {
         "version": "2.32",
         "recipe": {
@@ -339,6 +345,18 @@
         },
         "files": [
             "./config/packages/messenger.yaml"
+        ]
+    },
+    "symfonycasts/reset-password-bundle": {
+        "version": "1.24",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "1.0",
+            "ref": "97c1627c0384534997ae1047b93be517ca16de43"
+        },
+        "files": [
+            "./config/packages/reset_password.yaml"
         ]
     },
     "twig/extra-bundle": {
