@@ -135,6 +135,8 @@ class ResetPasswordController extends AbstractController
         }
 
         try {
+            $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);
+        } catch (ResetPasswordExceptionInterface $e) {
             // Debug: Log the token being validated
             error_log("🔍 [ResetPassword] Validating token: " . substr($token, 0, 10) . "...");
             $user = $this->resetPasswordHelper->validateTokenAndFetchUser($token);

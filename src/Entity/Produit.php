@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: ProduitRepository::class)]
@@ -18,15 +19,17 @@ class Produit
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Gedmo\Translatable]
     #[Assert\NotBlank(message: 'Le nom du produit est obligatoire')]
     private ?string $nom = null;
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'La catégorie est obligatoire')]
-    #[Assert\Choice(choices: ['Informatique', 'Scientifique', 'Accessoires' , 'Supports'])]
+    #[Assert\Choice(choices: ['Informatique', 'Scientifique', 'Accessoires', 'Supports'])]
     private ?string $categorie = null;
 
     #[ORM\Column(type: Types::TEXT)]
+    #[Gedmo\Translatable]
     #[Assert\NotBlank(message: 'La description est obligatoire')]
     private ?string $description = null;
 
@@ -36,9 +39,7 @@ class Produit
     private ?string $prix = null;
 
     #[ORM\Column]
-    
     #[Assert\PositiveOrZero(message: 'Le stock ne peut pas être négatif')]
-
     private ?int $stock = 0;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -53,10 +54,13 @@ class Produit
     #[ORM\OneToMany(mappedBy: 'produit', targetEntity: CommandeItem::class)]
     private Collection $commandeItems;
 
+    #[Gedmo\Locale]
+    private ?string $locale = null;
+
     public function __construct()
     {
-        $this->dateCreation = new \DateTime();
         $this->commandeItems = new ArrayCollection();
+        $this->dateCreation = new \DateTime();
     }
 
     public function getId(): ?int
@@ -166,6 +170,7 @@ class Produit
             $this->commandeItems->add($commandeItem);
             $commandeItem->setProduit($this);
         }
+
         return $this;
     }
 
@@ -176,6 +181,12 @@ class Produit
                 $commandeItem->setProduit(null);
             }
         }
+        return $this;
+    }
+
+    public function setTranslatableLocale(string $locale): static
+    {
+        $this->locale = $locale;
         return $this;
     }
 }

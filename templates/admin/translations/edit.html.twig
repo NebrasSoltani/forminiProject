@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Traductions - Produit #{{ produit.id }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="bi bi-translate me-2"></i>
+                        Modifier Traductions - Produit #{{ produit.id }}
+                    </h4>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <strong>Catégorie:</strong> 
+                            <span class="badge bg-info">{{ produit.categorie }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Prix:</strong> 
+                            <span class="text-success">{{ produit.prix|number_format(2, ',', ' ') }} Dt</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Affichage des traductions existantes -->
+                    {% if translations is not empty %}
+                        <h5 class="mb-3">Traductions existantes:</h5>
+                        <div class="row">
+                            {% for translation in translations %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <span class="badge bg-{{ translation.locale == 'fr' ? 'primary' : 'secondary' }}">
+                                                {{ translation.locale|upper }}
+                                            </span>
+                                            <span class="ms-2">{{ translation.field }}</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <p class="card-text">{{ translation.content|nl2br }}</p>
+                                            <small class="text-muted">
+                                                ID: {{ translation.id }} | 
+                                                Créé le: {{ translation.created_at|date('d/m/Y H:i') }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Formulaire d'édition -->
+                    <hr class="my-4">
+                    <h5 class="mb-3">Ajouter/Modifier une traduction:</h5>
+                    
+                    <form method="post" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="locale" class="form-label">Langue</label>
+                            <select class="form-select" id="locale" name="locale" required>
+                                <option value="">Choisir...</option>
+                                <option value="fr">Français</option>
+                                <option value="en">Anglais</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label for="field" class="form-label">Champ</label>
+                            <select class="form-select" id="field" name="field" required>
+                                <option value="">Choisir...</option>
+                                <option value="nom">Nom</option>
+                                <option value="description">Description</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="content" class="form-label">Contenu</label>
+                            <textarea class="form-control" id="content" name="content" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Enregistrer
+                            </button>
+                            <a href="{{ path('admin_translations_index') }}" class="btn btn-secondary ms-2">
+                                <i class="bi bi-x-circle me-1"></i>Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

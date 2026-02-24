@@ -138,6 +138,64 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {% if suggestions is defined and suggestions is not empty %}
+                                <div class="tera-ai-suggestions mt-5">
+                                    <div class="tera-ai-header mb-4">
+                                        <div class="tera-ai-header-icon">
+                                            <i class="bi bi-stars"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="mb-0">Suggestions IA pour vous</h4>
+                                            <p class="tera-ai-subtitle mb-0">Produits du même type que celui que vous consultez</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="row g-4">
+                                        {% for suggestion in suggestions %}
+                                            <div class="col-md-6">
+                                                <div class="tera-ai-card">
+                                                    <a href="{{ path('boutique_produit_show', {id: suggestion.id}) }}" class="tera-ai-thumb-wrap">
+                                                        {% if suggestion.image %}
+                                                            <img src="{{ asset('uploads/produits/' ~ suggestion.image) }}" alt="{{ suggestion.nom }}" class="tera-ai-thumb">
+                                                        {% else %}
+                                                            <div class="tera-ai-thumb-placeholder">
+                                                                <i class="bi bi-image"></i>
+                                                            </div>
+                                                        {% endif %}
+                                                        <span class="tera-ai-match-badge">
+                                                            <i class="bi bi-stars me-1"></i>Recommandé
+                                                        </span>
+                                                    </a>
+
+                                                    <div class="tera-ai-content">
+                                                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                                            <span class="tera-ai-cat">{{ suggestion.categorie }}</span>
+                                                            <strong class="tera-ai-price">{{ suggestion.prix|number_format(2, ',', ' ') }} Dt</strong>
+                                                        </div>
+                                                        <h6 class="tera-ai-title">{{ suggestion.nom }}</h6>
+                                                        <p class="tera-ai-desc mb-0">
+                                                            {{ suggestion.description ? (suggestion.description|length > 82 ? suggestion.description|slice(0, 82) ~ '...' : suggestion.description) : 'Produit recommandé pour compléter votre achat.' }}
+                                                        </p>
+                                                    </div>
+
+                                                    <div class="tera-ai-actions">
+                                                        <a href="{{ path('boutique_produit_show', {id: suggestion.id}) }}" class="btn btn-sm tera-ai-btn-outline w-100">
+                                                            <i class="bi bi-eye me-1"></i>Voir
+                                                        </a>
+                                                        <form method="post" action="{{ path('boutique_panier_ajouter', {id: suggestion.id}) }}" class="w-100 m-0">
+                                                            <input type="hidden" name="quantite" value="1">
+                                                            <button type="submit" class="btn btn-sm tera-ai-btn w-100">
+                                                                <i class="bi bi-lightning-charge-fill me-1"></i>Acheter maintenant
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -482,6 +540,175 @@
     transform: translateX(-2px);
 }
 
+.tera-ai-suggestions {
+    background:
+        radial-gradient(circle at top right, rgba(29, 78, 216, .14), transparent 40%),
+        linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+    border: 1px solid #dbeafe;
+    border-radius: 22px;
+    padding: 22px;
+    box-shadow: 0 10px 25px rgba(15, 23, 42, .07);
+}
+
+.tera-ai-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #0f172a;
+}
+
+.tera-ai-header-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    color: #fff;
+    box-shadow: 0 8px 20px rgba(29, 78, 216, .35);
+}
+
+.tera-ai-header-icon i {
+    font-size: 18px;
+}
+
+.tera-ai-subtitle {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.tera-ai-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+}
+
+.tera-ai-card:hover {
+    transform: translateY(-4px);
+    border-color: #bfdbfe;
+    box-shadow: 0 16px 30px rgba(15, 23, 42, .1);
+}
+
+.tera-ai-thumb-wrap {
+    display: block;
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+    background: #f1f5f9;
+}
+
+.tera-ai-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+}
+
+.tera-ai-card:hover .tera-ai-thumb {
+    transform: scale(1.05);
+}
+
+.tera-ai-thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    color: #64748b;
+}
+
+.tera-ai-thumb-placeholder i {
+    font-size: 30px;
+}
+
+.tera-ai-match-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(15, 23, 42, .82);
+    color: #fff;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+
+.tera-ai-content {
+    padding: 14px 14px 10px;
+    flex: 1;
+}
+
+.tera-ai-cat {
+    background: #e0ecff;
+    color: #1e40af;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .35px;
+}
+
+.tera-ai-price {
+    color: #0b1324;
+    font-size: 15px;
+}
+
+.tera-ai-title {
+    color: #0f172a;
+    margin: 0;
+    line-height: 1.35;
+    font-size: 15px;
+    min-height: 40px;
+}
+
+.tera-ai-desc {
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.tera-ai-actions {
+    display: flex;
+    gap: 8px;
+    padding: 0 14px 14px;
+}
+
+.tera-ai-btn {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    color: #fff;
+    border: 0;
+    font-weight: 700;
+}
+
+.tera-ai-btn:hover {
+    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+    color: #fff;
+}
+
+.tera-ai-btn-outline {
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    background: #eff6ff;
+    font-weight: 700;
+}
+
+.tera-ai-btn-outline:hover {
+    background: #1d4ed8;
+    color: #fff;
+    border-color: #1d4ed8;
+}
+
 /* RESPONSIVE */
 @media (max-width: 991px) {
     .tera-product-image-wrapper {
@@ -521,6 +748,14 @@
     
     .tera-info-grid {
         grid-template-columns: 1fr;
+    }
+
+    .tera-ai-actions {
+        flex-direction: column;
+    }
+
+    .tera-ai-thumb-wrap {
+        height: 170px;
     }
 }
 </style>
