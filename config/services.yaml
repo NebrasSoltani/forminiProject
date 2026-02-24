@@ -17,6 +17,8 @@ parameters:
     twilio_api_key_secret: '%env(default::TWILIO_API_KEY_SECRET)%'
     callmebot_api_key: '%env(default::CALLMEBOT_API_KEY)%'
     gemini_api_key: '%env(GEMINI_API_KEY)%'
+    app.turnstile_site_key: "%env(string:CLOUDFLARE_TURNSTILE_SITE_KEY)%"
+    app.turnstile_secret_key: "%env(string:CLOUDFLARE_TURNSTILE_SECRET_KEY)%"
 
 services:
     _defaults:
@@ -77,3 +79,34 @@ services:
     App\Twig\LanguageExtension:
         tags:
             - { name: twig.extension }
+            $sendgridApiKey: "%env(string:SENDGRID_API_KEY)%"
+            $sendgridFromEmail: "%env(string:SENDGRID_FROM_EMAIL)%"
+            $sendgridFromName: "%env(string:SENDGRID_FROM_NAME)%"
+            $httpClient: "@http_client"
+
+    # ⭐ Configuration du service ChatbotAnalyseService
+    App\Service\ChatbotAnalyseService:
+        arguments:
+            $questionRepository: '@App\Repository\QuestionRepository'
+            $reponseRepository: '@App\Repository\ReponseRepository'
+            $httpClient: "@http_client"
+            $logger: "@logger"
+            $emailSender: '@App\Service\SendGridEmailSender'
+            $geminiApiKey: "%env(string:GEMINI_API_KEY)%"
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    
+    # ⭐ Google Two-Factor Authentication Provider
+    scheb_two_factor.security.google.authenticator:
+        class: Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Google\GoogleAuthenticator
+        arguments:
+            $leeway: 1
+        tags:
+            - { name: "scheb_two_factor.provider", alias: "google" }
+
+# ⭐ NOUVEAU — GeminiService
+    App\Service\GeminiService:
+        arguments:
+            $httpClient: "@http_client"
+            $apiKey: "%env(string:GEMINI_API_KEY)%"

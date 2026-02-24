@@ -187,6 +187,11 @@ class ProduitController extends AbstractController
                 $em->flush();
                 $this->addFlash('warning', 'Produit lie a des commandes: il a ete desactive (inactif) au lieu d etre supprime.');
             }
+        // Vérification du token CSRF pour sécurité (CSRF = Cross-Site Request Forgery)
+        if ($this->isCsrfTokenValid('delete'.$produit->getId(), $request->request->get('_token'))) {
+            $em->remove($produit); // suppression
+            $em->flush();           // exécution en BDD
+            $this->addFlash('success', 'Produit supprimé avec succès!');
         }
 
         return $this->redirectToRoute('produit_index');
