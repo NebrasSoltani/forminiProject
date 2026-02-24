@@ -1,0 +1,379 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Choisir votre rôle - Plateforme{% endblock %}
+
+{% block body %}
+<style>
+:root {
+    --primary: #6974e8;
+    --secondary: #6974e8;
+    --success: #4cc9f0;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+}
+
+.role-selection-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.role-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    animation: fadeIn 0.6s ease-out;
+    border: none;
+    background: white;
+}
+
+.role-header {
+    background: linear-gradient(120deg, var(--primary), #6974e8);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.role-header::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(30deg);
+}
+
+.role-header h1 {
+    color: white;
+    font-weight: 700;
+    font-size: 2.2rem;
+    letter-spacing: -0.5px;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.role-header p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.15rem;
+    margin: 0;
+    position: relative;
+}
+
+.user-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.user-details h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.user-details p {
+    margin: 0.25rem 0 0 0;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.role-body {
+    padding: 2.5rem;
+}
+
+.role-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.role-option {
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.role-option:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(67, 97, 238, 0.15);
+}
+
+.role-option.selected {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, rgba(105, 116, 232, 0.05), rgba(105, 116, 232, 0.1));
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
+}
+
+.role-option.selected::before {
+    content: "✓";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--primary);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.role-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.role-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.role-description {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.role-features {
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.role-features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.role-features li {
+    padding: 0.25rem 0;
+    color: #4a5568;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.role-features li::before {
+    content: "✓";
+    color: var(--success);
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.submit-section {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.btn-submit {
+    background: linear-gradient(120deg, var(--primary), var(--secondary));
+    border: none;
+    padding: 1rem 3rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.5px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+    transition: var(--transition);
+    color: white;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.45);
+    background: linear-gradient(120deg, var(--secondary), #323c9e);
+    color: white;
+}
+
+.btn-submit:disabled {
+    background: #cbd5e0;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .role-header h1 {
+        font-size: 1.9rem;
+    }
+    
+    .role-header p {
+        font-size: 1.05rem;
+    }
+    
+    .role-body {
+        padding: 2rem;
+    }
+    
+    .role-options {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<div class="role-selection-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="card role-card">
+                    <div class="role-header">
+                        <h1>👋 Bienvenue !</h1>
+                        <p>Choisissez votre rôle pour continuer</p>
+                    </div>
+                    
+                    <div class="user-info">
+                        {% if oauth_data.avatarUrl %}
+                            <img src="{{ oauth_data.avatarUrl }}" alt="Avatar" class="user-avatar">
+                        {% else %}
+                            <div class="user-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;">
+                                {{ oauth_data.name|first|upper }}
+                            </div>
+                        {% endif %}
+                        <div class="user-details">
+                            <h3>{{ oauth_data.name }}</h3>
+                            <p>{{ oauth_data.email }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="role-body">
+                        <form method="post" action="{{ path('oauth_role_submit') }}">
+                            <input type="hidden" name="oauth_data" value="{{ oauth_data_json }}">
+                            <input type="hidden" name="provider" value="{{ oauth_data.provider }}">
+                            
+                            <div class="role-options">
+                                <div class="role-option" data-role="apprenant">
+                                    <span class="role-icon">🎓</span>
+                                    <div class="role-title">Apprenant</div>
+                                    <div class="role-description">
+                                        Je veux apprendre et me former
+                                    </div>
+                                    <div class="role-features">
+                                        <ul>
+                                            <li>Accès aux formations</li>
+                                            <li>Suivi de progression</li>
+                                            <li>Certificats de réussite</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="role-option" data-role="formateur">
+                                    <span class="role-icon">👨‍🏫</span>
+                                    <div class="role-title">Formateur</div>
+                                    <div class="role-description">
+                                        Je veux créer et donner des formations
+                                    </div>
+                                    <div class="role-features">
+                                        <ul>
+                                            <li>Créer des formations</li>
+                                            <li>Suivre les apprenants</li>
+                                            <li>Gérer les contenus</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <input type="hidden" name="role" id="selectedRole" required>
+                            
+                            <div class="submit-section">
+                                <button type="submit" class="btn btn-submit" id="submitBtn" disabled>
+                                    Continuer avec ce rôle
+                                </button>
+                            </div>
+                            
+                            <input type="hidden" name="_token" value="{{ csrf_token('oauth_role_selection') }}">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleOptions = document.querySelectorAll('.role-option');
+    const selectedRoleInput = document.getElementById('selectedRole');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    roleOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove selected class from all options
+            roleOptions.forEach(opt => opt.classList.remove('selected'));
+            
+            // Add selected class to clicked option
+            this.classList.add('selected');
+            
+            // Set the selected role
+            const role = this.getAttribute('data-role');
+            selectedRoleInput.value = role;
+            
+            // Enable submit button
+            submitBtn.disabled = false;
+            
+            // Add animation effect
+            this.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 200);
+        });
+    });
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        if (!selectedRoleInput.value) {
+            e.preventDefault();
+            alert('Veuillez choisir un rôle pour continuer.');
+        }
+    });
+});
+</script>
+{% endblock %}

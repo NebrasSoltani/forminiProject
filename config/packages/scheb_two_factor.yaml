@@ -1,0 +1,10 @@
+scheb_two_factor:
+    persister: doctrine
+    security_tokens:
+        Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken: true
+    google:
+        enabled: true
+        server_name: "Formini"
+        issuer: "Formini"
+        digits: 6
+        leeway: 1
