@@ -16,11 +16,4 @@ knpu_oauth2_client:
             redirect_params: {}
             use_state: true
             
-        linkedin:
-            type: generic
-            provider_class: League\OAuth2\Client\Provider\LinkedIn
-            client_id: '%env(LINKEDIN_CLIENT_ID)%'
-            client_secret: '%env(LINKEDIN_CLIENT_SECRET)%'
-            redirect_route: oauth_linkedin_check
-            redirect_params: {}
-            use_state: true
+        

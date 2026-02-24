@@ -33,11 +33,6 @@ class OAuthController extends AbstractController
         return $this->redirectToRoute('oauth_github');
     }
 
-    #[Route('/login/linkedin', name: 'login_linkedin_redirect')]
-    public function loginLinkedinRedirect(): Response
-    {
-        return $this->redirectToRoute('oauth_linkedin');
-    }
 
     #[Route('/connect/google', name: 'oauth_google')]
     public function connectGoogle(ClientRegistry $clientRegistry): Response
@@ -51,11 +46,6 @@ class OAuthController extends AbstractController
         return $clientRegistry->getClient('github')->redirect(['user:email'], []);
     }
 
-    #[Route('/connect/linkedin', name: 'oauth_linkedin')]
-    public function connectLinkedin(ClientRegistry $clientRegistry): Response
-    {
-        return $clientRegistry->getClient('linkedin')->redirect([], []);
-    }
 
     #[Route('/connect/google/check', name: 'oauth_google_check')]
     public function connectGoogleCheck(
@@ -71,20 +61,35 @@ class OAuthController extends AbstractController
             /** @var GoogleUser $googleUser */
             $googleUser = $client->fetchUserFromToken($accessToken);
             
-            $user = $this->findOrCreateOAuthUser(
-                $googleUser->getEmail(),
-                $googleUser->getName(),
-                $googleUser->getAvatar(),
-                $googleUser->getId(),
-                'google',
-                $entityManager,
-                $passwordHasher
-            );
-
-            // Manually authenticate the user
-            $this->authenticateUser($user, $request);
-
-            return $this->redirectToRoute('accueil');
+            // Check if user already exists
+            $userRepository = $entityManager->getRepository(User::class);
+            $existingUser = $userRepository->findOneBy(['googleId' => $googleUser->getId()]);
+            
+            if (!$existingUser) {
+                // Check if user exists with this email
+                $existingUser = $userRepository->findOneBy(['email' => $googleUser->getEmail()]);
+            }
+            
+            if ($existingUser) {
+                // User exists, authenticate directly
+                $this->authenticateUser($existingUser, $request);
+                $this->addFlash('success', 'Bienvenue ! Vous êtes maintenant connecté.');
+                return $this->redirectToRoute('accueil');
+            }
+            
+            // New user - store OAuth data for role selection
+            $oauthData = [
+                'email' => $googleUser->getEmail(),
+                'name' => $googleUser->getName(),
+                'avatarUrl' => $googleUser->getAvatar(),
+                'id' => $googleUser->getId(),
+                'provider' => 'google'
+            ];
+            
+            $request->getSession()->set('oauth_data', $oauthData);
+            
+            // Redirect to role selection page
+            return $this->redirectToRoute('oauth_role_selection');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Erreur lors de l\'authentification Google: ' . $e->getMessage());
             return $this->redirectToRoute('app_login');
@@ -113,63 +118,41 @@ class OAuthController extends AbstractController
                 $email = $userData['email'] ?? null;
             }
             
-            $user = $this->findOrCreateOAuthUser(
-                $email,
-                $githubUser->getNickname() ?? $githubUser->getName(),
-                $githubUser->toArray()['avatar_url'] ?? null,
-                $githubUser->getId(),
-                'github',
-                $entityManager,
-                $passwordHasher
-            );
-
-            // Manually authenticate the user
-            $this->authenticateUser($user, $request);
-
-            return $this->redirectToRoute('accueil');
+            // Check if user already exists
+            $userRepository = $entityManager->getRepository(User::class);
+            $existingUser = $userRepository->findOneBy(['githubId' => $githubUser->getId()]);
+            
+            if (!$existingUser) {
+                // Check if user exists with this email
+                $existingUser = $userRepository->findOneBy(['email' => $email]);
+            }
+            
+            if ($existingUser) {
+                // User exists, authenticate directly
+                $this->authenticateUser($existingUser, $request);
+                $this->addFlash('success', 'Bienvenue ! Vous êtes maintenant connecté.');
+                return $this->redirectToRoute('accueil');
+            }
+            
+            // New user - store OAuth data for role selection
+            $oauthData = [
+                'email' => $email,
+                'name' => $githubUser->getNickname() ?? $githubUser->getName(),
+                'avatarUrl' => $githubUser->toArray()['avatar_url'] ?? null,
+                'id' => $githubUser->getId(),
+                'provider' => 'github'
+            ];
+            
+            $request->getSession()->set('oauth_data', $oauthData);
+            
+            // Redirect to role selection page
+            return $this->redirectToRoute('oauth_role_selection');
         } catch (\Exception $e) {
             $this->addFlash('error', 'Erreur lors de l\'authentification GitHub: ' . $e->getMessage());
             return $this->redirectToRoute('app_login');
         }
     }
 
-    #[Route('/connect/linkedin/check', name: 'oauth_linkedin_check')]
-    public function connectLinkedinCheck(
-        Request $request,
-        ClientRegistry $clientRegistry,
-        EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
-    ): Response {
-        try {
-            $client = $clientRegistry->getClient('linkedin');
-            $accessToken = $client->getAccessToken();
-            
-            $linkedinUser = $client->fetchUserFromToken($accessToken);
-            $userData = $linkedinUser->toArray();
-            
-            $email = $userData['email'] ?? null;
-            $name = ($userData['firstName'] ?? '') . ' ' . ($userData['lastName'] ?? '');
-            $avatar = $userData['profilePicture']['displayImage'] ?? null;
-            
-            $user = $this->findOrCreateOAuthUser(
-                $email,
-                $name,
-                $avatar,
-                $userData['id'] ?? null,
-                'linkedin',
-                $entityManager,
-                $passwordHasher
-            );
-
-            // Manually authenticate the user
-            $this->authenticateUser($user, $request);
-
-            return $this->redirectToRoute('accueil');
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Erreur lors de l\'authentification LinkedIn: ' . $e->getMessage());
-            return $this->redirectToRoute('app_login');
-        }
-    }
 
     private function findOrCreateOAuthUser(
         ?string $email,
@@ -232,9 +215,6 @@ class OAuthController extends AbstractController
             case 'github':
                 $user->setGithubId($oauthId);
                 break;
-            case 'linkedin':
-                $user->setLinkedinId($oauthId);
-                break;
         }
 
         // Set name if provided
@@ -270,9 +250,6 @@ class OAuthController extends AbstractController
                 break;
             case 'github':
                 $user->setGithubId($oauthId);
-                break;
-            case 'linkedin':
-                $user->setLinkedinId($oauthId);
                 break;
         }
     }

@@ -2,66 +2,353 @@
 
 {% block title %}Two-Factor Authentication{% endblock %}
 
+{% block stylesheets %}
+<style>
+.auth-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.auth-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    max-width: 450px;
+    width: 100%;
+    overflow: hidden;
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.auth-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+}
+
+.auth-header h3 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.auth-header .subtitle {
+    margin-top: 10px;
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+.auth-body {
+    padding: 40px 30px;
+}
+
+.verification-badge {
+    display: inline-flex;
+    align-items: center;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 25px;
+}
+
+.verification-badge i {
+    margin-right: 10px;
+    font-size: 1.1rem;
+}
+
+.info-alert {
+    background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+    border: 1px solid #bbdefb;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.info-alert h5 {
+    color: #1565c0;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.info-alert p {
+    margin: 0;
+    color: #424242;
+}
+
+.code-input-group {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.code-input {
+    width: 100%;
+    height: 70px;
+    font-size: 2.2rem;
+    font-weight: bold;
+    text-align: center;
+    letter-spacing: 0.6rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.code-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    background: white;
+    transform: scale(1.02);
+}
+
+.code-input.error {
+    border-color: #dc3545;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px); }
+    75% { transform: translateX(10px); }
+}
+
+.trust-device {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.trust-device:hover {
+    background: #e9ecef;
+}
+
+.trust-device .form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+    transform: scale(1.1);
+}
+
+.trust-device .form-check-label {
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-verify {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 18px 30px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    color: white;
+}
+
+.btn-verify:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-verify:active {
+    transform: translateY(0);
+}
+
+.btn-cancel {
+    background: #6c757d;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 30px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    color: white;
+    display: inline-block;
+    text-decoration: none;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 10;
+    position: relative;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.help-text {
+    text-align: center;
+    margin-top: 25px;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.help-text i {
+    margin-right: 5px;
+}
+
+.alert-danger {
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #fee 0%, #fcc 100%);
+    color: #dc3545;
+    padding: 15px 20px;
+    margin-bottom: 25px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.countdown-timer {
+    font-size: 0.8rem;
+    color: #667eea;
+    text-align: center;
+    margin-top: 10px;
+    font-weight: 500;
+}
+
+.security-tips {
+    background: #f0f8ff;
+    border-radius: 12px;
+    padding: 15px;
+    margin-top: 20px;
+    border-left: 4px solid #667eea;
+}
+
+.security-tips h6 {
+    color: #667eea;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.security-tips ul {
+    margin: 0;
+    padding-left: 20px;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.security-tips li {
+    margin-bottom: 5px;
+}
+</style>
+{% endblock %}
+
 {% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Two-Factor Authentication</h3>
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h3>
+                <i class="bi bi-shield-check"></i>
+                Two-Factor Authentication
+            </h3>
+            <div class="subtitle">Complete your secure login</div>
+        </div>
+        
+        <div class="auth-body">
+            <div class="verification-badge">
+                <i class="bi bi-shield-fill-check"></i>
+                Verification Required
+            </div>
+
+            <div class="info-alert">
+                <h5><i class="bi bi-info-circle me-2"></i>Security Check</h5>
+                <p>Please enter your two-factor authentication code to continue.</p>
+            </div>
+
+            {% if authenticationError %}
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    {{ authenticationError|trans }}
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-info">
-                        <h5><i class="fas fa-shield-alt"></i> Verification Required</h5>
-                        <p>Please enter your two-factor authentication code to continue.</p>
+            {% endif %}
+
+            <form action="{{ checkPath }}" method="post" id="2fa-form">
+                {% if displayTrustedOption %}
+                    <div class="trust-device">
+                        <div class="form-check">
+                            <input type="checkbox" id="trusted" name="{{ trustedParameterName }}" class="form-check-input">
+                            <label for="trusted" class="form-check-label">
+                                <strong>Trust this device</strong><br>
+                                <small class="text-muted">Don't ask for codes on this device for {{ lifetime }} hours</small>
+                            </label>
+                        </div>
                     </div>
+                {% endif %}
 
-                    {% if authenticationError %}
-                        <div class="alert alert-danger">
-                            <i class="fas fa-exclamation-triangle"></i> {{ authenticationError|trans }}
-                        </div>
-                    {% endif %}
-
-                    <form action="{{ checkPath }}" method="post">
-                        {% if displayTrustedOption %}
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" id="trusted" name="{{ trustedParameterName }}" class="form-check-input">
-                                <label for="trusted" class="form-check-label">
-                                    Trust this device for {{ lifetime }} hours
-                                </label>
-                            </div>
-                        {% endif %}
-
-                        <div class="mb-3">
-                            <label for="_auth_code" class="form-label">Authentication Code</label>
-                            <input type="text" id="_auth_code" name="{{ authCodeParameterName }}" 
-                                   class="form-control form-control-lg text-center" 
-                                   placeholder="000000" maxlength="6" pattern="[0-9]{6}" 
-                                   autocomplete="one-time-code" autofocus required>
-                            <div class="form-text">Enter the 6-digit code from your authenticator app</div>
-                        </div>
-
-                        {% if csrfToken %}
-                            <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrfToken }}">
-                        {% endif %}
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-sign-in-alt"></i> Verify & Login
-                            </button>
-                            <a href="{{ logoutPath }}" class="btn btn-secondary">
-                                <i class="fas fa-sign-out-alt"></i> Cancel
-                            </a>
-                        </div>
-                    </form>
-
-                    <div class="mt-4 text-center">
-                        <small class="text-muted">
-                            <i class="fas fa-info-circle"></i>
-                            Having trouble? Make sure your device's time is synchronized and try again.
-                        </small>
+                <div class="code-input-group">
+                    <label for="_auth_code" class="form-label fw-bold">Authentication Code</label>
+                    <input type="text" id="_auth_code" name="{{ authCodeParameterName }}" 
+                           class="form-control code-input" 
+                           placeholder="000000" maxlength="6" pattern="[0-9]{6}" 
+                           autocomplete="one-time-code" autofocus required>
+                    <div class="form-text text-center mt-2">
+                        Enter the 6-digit code from your authenticator app
+                    </div>
+                    <div class="countdown-timer" id="countdown">
+                        <i class="bi bi-clock me-1"></i>
+                        Code refreshes in <span id="timer">30</span>s
                     </div>
                 </div>
+
+                {% if csrfToken %}
+                    <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrfToken }}">
+                {% endif %}
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-verify">
+                        <i class="bi bi-shield-check me-2"></i>
+                        Verify & Login
+                    </button>
+                    <a href="{{ path('app_logout') }}" class="btn btn-cancel" onclick="window.location.href='{{ path('app_logout') }}'; return false;">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Cancel and Logout
+                    </a>
+                </div>
+            </form>
+
+            <div class="security-tips">
+                <h6><i class="bi bi-lightbulb me-1"></i>Security Tips</h6>
+                <ul>
+                    <li>Make sure your device's time is synchronized</li>
+                    <li>Codes refresh every 30 seconds</li>
+                    <li>Keep your authenticator app secure</li>
+                </ul>
             </div>
         </div>
     </div>
@@ -70,20 +357,47 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const codeInput = document.getElementById('_auth_code');
+    const form = document.getElementById('2fa-form');
+    const timerElement = document.getElementById('timer');
+    const countdownElement = document.getElementById('countdown');
     
     // Auto-focus and select all
     codeInput.focus();
     codeInput.select();
     
-    // Auto-submit when 6 digits are entered
+    // Countdown timer
+    let timeLeft = 30;
+    let timerInterval = setInterval(function() {
+        timeLeft--;
+        timerElement.textContent = timeLeft;
+        
+        if (timeLeft <= 5) {
+            countdownElement.style.color = '#dc3545';
+            countdownElement.style.fontWeight = 'bold';
+        }
+        
+        if (timeLeft <= 0) {
+            timeLeft = 30;
+            countdownElement.style.color = '#667eea';
+            countdownElement.style.fontWeight = '500';
+        }
+    }, 1000);
+    
+    // Auto-format and validation
     codeInput.addEventListener('input', function(e) {
         const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+        
+        // Remove error class if present
+        this.classList.remove('error');
         
         if (value.length === 6) {
             e.target.value = value;
             // Small delay to show the last digit before submitting
             setTimeout(() => {
-                e.target.form.submit();
+                if (e.target.value.length === 6) {
+                    clearInterval(timerInterval);
+                    e.target.form.submit();
+                }
             }, 100);
         } else {
             e.target.value = value;
@@ -97,12 +411,61 @@ document.addEventListener('DOMContentLoaded', function() {
         const digits = pastedData.replace(/\D/g, '').slice(0, 6);
         e.target.value = digits;
         
+        // Remove error class if present
+        this.classList.remove('error');
+        
         if (digits.length === 6) {
             setTimeout(() => {
+                clearInterval(timerInterval);
                 e.target.form.submit();
             }, 100);
         }
     });
+    
+    // Add error animation on failed submission
+    {% if authenticationError %}
+        codeInput.classList.add('error');
+        // Focus back to input on error
+        codeInput.focus();
+        codeInput.select();
+        
+        // Shake the input field
+        codeInput.style.animation = 'shake 0.5s ease-in-out';
+        setTimeout(() => {
+            codeInput.style.animation = '';
+        }, 500);
+    {% endif %}
+    
+    // Prevent form submission on Enter if code is incomplete
+    form.addEventListener('submit', function(e) {
+        if (codeInput.value.length !== 6) {
+            e.preventDefault();
+            codeInput.classList.add('error');
+            codeInput.focus();
+            
+            // Shake animation
+            codeInput.style.animation = 'shake 0.5s ease-in-out';
+            setTimeout(() => {
+                codeInput.style.animation = '';
+            }, 500);
+        }
+    });
+    
+    // Clean up timer on page unload
+    window.addEventListener('beforeunload', function() {
+        clearInterval(timerInterval);
+    });
+    
+    // Add keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        // Escape key to cancel and logout
+        if (e.key === 'Escape') {
+            window.location.href = '{{ path('app_logout') }}';
+        }
+    });
+    
+    // Test logout functionality
+    console.log('Logout path:', '{{ path('app_logout') }}');
 });
 </script>
 {% endblock %}

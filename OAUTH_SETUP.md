@@ -1,13 +1,12 @@
 # OAuth2 Integration Setup Guide
 
-This guide explains how to configure OAuth2 authentication for Google, GitHub, and LinkedIn in your Symfony application.
+This guide explains how to configure OAuth2 authentication for Google and GitHub in your Symfony application.
 
 ## Overview
 
 The application now supports OAuth2 authentication using:
 - **Google OAuth2** - For users with Google accounts
-- **GitHub OAuth2** - For users with GitHub accounts  
-- **LinkedIn OAuth2** - For users with LinkedIn accounts
+- **GitHub OAuth2** - For users with GitHub accounts
 
 ## Implementation Details
 
@@ -81,52 +80,11 @@ GITHUB_CLIENT_ID=your_github_client_id_here
 GITHUB_CLIENT_SECRET=your_github_client_secret_here
 ```
 
-## 3. LinkedIn OAuth2 Setup
-
-### 3.1 Create LinkedIn OAuth Application
-
-1. Go to [LinkedIn Developer Portal](https://www.linkedin.com/developers/apps)
-2. Click **Create App**
-3. Configure:
-   - **App name**: Your application name
-   - **LinkedIn Page**: Select or create a LinkedIn page
-   - **App logo**: Upload your app logo
-   - **Website URL**: `http://localhost:8000` (or your production URL)
-   - **Redirect URL**: 
-     ```
-     http://localhost:8000/connect/linkedin/check
-     ```
-   - For production: `https://yourdomain.com/connect/linkedin/check`
-
-### 3.2 Configure Products
-
-In your LinkedIn app settings:
-1. Go to **Products** tab
-2. Add **Sign In with LinkedIn** product
-3. Configure permissions:
-   - `r_liteprofile` - Basic profile
-   - `r_emailaddress` - Email address
-
-### 3.3 Get Credentials
-
-After creating the app, you'll receive:
-- **Client ID**
-- **Client Secret**
-
-### 3.4 Update Environment
-
-Add to your `.env` file:
-```bash
-LINKEDIN_CLIENT_ID=your_linkedin_client_id_here
-LINKEDIN_CLIENT_SECRET=your_linkedin_client_secret_here
-```
-
-## 4. Database Setup
+## 3. Database Setup
 
 The OAuth integration adds the following fields to the User entity:
 - `googleId` - Google user ID
 - `githubId` - GitHub user ID  
-- `linkedinId` - LinkedIn user ID
 - `oauthProvider` - OAuth provider name
 - `avatarUrl` - Profile picture URL
 
@@ -168,7 +126,6 @@ php bin/console debug:router | findstr oauth
 
 2. **"Unable to get email" error**
    - For GitHub: Ensure user has public email or request email scope
-   - For LinkedIn: Verify email permission is granted
 
 3. **"The metadata storage is not up to date" error**
    - Run: `php bin/console doctrine:migrations:sync-metadata-storage`
@@ -243,8 +200,7 @@ This approach uses:
 ```sql
 ALTER TABLE user 
 ADD google_id VARCHAR(100) NULL,
-ADD github_id VARCHAR(100) NULL, 
-ADD linkedin_id VARCHAR(100) NULL,
+ADD github_id VARCHAR(100) NULL,
 ADD oauth_provider VARCHAR(20) NULL,
 ADD avatar_url VARCHAR(255) NULL;
 ```

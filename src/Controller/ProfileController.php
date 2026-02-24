@@ -46,7 +46,7 @@ class ProfileController extends AbstractController
             $apprenant = $user->getApprenant();
             $form->get('genre')->setData($apprenant->getGenre());
             $form->get('etatCivil')->setData($apprenant->getEtatCivil());
-            $form->get('niveauEtude')->setData($apprenant->getNiveauEtude());
+            $form->get('niveauEtude')->setData($user->getNiveauEtude());
             $form->get('objectif')->setData($apprenant->getObjectif());
         } elseif ($roleUtilisateur === 'societe' && $user->getSociete()) {
             $societe = $user->getSociete();
