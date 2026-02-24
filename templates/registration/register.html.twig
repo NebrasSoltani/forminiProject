@@ -856,8 +856,22 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
                             </div>
                         </div>
 
+                        <!-- Cloudflare Turnstile -->
+                        <div class="form-group mt-4 mb-3">
+                            <div class="cf-turnstile" 
+                                 data-sitekey="{{ turnstile_site_key|default('your_turnstile_site_key_here') }}"
+                                 data-callback="onTurnstileSuccess"
+                                 data-expired-callback="onTurnstileExpired"
+                                 data-error-callback="onTurnstileError">
+                            </div>
+                            <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">
+                            <div class="form-error" id="turnstile-error" style="display: none;">
+                                Veuillez compléter la vérification de sécurité.
+                            </div>
+                        </div>
+
                         <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-submit">
+                            <button type="submit" class="btn btn-submit" id="register-submit-btn">
                                 <span class="d-flex align-items-center justify-content-center">
                                     <span>🚀 Créer mon compte</span>
                                 </span>
@@ -898,6 +912,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
     </div>
 </div>
 
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Password visibility toggle
@@ -1022,6 +1037,40 @@ document.addEventListener('DOMContentLoaded', function() {
         addInterestBtn.addEventListener('click', addCustomInterest);
         autreInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addCustomInterest();
+        });
+    }
+
+    // Turnstile callbacks
+    window.onTurnstileSuccess = function(token) {
+        document.getElementById('cf-turnstile-response').value = token;
+        document.getElementById('turnstile-error').style.display = 'none';
+        document.getElementById('register-submit-btn').disabled = false;
+    };
+
+    window.onTurnstileExpired = function() {
+        document.getElementById('cf-turnstile-response').value = '';
+        document.getElementById('register-submit-btn').disabled = true;
+    };
+
+    window.onTurnstileError = function() {
+        document.getElementById('cf-turnstile-response').value = '';
+        document.getElementById('turnstile-error').style.display = 'block';
+        document.getElementById('register-submit-btn').disabled = true;
+    };
+
+    // Form validation
+    const registrationForm = document.querySelector('form[name="registration_form"]');
+    
+    if (registrationForm) {
+        registrationForm.addEventListener('submit', function(e) {
+            const turnstileResponse = document.getElementById('cf-turnstile-response').value;
+            
+            if (!turnstileResponse) {
+                e.preventDefault();
+                document.getElementById('turnstile-error').style.display = 'block';
+                document.getElementById('turnstile-error').textContent = 'Veuillez compléter la vérification de sécurité.';
+                return false;
+            }
         });
     }
 });
