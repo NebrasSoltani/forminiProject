@@ -535,7 +535,21 @@
                             </a>
                         </div>
 
-                        <button class="btn btn-login" type="submit">
+                        <!-- Cloudflare Turnstile -->
+                        <div class="form-group mb-3">
+                            <div class="cf-turnstile" 
+                                 data-sitekey="{{ turnstile_site_key|default('your_turnstile_site_key_here') }}"
+                                 data-callback="onTurnstileSuccess"
+                                 data-expired-callback="onTurnstileExpired"
+                                 data-error-callback="onTurnstileError">
+                            </div>
+                            <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">
+                            <div class="form-error" id="turnstile-error" style="display: none;">
+                                Veuillez compléter la vérification de sécurité.
+                            </div>
+                        </div>
+
+                        <button class="btn btn-login" type="submit" id="login-submit-btn">
                             <span>➡️ Se connecter</span>
                         </button>
 
@@ -574,6 +588,7 @@
     </div>
 </div>
 
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Password visibility toggle
@@ -625,6 +640,41 @@ document.addEventListener('DOMContentLoaded', function() {
         if (emailInput.value) {
             emailInput.closest('.input-group').classList.add('focus-within');
         }
+    }
+
+    // Turnstile callbacks
+    window.onTurnstileSuccess = function(token) {
+        document.getElementById('cf-turnstile-response').value = token;
+        document.getElementById('turnstile-error').style.display = 'none';
+        document.getElementById('login-submit-btn').disabled = false;
+    };
+
+    window.onTurnstileExpired = function() {
+        document.getElementById('cf-turnstile-response').value = '';
+        document.getElementById('login-submit-btn').disabled = true;
+    };
+
+    window.onTurnstileError = function() {
+        document.getElementById('cf-turnstile-response').value = '';
+        document.getElementById('turnstile-error').style.display = 'block';
+        document.getElementById('login-submit-btn').disabled = true;
+    };
+
+    // Form validation
+    const loginForm = document.querySelector('form[method="post"]');
+    const submitBtn = document.getElementById('login-submit-btn');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const turnstileResponse = document.getElementById('cf-turnstile-response').value;
+            
+            if (!turnstileResponse) {
+                e.preventDefault();
+                document.getElementById('turnstile-error').style.display = 'block';
+                document.getElementById('turnstile-error').textContent = 'Veuillez compléter la vérification de sécurité.';
+                return false;
+            }
+        });
     }
 });
 </script>

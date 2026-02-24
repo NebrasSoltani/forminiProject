@@ -8,6 +8,7 @@ use App\Entity\Apprenant;
 use App\Entity\Societe;
 use App\Form\RegistrationFormType;
 use App\Service\SendGridEmailSender;
+use App\Service\TurnstileService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -22,13 +23,23 @@ use Twig\Environment;
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, SluggerInterface $slugger, Environment $twig, UrlGeneratorInterface $urlGenerator, SendGridEmailSender $sendGridEmailSender): Response
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher, EntityManagerInterface $em, SluggerInterface $slugger, Environment $twig, UrlGeneratorInterface $urlGenerator, SendGridEmailSender $sendGridEmailSender, TurnstileService $turnstileService): Response
     {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Validate Turnstile
+            $turnstileResponse = $request->request->get('cf-turnstile-response');
+            if (!$turnstileService->verify($turnstileResponse)) {
+                $this->addFlash('error', 'Veuillez compléter la vérification de sécurité.');
+                return $this->render('registration/register.html.twig', [
+                    'registrationForm' => $form,
+                    'turnstile_site_key' => $turnstileService->getSiteKey(),
+                ]);
+            }
+
             $user->setPassword(
                 $passwordHasher->hashPassword(
                     $user,
@@ -186,6 +197,7 @@ class RegistrationController extends AbstractController
 
         return $this->render('registration/register.html.twig', [
             'registrationForm' => $form,
+            'turnstile_site_key' => $turnstileService->getSiteKey(),
         ]);
     }
 }
