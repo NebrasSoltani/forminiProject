@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Commande réussie</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background-color: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+        <h2 style="color: #10b981;">✅ Votre commande a été validée !</h2>
+        <p>Bonjour {{ user.prenom|default(user.nom)|default(user.email) }},</p>
+        <p>Merci pour votre achat sur <strong>formini.tn</strong>.</p>
+
+        <h3>Détails de la commande :</h3>
+        <ul>
+            {% for item in commande.items %}
+                <li>{{ item.nomProduit }} x {{ item.quantite }} - {{ item.prixUnitaire }} €</li>
+            {% endfor %}
+        </ul>
+
+        <p><strong>Total : {{ commande.total }} €</strong></p>
+        <p>Nous vous remercions pour votre confiance.</p>
+    </div>
+</body>
+</html>

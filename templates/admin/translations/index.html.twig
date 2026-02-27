@@ -1,0 +1,88 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des Traductions{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title">
+                        <i class="bi bi-translate me-2"></i>
+                        Gestion des Traductions des Produits
+                    </h4>
+                    <p class="card-subtitle mb-4">
+                        Visualisez et modifiez les traductions des noms et descriptions des produits
+                    </p>
+                    
+                    {% if products is empty %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Aucune traduction trouvée. 
+                            <a href="{{ path('admin_create_product_translations') }}" class="btn btn-sm btn-primary ms-2">
+                                Créer des traductions
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Produit ID</th>
+                                        <th>Catégorie</th>
+                                        <th>Prix</th>
+                                        <th>Traductions</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                        <tr>
+                                            <td>
+                                                <strong>#{{ product.id }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ product.categorie }}</span>
+                                            </td>
+                                            <td>
+                                                <strong>{{ product.prix|number_format(2, ',', ' ') }} Dt</strong>
+                                            </td>
+                                            <td>
+                                                {% for translation in product.translations %}
+                                                    <div class="mb-1">
+                                                        <span class="badge bg-{{ translation.locale == 'fr' ? 'primary' : 'secondary' }}">
+                                                            {{ translation.locale|upper }}
+                                                        </span>
+                                                        <small class="text-muted ms-1">{{ translation.field }}</small>
+                                                        <br>
+                                                        <small class="text-truncate d-block" style="max-width: 200px;">
+                                                            {{ translation.content|slice(0, 50) }}{% if translation.content|length > 50 %}...{% endif %}
+                                                        </small>
+                                                    </div>
+                                                {% endfor %}
+                                            </td>
+                                            <td>
+                                                <a href="{{ path('admin_translations_edit', {id: product.id}) }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-pencil me-1"></i>Modifier
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{{ path('admin_dashboard') }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left me-1"></i>Retour au dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

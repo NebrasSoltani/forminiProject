@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement réussi{% endblock %}
+
+{% block body %}
+<div class="container mx-auto my-10 p-6 bg-green-100 rounded shadow-md text-center">
+    <h1 class="text-3xl font-bold text-green-800 mb-4">✅ Paiement réussi !</h1>
+
+    {% if commande %}
+        <p class="text-lg mb-2">Merci pour votre achat, {{ commande.utilisateur.prenom }}.</p>
+        <p class="mb-2">Commande n° <strong>{{ commande.id }}</strong></p>
+        <p class="mb-4">Montant payé : <strong>{{ commande.total|number_format(2, ',', ' ') }} Dt</strong></p>
+        <a href="{{ path('boutique_index') }}" class="btn btn-primary">Retour à la boutique</a>
+    {% else %}
+        <p class="text-lg mb-4">Votre paiement a été confirmé, mais nous n'avons pas retrouvé votre commande.</p>
+        <a href="{{ path('boutique_index') }}" class="btn btn-primary">Retour à la boutique</a>
+    {% endif %}
+</div>
+{% endblock %}

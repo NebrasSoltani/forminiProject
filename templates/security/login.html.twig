@@ -1,0 +1,709 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion - Plateforme{% endblock %}
+
+{% block body %}
+<style>
+:root {
+    --primary: #4361ee;
+    --primary-dark: #3a56d4;
+    --secondary: #7209b7;
+    --success: #4cc9f0;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --gray: #6c757d;
+    --border-radius: 16px;
+    --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    --transition: all 0.35s ease;
+}
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.login-card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    animation: fadeIn 0.6s ease-out;
+    border: none;
+}
+
+.login-header {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    padding: 2.2rem 1.8rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-header::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+    transform: rotate(30deg);
+}
+
+.login-header h1 {
+    color: white;
+    font-weight: 700;
+    font-size: 2.2rem;
+    letter-spacing: -0.5px;
+    position: relative;
+    margin-bottom: 0.5rem;
+}
+
+.login-header p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.15rem;
+    margin: 0;
+    position: relative;
+}
+
+.login-body {
+    padding: 2.5rem;
+    background: white;
+}
+
+.form-group {
+    margin-bottom: 1.6rem;
+    position: relative;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 0.65rem;
+    display: block;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-label i {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+.input-group {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    border: 1.5px solid #e2e8f0;
+    transition: var(--transition);
+}
+
+.input-group:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.input-group-text {
+    background: #f8fafc;
+    border: none;
+    padding: 0 1.2rem;
+    color: var(--primary);
+    font-size: 1.3rem;
+}
+
+.form-control {
+    border: none;
+    padding: 0.95rem 1.2rem;
+    font-size: 1.05rem;
+    height: auto !important;
+    box-shadow: none !important;
+    background: transparent;
+}
+
+.form-control:focus {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+    font-style: italic;
+}
+
+/* Password toggle button */
+.toggle-password {
+    background: #f8fafc;
+    border: none;
+    padding: 0 1.3rem;
+    color: var(--gray);
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-password:hover {
+    background: #edf2f7;
+    color: var(--primary);
+}
+
+/* Remember me checkbox */
+.form-check {
+    padding-left: 2.1rem;
+    margin-top: 0.3rem;
+}
+
+.form-check-input {
+    width: 1.4rem;
+    height: 1.4rem;
+    margin-top: 0.2rem;
+    margin-left: -2.1rem;
+    border: 1.5px solid #cbd5e0;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+}
+
+.form-check-label {
+    font-weight: 500;
+    color: #4a5568;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.form-check-input:hover + .form-check-label,
+.form-check-input:focus + .form-check-label {
+    color: var(--primary);
+}
+
+/* Submit button */
+.btn-login {
+    background: linear-gradient(120deg, var(--primary), var(--primary-dark));
+    border: none;
+    padding: 0.95rem;
+    font-weight: 600;
+    font-size: 1.15rem;
+    letter-spacing: 0.5px;
+    border-radius: 14px;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.35);
+    transition: var(--transition);
+    width: 100%;
+    margin-top: 0.4rem;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.45);
+    background: linear-gradient(120deg, var(--primary-dark), #323c9e);
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+/* Alert messages */
+.alert {
+    border-radius: 12px;
+    border: none;
+    padding: 1rem 1.3rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    font-weight: 500;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.alert-success {
+    background: #e6f7ee;
+    color: #1a7f4b;
+    border-left: 4px solid #2ecc71;
+}
+
+.alert-danger {
+    background: #fff5f5;
+    color: #c53030;
+    border-left: 4px solid #e53e3e;
+}
+
+.alert i {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+    position: relative;
+    top: 2px;
+}
+
+/* Already logged in message */
+.logged-in-message {
+    background: #eef7ff;
+    border-radius: 14px;
+    padding: 1.2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    border: 1px solid #bee3f8;
+}
+
+.logged-in-message a {
+    color: var(--secondary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.logged-in-message a:hover {
+    text-decoration: underline;
+    color: #5a0790;
+}
+
+/* Forgot password link */
+.forgot-password-link {
+    color: var(--primary);
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.forgot-password-link:hover {
+    color: var(--primary-dark);
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.forgot-password-link i {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+/* Register link */
+.register-link {
+    text-align: center;
+    margin-top: 1.8rem;
+    padding-top: 1.5rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.register-link p {
+    margin: 0;
+    color: #4a5568;
+    font-size: 0.95rem;
+}
+
+.register-link a {
+    color: var(--primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+    display: inline-block;
+    position: relative;
+    padding-bottom: 2px;
+}
+
+.register-link a:hover {
+    color: var(--primary-dark);
+}
+
+.register-link a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    background: var(--primary);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.3s ease;
+}
+
+.register-link a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* OAuth Divider */
+.oauth-divider {
+    text-align: center;
+    margin: 2rem 0 1.5rem;
+    position: relative;
+}
+
+.oauth-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e2e8f0;
+}
+
+.oauth-divider span {
+    background: white;
+    padding: 0 1rem;
+    color: #6c757d;
+    font-weight: 500;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 1;
+}
+
+/* OAuth Buttons */
+.oauth-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-oauth {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 0.85rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: var(--transition);
+    background: white;
+    color: #2d3748;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.btn-oauth:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    text-decoration: none;
+    color: #2d3748;
+}
+
+.btn-oauth:active {
+    transform: translateY(0);
+}
+
+.btn-oauth svg {
+    flex-shrink: 0;
+}
+
+/* Google Button */
+.btn-google:hover {
+    border-color: #4285f4;
+    background: #f8f9ff;
+}
+
+/* GitHub Button */
+.btn-github:hover {
+    border-color: #24292e;
+    background: #f6f8fa;
+}
+
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .login-body {
+        padding: 2rem;
+    }
+    
+    .login-header h1 {
+        font-size: 1.9rem;
+    }
+    
+    .login-header p {
+        font-size: 1.05rem;
+    }
+    
+    .form-label {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<div >
+    <div class="row justify-content-center">
+        <div class="col-lg-5 col-md-7">
+            <div class="card login-card">
+                <div class="login-header">
+                    <h1>👋 Bonjour !</h1>
+                    <p>Connectez-vous à votre compte</p>
+                </div>
+                <div class="login-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success">
+                            <i>✅</i> {{ message }}
+                        </div>
+                    {% endfor %}
+                    
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger">
+                            <i>❌</i> {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    <form method="post" data-turbo="false">
+                        {% if error %}
+                            <div class="alert alert-danger">
+                                <i>⚠️</i> {{ error.messageKey|trans(error.messageData, 'security') }}
+                            </div>
+                        {% endif %}
+
+                        {% if app.user %}
+                            <div class="logged-in-message">
+                                <p>Vous êtes connecté en tant que <strong>{{ app.user.userIdentifier }}</strong></p>
+                                <a href="{{ path('app_logout') }}">→ Déconnexion</a>
+                            </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="inputEmail" class="form-label">
+                                <i>📧</i> Email
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                                <input 
+                                    type="email" 
+                                    value="{{ last_username }}" 
+                                    name="_username" 
+                                    id="inputEmail" 
+                                    class="form-control" 
+                                    autocomplete="email" 
+                                    required 
+                                    autofocus
+                                    placeholder="votre@email.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="inputPassword" class="form-label">
+                                <i>🔒</i> Mot de passe
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                                <input 
+                                    type="password" 
+                                    name="_password" 
+                                    id="inputPassword" 
+                                    class="form-control" 
+                                    autocomplete="current-password" 
+                                    required
+                                    placeholder="••••••••">
+                                <button class="toggle-password" type="button" aria-label="Afficher le mot de passe">👁️</button>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        <div class="form-check mb-4">
+                            <input 
+                                type="checkbox" 
+                                name="_remember_me" 
+                                class="form-check-input" 
+                                id="remember_me">
+                            <label class="form-check-label" for="remember_me">
+                                Se souvenir de moi
+                            </label>
+                        </div>
+
+                        <div class="text-end mb-3">
+                            <a href="{{ path('app_forgot_password_request') }}" class="forgot-password-link">
+                                <i class="bi bi-question-circle"></i> Mot de passe oublié ?
+                            </a>
+                        </div>
+
+                        <!-- Cloudflare Turnstile -->
+                        <div class="form-group mb-3">
+                            <div class="cf-turnstile" 
+                                 data-sitekey="{{ turnstile_site_key|default('your_turnstile_site_key_here') }}"
+                                 data-callback="onTurnstileSuccess"
+                                 data-expired-callback="onTurnstileExpired"
+                                 data-error-callback="onTurnstileError">
+                            </div>
+                            <input type="hidden" name="cf-turnstile-response" id="cf-turnstile-response">
+                            <div class="form-error" id="turnstile-error" style="display: none;">
+                                Veuillez compléter la vérification de sécurité.
+                            </div>
+                        </div>
+
+                        <button class="btn btn-login" type="submit" id="login-submit-btn">
+                            <span>➡️ Se connecter</span>
+                        </button>
+
+                        <!-- OAuth Login Buttons -->
+                        <div class="oauth-divider">
+                            <span>OU</span>
+                        </div>
+                        
+                        <div class="oauth-buttons">
+                            <a href="{{ path('oauth_google') }}" class="btn btn-oauth btn-google">
+                                <svg width="18" height="18" viewBox="0 0 24 24">
+                                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                                </svg>
+                                Se connecter avec Google
+                            </a>
+                            
+                            <a href="{{ path('oauth_github') }}" class="btn btn-oauth btn-github">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                                </svg>
+                                Se connecter avec GitHub
+                            </a>
+                            
+                        </div>
+
+                        <div class="register-link">
+                            <p>Pas encore de compte ? <a href="{{ path('app_register') }}">Créer un compte gratuitement</a></p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    const togglePasswordBtn = document.querySelector('.toggle-password');
+    const passwordInput = document.getElementById('inputPassword');
+    
+    if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', function() {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            this.textContent = isPassword ? '🙈' : '👁️';
+            this.setAttribute('aria-label', isPassword ? 'Cacher le mot de passe' : 'Afficher le mot de passe');
+            
+            // Visual feedback
+            passwordInput.closest('.input-group').classList.add('focus-within');
+            setTimeout(() => {
+                if (!isPassword) {
+                    passwordInput.closest('.input-group').classList.remove('focus-within');
+                }
+            }, 300);
+        });
+        
+        // Add focus effect when typing
+        passwordInput.addEventListener('focus', () => {
+            passwordInput.closest('.input-group').classList.add('focus-within');
+        });
+        
+        passwordInput.addEventListener('blur', () => {
+            if (!passwordInput.value) {
+                passwordInput.closest('.input-group').classList.remove('focus-within');
+            }
+        });
+    }
+    
+    // Email field focus effect
+    const emailInput = document.getElementById('inputEmail');
+    if (emailInput) {
+        emailInput.addEventListener('focus', () => {
+            emailInput.closest('.input-group').classList.add('focus-within');
+        });
+        
+        emailInput.addEventListener('blur', () => {
+            if (!emailInput.value) {
+                emailInput.closest('.input-group').classList.remove('focus-within');
+            }
+        });
+        
+        // Initialize if field has value
+        if (emailInput.value) {
+            emailInput.closest('.input-group').classList.add('focus-within');
+        }
+    }
+
+    // Turnstile callbacks
+    window.onTurnstileSuccess = function(token) {
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = token;
+        }
+        const errorElement = document.getElementById('turnstile-error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+        const submitBtn = document.getElementById('login-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+        }
+    };
+
+    window.onTurnstileExpired = function() {
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = '';
+        }
+        const submitBtn = document.getElementById('login-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
+    };
+
+    window.onTurnstileError = function() {
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = '';
+        }
+        const errorElement = document.getElementById('turnstile-error');
+        if (errorElement) {
+            errorElement.style.display = 'block';
+        }
+        const submitBtn = document.getElementById('login-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
+    };
+
+    // Form validation
+    const loginForm = document.querySelector('form[method="post"]');
+    const submitBtn = document.getElementById('login-submit-btn');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const responseElement = document.getElementById('cf-turnstile-response');
+            const turnstileResponse = responseElement ? responseElement.value : '';
+            
+            if (!turnstileResponse) {
+                e.preventDefault();
+                const errorElement = document.getElementById('turnstile-error');
+                if (errorElement) {
+                    errorElement.style.display = 'block';
+                    errorElement.textContent = 'Veuillez compléter la vérification de sécurité.';
+                }
+                return false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

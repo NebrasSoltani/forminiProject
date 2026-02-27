@@ -1,0 +1,200 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Réinitialiser votre mot de passe{% endblock %}
+
+{% block body %}
+<style>
+:root {
+    --primary: #6974e8;
+    --secondary: #6974e8;
+    --success: #4cc9f0;
+    --light: #f8f9fa;
+    --dark: #212529;
+    --border-radius: 12px;
+    --box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+}
+
+.form-container {
+    animation: fadeIn 0.6s ease-out;
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-top: 2rem;
+}
+
+.card-header {
+    background: linear-gradient(120deg, var(--primary), #6974e8);
+    padding: 1.8rem;
+    text-align: center;
+    position: relative;
+}
+
+.card-header h3 {
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    font-size: 1.8rem;
+    color: white;
+}
+
+.form-control, .form-select {
+    border: 1.5px solid #e2e8f0;
+    padding: 0.75rem 1.1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: var(--transition);
+    height: calc(2.6rem + 2px);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 3px rgba(67, 97, 238, 0.15);
+    outline: none;
+}
+
+.form-control::placeholder {
+    color: #a0aec0;
+}
+
+/* Password fields */
+.input-group {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.input-group .form-control {
+    border-radius: 0;
+    border-right: none;
+    box-shadow: none;
+}
+
+.input-group .btn {
+    border-radius: 0;
+    border-left: none;
+    background: white;
+    transition: var(--transition);
+}
+
+.input-group .btn:hover {
+    background: #edf2f7;
+    color: var(--primary);
+}
+
+.btn-primary {
+    background: linear-gradient(120deg, var(--primary), #6974e8);
+    border: none;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    border-radius: 10px;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(105, 116, 232, 0.35);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card form-container">
+                    <div class="card-header">
+                        <h3>🔒 Réinitialiser votre mot de passe</h3>
+                    </div>
+                    <div class="card-body p-4">
+                        {% for flash_error in app.flashes('reset_password_error') %}
+                            <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
+                        {% endfor %}
+
+                        {{ form_start(resetForm, {'attr': {'data-turbo': 'false'}}) }}
+                            <div class="mb-4">
+                                {{ form_label(resetForm.plainPassword.first, 'Nouveau mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="input-group">
+                                    {{ form_widget(resetForm.plainPassword.first, {
+                                        'attr': {
+                                            'class': 'form-control form-control-lg password-field',
+                                            'placeholder': '••••••••',
+                                            'autocomplete': 'new-password'
+                                        }
+                                    }) }}
+                                    <button class="btn toggle-password" type="button" aria-label="Afficher le mot de passe">👁️</button>
+                                </div>
+                                {{ form_errors(resetForm.plainPassword.first) }}
+                            </div>
+
+                            <div class="mb-4">
+                                {{ form_label(resetForm.plainPassword.second, 'Confirmer le mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                                <div class="input-group">
+                                    {{ form_widget(resetForm.plainPassword.second, {
+                                        'attr': {
+                                            'class': 'form-control form-control-lg password-field',
+                                            'placeholder': '••••••••',
+                                            'autocomplete': 'new-password'
+                                        }
+                                    }) }}
+                                    <button class="btn toggle-password" type="button" aria-label="Afficher le mot de passe">👁️</button>
+                                </div>
+                                {{ form_errors(resetForm.plainPassword.second) }}
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    🔒 Réinitialiser le mot de passe
+                                </button>
+                            </div>
+                        {{ form_end(resetForm) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            const isPassword = input.type === 'password';
+            
+            input.type = isPassword ? 'text' : 'password';
+            this.textContent = isPassword ? '🙈' : '👁️';
+            this.setAttribute('aria-label', isPassword ? 'Cacher le mot de passe' : 'Afficher le mot de passe');
+            
+            // Add visual feedback
+            input.classList.add('is-invalid');
+            setTimeout(() => {
+                input.classList.remove('is-invalid');
+            }, 300);
+        });
+        
+        // Add focus effect when typing
+        input.addEventListener('focus', () => {
+            input.closest('.input-group').style.borderColor = 'var(--primary)';
+            input.closest('.input-group').style.boxShadow = '0 0 3px rgba(67, 97, 238, 0.15)';
+        });
+        
+        input.addEventListener('blur', () => {
+            if (!input.value) {
+                input.closest('.input-group').style.borderColor = '#e2e8f0';
+                input.closest('.input-group').style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

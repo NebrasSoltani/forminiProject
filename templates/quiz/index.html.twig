@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Quiz - {{ formation.titre }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Quiz de la formation</h1>
+            <p class="text-muted">{{ formation.titre }}</p>
+        </div>
+        <div>
+            <a href="{{ path('formation_show', {'id': formation.id}) }}" class="btn btn-secondary">← Retour à la formation</a>
+            <a href="{{ path('quiz_new', {'formationId': formation.id}) }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nouveau Quiz
+            </a>
+        </div>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+
+    {# ══════════════════════════════════════════════════════════════
+       BUNDLE 1 — KnpPaginatorBundle : affichage du nombre total
+       ══════════════════════════════════════════════════════════════ #}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-muted">
+            <strong>{{ pagination.getTotalItemCount }}</strong> quiz au total
+        </span>
+    </div>
+
+    <div class="row">
+        {% if pagination.getTotalItemCount == 0 %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <h5>Aucun quiz pour cette formation</h5>
+                    <p>Créez votre premier quiz pour évaluer vos apprenants</p>
+                </div>
+            </div>
+        {% else %}
+            {# ── KnpPaginator : on boucle sur pagination au lieu de quizzes ── #}
+            {% for quiz in pagination %}
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">{{ quiz.titre }}</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if quiz.description %}
+                            <p class="text-muted">{{ quiz.description }}</p>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <strong>⏱️ Durée :</strong> {{ quiz.duree }} minutes<br>
+                            <strong>✅ Note minimale :</strong> {{ quiz.noteMinimale }}%<br>
+                            <strong>📝 Questions :</strong> {{ quiz.questions|length }}<br>
+                            <strong>🔀 Mélanger :</strong> {{ quiz.melanger ? 'Oui' : 'Non' }}<br>
+                            <strong>📊 Correction :</strong> {{ quiz.afficherCorrection ? 'Affichée' : 'Masquée' }}
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex gap-2">
+                        <a href="{{ path('quiz_show', {'formationId': formation.id, 'id': quiz.id}) }}" class="btn btn-sm btn-info">
+                            👁️ Voir
+                        </a>
+                        <a href="{{ path('question_index', {'formationId': formation.id, 'quizId': quiz.id}) }}" class="btn btn-sm btn-success">
+                            📝 Questions
+                        </a>
+                        <a href="{{ path('quiz_edit', {'formationId': formation.id, 'id': quiz.id}) }}" class="btn btn-sm btn-warning">
+                            ✏️ Modifier
+                        </a>
+                        <form method="post" action="{{ path('quiz_delete', {'formationId': formation.id, 'id': quiz.id}) }}" class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ quiz.id) }}">
+                            <button class="btn btn-sm btn-danger" onclick="return confirm('Êtes-vous sûr ?')">🗑️</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    {# ══════════════════════════════════════════════════════════════
+       BUNDLE 1 — KnpPaginatorBundle : rendu de la navigation
+       ══════════════════════════════════════════════════════════════ #}
+    {% if pagination.getTotalItemCount > 0 %}
+    <div class="d-flex justify-content-center mt-4">
+        {{ knp_pagination_render(pagination) }}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

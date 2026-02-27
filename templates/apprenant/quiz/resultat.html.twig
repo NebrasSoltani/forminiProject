@@ -1,0 +1,1129 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Résultat - {{ quiz.titre }}{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    /* ========== CHATBOT CONTAINER ========== */
+    .chatbot-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 420px;
+        max-height: 650px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .chatbot-container.minimized {
+        max-height: 70px;
+    }
+
+    /* ========== CHATBOT HEADER ========== */
+    .chatbot-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 18px 20px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        user-select: none;
+    }
+
+    .chatbot-header:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #653a8e 100%);
+    }
+
+    .chatbot-header-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .chatbot-avatar {
+        width: 40px;
+        height: 40px;
+        background: #eee;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+
+    .chatbot-title h4 {
+        margin: 0;
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .chatbot-title small {
+        font-size: 12px;
+        opacity: 0.9;
+    }
+
+    .chatbot-toggle {
+        font-size: 24px;
+        transition: transform 0.3s ease;
+    }
+
+    .chatbot-container.minimized .chatbot-toggle {
+        transform: rotate(180deg);
+    }
+
+    /* ========== CHATBOT BODY ========== */
+    .chatbot-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        max-height: 480px;
+    }
+
+    .chatbot-body::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chatbot-body::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .chatbot-body::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 3px;
+    }
+
+    /* ========== MESSAGES ========== */
+    .chatbot-message {
+        margin-bottom: 16px;
+        animation: slideInUp 0.4s ease;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .bot-message {
+        background: white;
+        padding: 14px 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        border-left: 4px solid #667eea;
+    }
+
+    .bot-message strong {
+        color: #667eea;
+        display: block;
+        margin-bottom: 8px;
+        font-size: 15px;
+    }
+
+    .bot-message p {
+        margin: 0;
+        color: #333;
+        line-height: 1.6;
+        font-size: 14px;
+    }
+
+    /* ========== SCORE DISPLAY ========== */
+    .score-display {
+        text-align: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 12px;
+        margin-bottom: 16px;
+    }
+
+    .score-number {
+        font-size: 48px;
+        font-weight: 700;
+        margin: 10px 0;
+    }
+
+    .score-label {
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    /* ========== ERROR CARDS ========== */
+    .error-card {
+        background: white;
+        border: 2px solid #fc8181;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 12px 0;
+        box-shadow: 0 2px 8px rgba(252, 129, 129, 0.1);
+        animation: slideInUp 0.5s ease;
+    }
+
+    .error-card h5 {
+        color: #c53030;
+        margin: 0 0 12px 0;
+        font-size: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .error-badge {
+        background: #c53030;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .question-text {
+        color: #2d3748;
+        font-weight: 500;
+        margin-bottom: 12px;
+        padding: 10px;
+        background: #f7fafc;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    /* ========== ANSWERS ========== */
+    .correct-answer, .user-answer {
+        padding: 12px;
+        margin: 8px 0;
+        border-radius: 8px;
+        font-size: 13px;
+    }
+
+    .correct-answer {
+        background: #f0fff4;
+        border-left: 3px solid #48bb78;
+        color: #22543d;
+    }
+
+    .user-answer {
+        background: #fff5f5;
+        border-left: 3px solid #fc8181;
+        color: #742a2a;
+    }
+
+    .correct-answer strong, .user-answer strong {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* ========== EXPLANATION BOXES ========== */
+    .explanation-box {
+        background: linear-gradient(135deg, #e6f2ff 0%, #f0f4ff 100%);
+        padding: 14px;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-size: 13px;
+        border-left: 3px solid #4299e1;
+    }
+
+    .explanation-box strong {
+        color: #2c5282;
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+    }
+
+    .explanation-box p {
+        margin: 0;
+        color: #2d3748;
+        line-height: 1.6;
+    }
+
+    /* ========== RECOMMENDATIONS ========== */
+    .recommendation {
+        background: white;
+        border-left: 4px solid #4299e1;
+        padding: 16px;
+        margin: 12px 0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .recommendation h6 {
+        margin: 0 0 10px 0;
+        color: #2c5282;
+        font-size: 14px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .recommendation.urgent {
+        border-left-color: #f56565;
+        background: linear-gradient(135deg, #fff5f5 0%, #fffafa 100%);
+    }
+
+    .recommendation.urgent h6 {
+        color: #c53030;
+    }
+
+    .recommendation.attention {
+        border-left-color: #ed8936;
+        background: linear-gradient(135deg, #fffaf0 0%, #fffbf5 100%);
+    }
+
+    .recommendation.attention h6 {
+        color: #c05621;
+    }
+
+    .recommendation.bien {
+        border-left-color: #48bb78;
+        background: linear-gradient(135deg, #f0fff4 0%, #f7fef9 100%);
+    }
+
+    .recommendation.bien h6 {
+        color: #22543d;
+    }
+
+    .recommendation.excellent {
+        border-left-color: #38b2ac;
+        background: linear-gradient(135deg, #e6fffa 0%, #f0fffd 100%);
+    }
+
+    .recommendation.excellent h6 {
+        color: #234e52;
+    }
+
+    .recommendation.conseil {
+        border-left-color: #9f7aea;
+        background: linear-gradient(135deg, #faf5ff 0%, #fcf9ff 100%);
+    }
+
+    .recommendation.conseil h6 {
+        color: #553c9a;
+    }
+
+    .recommendation.pointsForts {
+        border-left-color: #48bb78;
+        background: linear-gradient(135deg, #f0fff4 0%, #f7fef9 100%);
+    }
+
+    .recommendation.pointsForts h6 {
+        color: #22543d;
+    }
+
+    .recommendation p {
+        margin: 0 0 10px 0;
+        color: #4a5568;
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .recommendation ul {
+        margin: 0;
+        padding-left: 20px;
+    }
+
+    .recommendation ul li {
+        margin-bottom: 6px;
+        color: #2d3748;
+        font-size: 13px;
+    }
+
+    /* ========== POINTS FORTS ========== */
+    .points-forts-box {
+        background: linear-gradient(135deg, #f0fff4 0%, #f7fef9 100%);
+        border: 2px solid #48bb78;
+        border-radius: 12px;
+        padding: 16px;
+        margin: 12px 0;
+    }
+
+    .points-forts-box h5 {
+        color: #22543d;
+        margin: 0 0 10px 0;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .points-forts-box p {
+        margin: 0 0 10px 0;
+        color: #2d3748;
+        font-size: 14px;
+    }
+
+    .stat-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .stat-row:last-child {
+        border-bottom: none;
+    }
+
+    /* ========== CHATBOT FOOTER ========== */
+    .chatbot-footer {
+        padding: 16px;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-chatbot {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-rapport {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-rapport:hover {
+        background: linear-gradient(135deg, #5568d3 0%, #653a8e 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    /* ========== FLOATING BUTTON ========== */
+    .chatbot-floating-button {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: white;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        z-index: 999;
+        transition: all 0.3s ease;
+    }
+
+    .chatbot-floating-button:hover {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+    }
+
+    /* ========== RESPONSIVE ========== */
+    @media (max-width: 768px) {
+        .chatbot-container {
+            width: 90%;
+            right: 5%;
+            bottom: 10px;
+            max-height: 80vh;
+        }
+
+        .chatbot-body {
+            max-height: calc(80vh - 150px);
+        }
+    }
+    /* ========== FEEDBACK CHARACTER ========== */
+    .feedback-character-container {
+        position: fixed;
+        bottom: 0;
+        left: 30px;
+        z-index: 999;
+        display: flex;
+        align-items: flex-end;
+        pointer-events: none;
+        animation: characterSlideUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    @keyframes characterSlideUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .character-avatar {
+        font-size: 120px;
+        line-height: 1;
+        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+        margin-bottom: -10px;
+        position: relative;
+        animation: characterBounce 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes characterBounce {
+        from { transform: translateY(0); }
+        to { transform: translateY(-10px); }
+    }
+
+    /* ========== SUCCESS PREMIUM EFFECTS ========== */
+    .card-success-glow {
+        border: none !important;
+        position: relative;
+        overflow: hidden;
+        animation: cardAppearPop 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        box-shadow: 0 0 20px rgba(72, 187, 120, 0.2);
+    }
+
+    .card-success-glow::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: conic-gradient(transparent, rgba(72, 187, 120, 0.3), transparent 30%);
+        animation: rotateGlow 4s linear infinite;
+        z-index: 0;
+    }
+
+    .card-success-glow .card-header, .card-success-glow .card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    @keyframes rotateGlow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes cardAppearPop {
+        0% { transform: scale(0.8); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    .floating-star {
+        position: absolute;
+        font-size: 24px;
+        pointer-events: none;
+        z-index: 0;
+        animation: starFloat 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes starFloat {
+        0% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 0.8; }
+        100% { transform: translate(20px, -30px) rotate(20deg) scale(1.2); opacity: 1; }
+    }
+
+    .score-count-up {
+        display: inline-block;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .success-icon-pulse {
+        display: inline-block;
+        animation: trophySwing 2s ease-in-out infinite;
+    }
+
+    @keyframes trophySwing {
+        0%, 100% { transform: rotate(-10deg) scale(1.1); }
+        50% { transform: rotate(10deg) scale(1.2); }
+    }
+
+    /* ========== FAILURE SAD EFFECTS ========== */
+    .card-failure-shake {
+        animation: cardShake 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    @keyframes cardShake {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+        40%, 60% { transform: translate3d(4px, 0, 0); }
+    }
+
+    .floating-cloud {
+        position: absolute;
+        font-size: 30px;
+        pointer-events: none;
+        z-index: 0;
+        animation: cloudFloat 5s ease-in-out infinite alternate;
+        opacity: 0.6;
+    }
+
+    @keyframes cloudFloat {
+        from { transform: translateX(0); }
+        to { transform: translateX(30px); }
+    }
+
+    .failure-icon-sigh {
+        display: inline-block;
+        animation: sighPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes sighPulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.05); opacity: 0.9; }
+    }
+
+    /* ========== ENCOURAGEMENT EFFECTS ========== */
+    .floating-motivation {
+        position: absolute;
+        font-size: 28px;
+        pointer-events: none;
+        z-index: 0;
+        animation: motivationBounce 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes motivationBounce {
+        0% { transform: translateY(0) scale(1); opacity: 0.7; }
+        100% { transform: translateY(-30px) scale(1.3); opacity: 1; }
+    }
+
+    .rising-motivation {
+        position: fixed;
+        bottom: -50px;
+        font-size: 32px;
+        pointer-events: none;
+        z-index: 10001;
+        animation: itemRise linear forwards;
+    }
+
+    @keyframes itemRise {
+        to { transform: translateY(-110vh) rotate(360deg); }
+    }
+
+    .speech-bubble {
+        position: absolute;
+        bottom: 130px;
+        left: 80px;
+        background: white;
+        border-radius: 20px;
+        padding: 15px 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        min-width: 200px;
+        max-width: 300px;
+        font-weight: 600;
+        color: #333;
+        opacity: 0;
+        animation: bubblePop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 1s forwards;
+        pointer-events: auto;
+    }
+
+    .speech-bubble::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 20px;
+        border-width: 10px 10px 0 10px;
+        border-style: solid;
+        border-color: white transparent transparent transparent;
+    }
+
+    @keyframes bubblePop {
+        from { transform: scale(0); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Confetti canvas */
+    #confetti-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1001;
+    }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div id="main-result-container" class="container mt-5">
+    <canvas id="confetti-canvas"></canvas>
+
+    {# Personnage de Feedback #}
+    <div class="feedback-character-container">
+        <div class="speech-bubble" id="character-bubble">
+            {% if resultat.reussi %}
+                {% set messages = [
+                    "Exceptionnel ! Tu as brillamment réussi !",
+                    "Félicitations ! Quel talent !",
+                    "Bravo ! Ta persévérance porte ses fruits !",
+                    "Génial ! Tu maîtrises vraiment le sujet !"
+                ] %}
+                {{ messages[random(messages|length - 1)] }}
+            {% else %}
+                {% set messages = [
+                    "Pas de panique ! C'est en faisant des erreurs qu'on apprend.",
+                    "Dommage ! Il s'en est fallu de peu, réessaie !",
+                    "Accroche-toi ! Relis les leçons et tu vas y arriver !",
+                    "Un petit échec pour un futur succès. Ne lâche rien !"
+                ] %}
+                {{ messages[random(messages|length - 1)] }}
+            {% endif %}
+        </div>
+        <div class="character-avatar">
+            👨‍🏫
+        </div>
+    </div>
+    <div class="mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('apprenant_mes_formations') }}">Mes Formations</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('apprenant_suivre_formation', {'id': formation.id}) }}">{{ formation.titre }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('apprenant_quiz_index', {'formationId': formation.id}) }}">Quiz</a></li>
+                <li class="breadcrumb-item active">Résultat</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="card mb-4 {% if resultat.reussi %}card-success-glow border-success{% else %}card-failure-shake border-danger{% endif %}">
+        <div class="card-header {% if resultat.reussi %}bg-success{% else %}bg-danger{% endif %} text-white">
+            <h2 class="mb-0">
+                {% if resultat.reussi %}
+                    Félicitations ! Vous avez réussi le quiz !
+                {% else %}
+                    Quiz non réussi
+                {% endif %}
+            </h2>
+        </div>
+        <div class="card-body text-center">
+            <h3 class="display-4 {% if resultat.reussi %}text-success{% else %}text-danger{% endif %}">
+                <span id="score-counter" class="score-count-up">{{ resultat.note|number_format(0) }}</span>%
+            </h3>
+            <p class="text-muted">Note obtenue</p>
+            <hr>
+            <p class="lead">
+                {% if resultat.reussi %}
+                    Vous avez obtenu {{ resultat.note }}% au quiz "{{ quiz.titre }}". (Seuil de réussite : {{ quiz.noteMinimale }}%)
+                {% else %}
+                    Vous avez obtenu {{ resultat.note }}%, la note minimale pour réussir est {{ quiz.noteMinimale }}%. Réessayez !
+                {% endif %}
+            </p>
+            <p class="text-muted"><small>Quiz passé le {{ resultat.dateTentative|date('d/m/Y à H:i') }}</small></p>
+
+            <!-- Bouton pour ouvrir le chatbot -->
+            <div class="mt-3">
+                <button class="btn btn-primary btn-lg" onclick="openChatbot()">
+                    Voir l'analyse détaillée avec l'assistant
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Détail des réponses si correction activée -->
+    {% if quiz.afficherCorrection and detailsReponses %}
+        <div class="card mb-4">
+            <div class="card-header"><h4>📝 Détail de vos réponses</h4></div>
+            <div class="card-body">
+                {% for detail in detailsReponses %}
+                    {% set question = quiz.questions[loop.index0] %}
+                    {% if question %}
+                    <div class="mb-4 pb-3 {% if not loop.last %}border-bottom{% endif %}">
+                        <h6>Question {{ loop.index }} :</h6>
+                        {% if detail.correct %}
+                            <span class="badge bg-success">✓ Correct</span>
+                        {% else %}
+                            <span class="badge bg-danger">✗ Incorrect</span>
+                        {% endif %}
+                        <p>{{ question.enonce }}</p>
+                        <div class="ms-3">
+                            {% for reponse in question.reponses %}
+                                <div class="mb-1">
+                                    {% if reponse.id == detail.reponse_utilisateur and reponse.id == detail.reponse_correcte %}
+                                        <span class="text-success"><strong>✓ {{ reponse.texte }}</strong> (Votre réponse - Correcte)</span>
+                                    {% elseif reponse.id == detail.reponse_utilisateur %}
+                                        <span class="text-danger"><strong>✗ {{ reponse.texte }}</strong> (Votre réponse - Incorrecte)</span>
+                                    {% elseif reponse.estCorrecte %}
+                                        <span class="text-success">✓ {{ reponse.texte }} (Bonne réponse)</span>
+                                    {% else %}
+                                        <span class="text-muted">{{ reponse.texte }}</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        {% if question.explication %}
+                            <div class="alert alert-info mt-2 mb-0"><small>Note : {{ question.explication }}</small></div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-between">
+        <a href="{{ path('apprenant_quiz_index', {'formationId': formation.id}) }}" class="btn btn-secondary">
+            ← Retour aux quiz
+        </a>
+        {% if not resultat.reussi %}
+            <a href="{{ path('apprenant_quiz_passer', {'formationId': formation.id, 'quizId': quiz.id}) }}" class="btn btn-primary">
+                Réessayer le quiz
+            </a>
+        {% else %}
+            {% if resultat.note >= 70 %}
+                <a href="{{ path('apprenant_quiz_certificate', {'formationId': formation.id, 'quizId': quiz.id, 'resultatId': resultat.id}) }}" class="btn btn-warning text-white" target="_blank">
+                    Télécharger le certificat
+                </a>
+            {% endif %}
+            <a href="{{ path('apprenant_suivre_formation', {'id': formation.id}) }}" class="btn btn-success">
+                Continuer la formation →
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Chatbot Assistant (initialement caché) -->
+<div class="chatbot-container minimized" id="chatbot" style="display: none;">
+    <div class="chatbot-header" onclick="toggleChatbot()">
+        <div class="chatbot-header-content">
+            <div class="chatbot-avatar">🤖</div>
+            <div class="chatbot-title">
+                <h4>Assistant d'apprentissage</h4>
+                <small>Analyse de votre performance</small>
+            </div>
+        </div>
+        <span class="chatbot-toggle">▼</span>
+    </div>
+
+    <div class="chatbot-body" id="chatbot-body">
+        <!-- Score principal -->
+        <div class="score-display">
+            <div class="score-label">Votre score</div>
+            <div class="score-number">{{ resultat.note }}%</div>
+            <div class="score-label">{{ resultat.nombreBonnesReponses }}/{{ resultat.nombreTotalQuestions }} bonnes réponses</div>
+        </div>
+
+        <!-- Message d'introduction -->
+        <div class="chatbot-message bot-message">
+            <strong>👋 Bonjour {{ app.user.prenom }} !</strong>
+            <p>J'ai analysé votre quiz en détail. Voici mon rapport personnalisé pour vous aider à progresser.</p>
+        </div>
+
+        <!-- Analyse des erreurs -->
+        {% if analyse.erreurs|length > 0 %}
+            <div class="chatbot-message bot-message">
+                <strong>❌ Analysons vos {{ analyse.erreurs|length }} erreur(s)</strong>
+                <p>Ne vous inquiétez pas ! Chaque erreur est une opportunité d'apprentissage. Regardons ensemble.</p>
+            </div>
+
+            {% for erreur in analyse.erreurs %}
+                <div class="error-card">
+                    <h5>
+                        <span class="error-badge">Erreur {{ loop.index }}</span>
+                        {{ erreur.points }} point(s)
+                    </h5>
+
+                    <div class="question-text">
+                        <strong>Question :</strong> {{ erreur.question }}
+                    </div>
+
+                    <div class="user-answer">
+                        <strong>❌ Votre réponse</strong>
+                        {{ erreur.reponse_donnee }}
+                    </div>
+
+                    <div class="correct-answer">
+                        <strong>✓ Réponse correcte</strong>
+                        {{ erreur.reponse_correcte }}
+                    </div>
+
+                    {% if erreur.explication_question %}
+                        <div class="explanation-box">
+                            <strong>💡 Explication générale</strong>
+                            <p>{{ erreur.explication_question }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if erreur.explications_detaillees %}
+                        <div class="explanation-box">
+                            <strong>📚 Pour comprendre en profondeur</strong>
+                            <p>{{ erreur.explications_detaillees }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if erreur.explication_reponse_correcte %}
+                        <div class="explanation-box">
+                            <strong>✓ Pourquoi cette réponse ?</strong>
+                            <p>{{ erreur.explication_reponse_correcte }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="points-forts-box">
+                <h5>🎉 Score parfait !</h5>
+                <p>Vous n'avez fait aucune erreur ! Excellent travail ! Vous maîtrisez parfaitement ce sujet.</p>
+            </div>
+        {% endif %}
+
+        <!-- Points forts -->
+        {% if analyse.pointsForts|length > 0 %}
+            <div class="points-forts-box">
+                <h5>✨ Vos points forts</h5>
+                <p>Vous avez brillamment réussi {{ analyse.pointsForts|length }} question(s) !</p>
+                <div class="stat-row">
+                    <span>Questions maîtrisées</span>
+                    <strong>{{ analyse.pointsForts|length }}/{{ resultat.nombreTotalQuestions }}</strong>
+                </div>
+                <div class="stat-row">
+                    <span>Taux de réussite</span>
+                    <strong>{{ resultat.note }}%</strong>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Recommandations personnalisées -->
+        <div class="chatbot-message bot-message">
+            <strong>💪 Mes recommandations pour vous</strong>
+            <p>Voici ce que je vous conseille en fonction de votre performance :</p>
+        </div>
+
+        {% for reco in analyse.recommandations %}
+            <div class="recommendation {{ reco.niveau }}">
+                <h6>{{ reco.niveau|upper }}</h6>
+                <p>{{ reco.message }}</p>
+                {% if reco.actions|length > 0 %}
+                    <ul>
+                        {% for action in reco.actions %}
+                            <li>{{ action }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- Message de conclusion -->
+        <div class="chatbot-message bot-message">
+            <strong>🎯 En résumé</strong>
+            <p>
+                {% if resultat.reussi %}
+                    Bravo ! Vous avez réussi ce quiz avec {{ resultat.note }}%. Continuez sur cette lancée et passez au module suivant ! 🚀
+                {% else %}
+                    Vous avez obtenu {{ resultat.note }}%. Ne vous découragez pas ! Utilisez mes conseils ci-dessus pour réviser et réessayer. Vous allez y arriver ! 💪
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div class="chatbot-footer">
+        <button class="btn-chatbot btn-rapport" onclick="telechargerRapport()">
+            📄 Télécharger le rapport complet
+        </button>
+    </div>
+</div>
+
+<!-- Bouton flottant pour réouvrir le chatbot -->
+<div class="chatbot-floating-button" id="chatbot-floating" onclick="openChatbot()">
+    🤖
+</div>
+
+<script>
+let chatbotOpened = false;
+
+function openChatbot() {
+    const chatbot = document.getElementById('chatbot');
+    const floatingBtn = document.getElementById('chatbot-floating');
+
+    chatbot.style.display = 'flex';
+    chatbot.classList.remove('minimized');
+    floatingBtn.style.display = 'none';
+    chatbotOpened = true;
+
+    setTimeout(() => {
+        const chatbotBody = document.getElementById('chatbot-body');
+        chatbotBody.scrollTop = 0;
+    }, 100);
+}
+
+function toggleChatbot() {
+    const chatbot = document.getElementById('chatbot');
+    const floatingBtn = document.getElementById('chatbot-floating');
+
+    if (chatbot.classList.contains('minimized')) {
+        chatbot.classList.remove('minimized');
+    } else {
+        chatbot.classList.add('minimized');
+        setTimeout(() => {
+            if (chatbot.classList.contains('minimized')) {
+                chatbot.style.display = 'none';
+                floatingBtn.style.display = 'flex';
+            }
+        }, 2000);
+    }
+}
+
+function telechargerRapport() {
+    const rapport = {{ rapportComplet|json_encode|raw }};
+    const blob = new Blob([rapport], { type: 'text/plain; charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'rapport_quiz_{{ quiz.titre|replace({' ': '_'}) }}_{{ resultat.dateTentative|date("Y-m-d") }}.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    const chatbotBody = document.getElementById('chatbot-body');
+    const message = document.createElement('div');
+    message.className = 'chatbot-message bot-message';
+    message.innerHTML = '<strong>✓ Téléchargement réussi</strong><p>Votre rapport a été téléchargé avec succès. Vous pouvez le consulter à tout moment !</p>';
+    chatbotBody.appendChild(message);
+    chatbotBody.scrollTop = chatbotBody.scrollHeight;
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // --- SYNTHÈSE VOCALE ---
+    function speakFeedback() {
+        if ('speechSynthesis' in window) {
+            const bubble = document.getElementById('character-bubble');
+            if (!bubble) return;
+
+            const text = bubble.innerText.trim();
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            // Essayer de trouver une voix française
+            let voices = window.speechSynthesis.getVoices();
+            
+            const setVoice = () => {
+                voices = window.speechSynthesis.getVoices();
+                const frenchVoice = voices.find(voice => voice.lang.startsWith('fr'));
+                if (frenchVoice) {
+                    utterance.voice = frenchVoice;
+                }
+            };
+
+            if (voices.length === 0) {
+                window.speechSynthesis.onvoiceschanged = setVoice;
+            } else {
+                setVoice();
+            }
+
+            utterance.lang = 'fr-FR';
+            utterance.pitch = 1.1;
+            utterance.rate = 1.0;
+
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+    // Attendre un peu que le personnage apparaisse avant de parler
+    setTimeout(speakFeedback, 1500);
+
+    // --- EFFETS SONORES ---
+    function playSound(type) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (type === 'success') {
+            // Un "Ding Dong" joyeux
+            const osc1 = audioCtx.createOscillator();
+            const gain1 = audioCtx.createGain();
+            osc1.type = 'triangle';
+            osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc1.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+            gain1.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain1.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc1.connect(gain1);
+            gain1.connect(audioCtx.destination);
+            osc1.start();
+            osc1.stop(audioCtx.currentTime + 0.5);
+        } else {
+            // Un "Bong" un peu triste
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+            osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.5); // A2
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.8);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.8);
+        }
+    }
+
+    // Jouer le son correspondant
+    setTimeout(() => {
+        playSound('{{ resultat.reussi ? "success" : "failure" }}');
+    }, 500);
+
+    // --- COMPTEUR DE SCORE ---
+    function animateScore() {
+        const counter = document.getElementById('score-counter');
+        if (!counter) return;
+        
+        const targetValue = parseFloat("{{ resultat.note|number_format(2, '.', '') }}") || 0;
+        const duration = 2000;
+        let startTime = null;
+        
+        function update(currentTime) {
+            if (!startTime) startTime = currentTime;
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            // Easing function (outQuad)
+            const easeProgress = progress * (2 - progress);
+            
+            const currentVal = Math.floor(easeProgress * targetValue);
+            counter.innerText = currentVal;
+            
+            if (progress < 1) {
+                requestAnimationFrame(update);
+            } else {
+                counter.innerText = Math.round(targetValue);
+            }
+        }
+        
+        requestAnimationFrame(update);
+    }
+
+    animateScore();
+
+    {% if not resultat.reussi %}
+        setTimeout(() => {
+            openChatbot();
+        }, 1500);
+    {% else %}
+        // Lancer les confettis si réussi
+        const duration = 3 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+
+        const interval = setInterval(function() {
+            const timeLeft = animationEnd - Date.now();
+
+            if (timeLeft <= 0) {
+                return clearInterval(interval);
+            }
+
+            const particleCount = 50 * (timeLeft / duration);
+            // since particles fall down, start a bit higher than random
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+        }, 250);
+    {% endif %}
+});
+</script>
+{% endblock %}

@@ -1,0 +1,236 @@
+{% extends 'base.html.twig' %}
+{# Hérite du layout principal : header, footer, CSS/JS communs #}
+
+{% block title %}Gestion des Commandes{% endblock %}
+{# Titre de la page qui s’affiche dans l’onglet du navigateur #}
+
+{% block body %}
+
+<div class="container-fluid py-4">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-body p-4">
+
+            {# ================= HEADER ================= #}
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+                <h3 class="fw-bold mb-0">
+                    <i class="fas fa-shopping-cart text-primary me-2"></i>
+                    Gestion des Commandes
+                </h3>
+
+                {# Bouton pour accéder à la page des produits #}
+                <a href="{{ path('produit_index') }}" class="btn btn-primary rounded-pill px-4">
+                    <i class="fas fa-box me-2"></i> Produits
+                </a>
+            </div>
+
+            {# ================= FLASH MESSAGES ================= #}
+            {# Affiche les messages de succès, erreur, info etc. #}
+            {% for label, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ label }} shadow-sm alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+
+            {# ================= FILTRES ================= #}
+            {# Boutons pour filtrer les commandes selon leur statut #}
+            <div class="mb-4 text-center">
+                <div class="btn-group rounded-pill shadow-sm overflow-hidden" role="group">
+
+                    <button class="btn btn-outline-dark active filter-btn" data-filter="all">
+                        Toutes ({{ total }})
+                    </button>
+
+                    <button class="btn btn-outline-warning filter-btn" data-filter="en_attente">
+                        En attente
+                    </button>
+
+                    <button class="btn btn-outline-info filter-btn" data-filter="confirmee">
+                        Confirmées
+                    </button>
+
+                    <button class="btn btn-outline-primary filter-btn" data-filter="en_cours">
+                        En cours
+                    </button>
+
+                    <button class="btn btn-outline-success filter-btn" data-filter="livree">
+                        Livrées
+                    </button>
+
+                </div>
+            </div>
+
+            {# ================= SEARCH ================= #}
+            {# Barre de recherche pour filtrer par texte #}
+            <div class="mb-3">
+                <input type="text" id="searchInput" class="form-control rounded-pill shadow-sm"
+                       placeholder="🔍 Rechercher une commande...">
+            </div>
+
+            {# ================= TABLEAU DES COMMANDES ================= #}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center" id="commandesTable">
+
+                    <thead class="table-light">
+                    <tr>
+                        <th>Référence</th>
+                        <th>Date</th>
+                        <th>Client</th>
+                        <th>Articles</th>
+                        <th>Total</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    {# Boucle sur toutes les commandes #}
+                    {% for commande in commandes %}
+                        <tr data-statut="{{ commande.statut }}" class="commande-row">
+
+                            <td class="fw-bold text-primary">
+                                {{ commande.reference }}
+                            </td>
+
+                            <td>
+                                {{ commande.dateCommande|date('d/m/Y H:i') }}
+                            </td>
+
+                            <td>
+                                <div class="fw-semibold">
+                                    {{ commande.utilisateur.nom }} {{ commande.utilisateur.prenom }}
+                                </div>
+                                <small class="text-muted">{{ commande.utilisateur.email }}</small>
+                            </td>
+
+                            <td>
+                               <span class="badge bg-info-subtle text-info rounded-pill px-3">
+                                    {{ commande.items|length }}
+                                </span>
+                            </td>
+
+                            <td class="fw-bold text-success">
+                                {{ commande.calculerTotal()|number_format(2, ',', ' ') }} dt
+                            </td>
+
+                            <td>
+                                {# Badge coloré selon le statut #}
+                                {% set colors = {
+                                    'en_attente':'warning',
+                                    'confirmee':'info',
+                                    'en_cours':'primary',
+                                    'livree':'success',
+                                    'annulee':'danger'
+                                } %}
+                                <span class="badge bg-{{ colors[commande.statut]|default('dark') }} rounded-pill px-3">
+                                    {{ commande.statut|capitalize }}
+                                </span>
+                            </td>
+
+                            <td>
+                                {# Bouton pour voir le détail de la commande #}
+                                <a href="{{ path('admin_commande_detail', {id: commande.id}) }}"
+                                   class="btn btn-sm btn-outline-primary rounded-circle shadow-sm">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+
+                        </tr>
+                    {% else %}
+                        {# Message si aucune commande n’est trouvée #}
+                        <tr>
+                            <td colspan="7" class="py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                Aucune commande
+                            </td>
+                        </tr>
+                    {% endfor %}
+
+                    </tbody>
+                </table>
+
+            </div>
+
+            {# ================= PAGINATION ================= #}
+            {% if pages > 1 %}
+            <div class="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-3">
+
+                <small class="text-muted">
+                    {{ total }} commandes au total
+                </small>
+
+                <ul class="pagination mb-0">
+
+                    <li class="page-item {{ currentPage == 1 ? 'disabled' }}">
+                        <a class="page-link" href="?page={{ currentPage - 1 }}">←</a>
+                    </li>
+
+                    {% for i in 1..pages %}
+                        <li class="page-item {{ currentPage == i ? 'active' }}">
+                            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+
+                    <li class="page-item {{ currentPage == pages ? 'disabled' }}">
+                        <a class="page-link" href="?page={{ currentPage + 1 }}">→</a>
+                    </li>
+
+                </ul>
+
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{# ================= STYLE ================= #}
+<style>
+.pagination .page-link {
+    border-radius: 10px;
+    margin: 0 3px;
+    padding: 6px 12px;
+}
+.pagination .active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+</style>
+
+{# ================= JS ================= #}
+<script>
+const buttons = document.querySelectorAll('.filter-btn');
+const rows = document.querySelectorAll('.commande-row');
+const searchInput = document.getElementById('searchInput');
+
+{# Filtre par statut #}
+buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const statut = btn.dataset.filter;
+
+        rows.forEach(row => {
+            row.style.display =
+                (statut === 'all' || row.dataset.statut === statut) ? '' : 'none';
+        });
+    });
+});
+
+{# Recherche par texte #}
+searchInput.addEventListener('keyup', () => {
+    const value = searchInput.value.toLowerCase();
+    rows.forEach(row => {
+        row.style.display =
+            row.innerText.toLowerCase().includes(value) ? '' : 'none';
+    });
+});
+</script>
+
+{% endblock %}

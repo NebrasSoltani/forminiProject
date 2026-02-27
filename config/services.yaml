@@ -1,0 +1,99 @@
+# config/services.yaml
+
+parameters:
+    images_directory: "%kernel.project_dir%/public/uploads/images"
+    sendgrid_api_key: '%env(SENDGRID_API_KEY)%'
+    sendgrid_from_email: '%env(SENDGRID_FROM_EMAIL)%'
+    sendgrid_from_name: '%env(SENDGRID_FROM_NAME)%'
+    mobile_text_alerts_api_url: '%env(default::MOBILE_TEXT_ALERTS_API_URL)%'
+    mobile_text_alerts_api_key: '%env(default::MOBILE_TEXT_ALERTS_API_KEY)%'
+    mobile_text_alerts_sender: '%env(default::MOBILE_TEXT_ALERTS_SENDER)%'
+    mobile_text_alerts_template_id: '%env(default::MOBILE_TEXT_ALERTS_TEMPLATE_ID)%'
+    sms_default_country_code: '%env(default::SMS_DEFAULT_COUNTRY_CODE)%'
+    twilio_account_sid: '%env(default::TWILIO_ACCOUNT_SID)%'
+    twilio_auth_token: '%env(default::TWILIO_AUTH_TOKEN)%'
+    twilio_from_number: '%env(default::TWILIO_FROM_NUMBER)%'
+    twilio_api_key_sid: '%env(default::TWILIO_API_KEY_SID)%'
+    twilio_api_key_secret: '%env(default::TWILIO_API_KEY_SECRET)%'
+    callmebot_api_key: '%env(default::CALLMEBOT_API_KEY)%'
+    gemini_api_key: '%env(GEMINI_API_KEY)%'
+    app.turnstile_site_key: "%env(string:CLOUDFLARE_TURNSTILE_SITE_KEY)%"
+    app.turnstile_secret_key: "%env(string:CLOUDFLARE_TURNSTILE_SECRET_KEY)%"
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: "../src/"
+        exclude:
+            - "../src/DependencyInjection/"
+            - "../src/Entity/"
+            - "../src/Kernel.php"
+
+    App\Service\SendGridEmailSender:
+        arguments:
+            $sendgridApiKey: '%sendgrid_api_key%'
+            $sendgridFromEmail: '%sendgrid_from_email%'
+            $sendgridFromName: '%sendgrid_from_name%'
+            $httpClient: '@http_client'
+
+    App\Service\MobileTextAlertsSmsSender:
+        arguments:
+            $mobileTextAlertsApiUrl: '%mobile_text_alerts_api_url%'
+            $mobileTextAlertsApiKey: '%mobile_text_alerts_api_key%'
+            $mobileTextAlertsSender: '%mobile_text_alerts_sender%'
+            $smsDefaultCountryCode: '%sms_default_country_code%'
+            $mobileTextAlertsTemplateId: '%mobile_text_alerts_template_id%'
+
+    App\Service\TwilioSmsSender:
+        arguments:
+            $twilioAccountSid: '%twilio_account_sid%'
+            $twilioAuthToken: '%twilio_auth_token%'
+            $twilioFromNumber: '%twilio_from_number%'
+            $smsDefaultCountryCode: '%sms_default_country_code%'
+            $twilioApiKeySid: '%twilio_api_key_sid%'
+            $twilioApiKeySecret: '%twilio_api_key_secret%'
+
+    App\Service\CallMeBotWhatsappSender:
+        arguments:
+            $callmebotApiKey: '%callmebot_api_key%'
+            $smsDefaultCountryCode: '%sms_default_country_code%'
+
+    App\Service\ChatbotAnalyseService:
+        arguments:
+            $questionRepository: '@App\Repository\QuestionRepository'
+            $reponseRepository: '@App\Repository\ReponseRepository'
+            $httpClient: '@http_client'
+            $logger: '@logger'
+            $geminiApiKey: '%env(GEMINI_API_KEY)%'
+            $emailSender: '@App\Service\SendGridEmailSender'
+
+    App\Service\GeminiService:
+        arguments:
+            $httpClient: '@http_client'
+            $apiKey: '%env(GEMINI_API_KEY)%'
+
+    # Extension Twig pour le sélecteur de langue
+    App\Twig\LanguageExtension:
+        tags:
+            - { name: twig.extension }
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    
+    # ⭐ Google Two-Factor Authentication Provider
+    scheb_two_factor.security.google.authenticator:
+        class: Scheb\TwoFactorBundle\Security\TwoFactor\Provider\Google\GoogleAuthenticator
+        arguments:
+            $leeway: 1
+        tags:
+            - { name: "scheb_two_factor.provider", alias: "google" }
+
+    # ⭐ Twilio Verify Service Configuration
+    App\Service\TwilioVerifyService:
+        arguments:
+            $accountSid: "%env(string:TWILIO_ACCOUNT_SID)%"
+            $authToken: "%env(string:TWILIO_AUTH_TOKEN)%"
+            $verifyServiceSid: "%env(string:TWILIO_VERIFY_SERVICE_SID)%"

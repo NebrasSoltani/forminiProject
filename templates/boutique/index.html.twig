@@ -1,0 +1,191 @@
+{% extends 'base.html.twig' %}
+{# Hérite du layout principal avec header, footer et styles globaux #}
+
+{% block title %}Boutique - Produits Pédagogiques{% endblock %}
+{# Titre de la page #}
+
+{% block body %}
+<div class="container mt-4">
+
+    {# ================= HEADER ================= #}
+    <div class="text-center py-5">
+        <h1 class="fw-bold display-5 mb-3">
+            <i class="bi bi-shop me-2 text-primary"></i>Boutique Pédagogique
+        </h1>
+        <p class="text-muted">Découvrez nos produits universitaires et matériels d'étude</p>
+
+        {# Boutons Panier et Commandes #}
+        <div class="d-flex justify-content-center gap-3 mt-3">
+            <a href="{{ path('boutique_panier') }}" class="btn btn-primary rounded-pill px-4 position-relative">
+                🛒 Panier
+                {# Badge indiquant le nombre de produits dans le panier #}
+                {% if panier|length > 0 %}
+                    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+                        {{ panier|length }}
+                    </span>
+                {% endif %}
+            </a>
+
+            <a href="{{ path('boutique_mes_commandes') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                📦 Commandes
+            </a>
+        </div>
+    </div>
+
+    {# ================= RECHERCHE ================= #}
+    <div class="text-center mb-4">
+        <form method="get" action="{{ path('boutique_index') }}" class="d-flex justify-content-center gap-2">
+            <input
+                type="text"
+                name="q"
+                value="{{ app.request.get('q') }}"
+                placeholder="Rechercher un produit..."
+                class="form-control w-50"
+            >
+            <button class="btn btn-primary">Rechercher</button>
+        </form>
+    </div>
+
+    {# ================= FILTRES ================= #}
+    <div class="tera-boutique-filters mb-4">
+
+        {# Filtre "Tous" #}
+        <a href="{{ path('boutique_index') }}"
+           class="tera-filter-pill {{ categorieFilter is null ? 'active' : '' }}">
+            Tous
+        </a>
+
+        {# Filtre par catégorie #}
+        <a href="{{ path('boutique_index', {categorie: 'Informatique'}) }}"
+           class="tera-filter-pill {{ categorieFilter == 'Informatique' ? 'active' : '' }}">
+            💻 Informatique
+        </a>
+
+        <a href="{{ path('boutique_index', {categorie: 'Scientifique'}) }}"
+           class="tera-filter-pill {{ categorieFilter == 'Scientifique' ? 'active' : '' }}">
+            📐 Scientifique
+        </a>
+
+        <a href="{{ path('boutique_index', {categorie: 'Accessoires'}) }}"
+           class="tera-filter-pill {{ categorieFilter == 'Accessoires' ? 'active' : '' }}">
+            🎒 Accessoires
+        </a>
+
+        <a href="{{ path('boutique_index', {categorie: 'Support'}) }}"
+           class="tera-filter-pill {{ categorieFilter == 'Support' ? 'active' : '' }}">
+            📚 Outils intelligentes
+        </a>
+    </div>
+
+    {# ================= PRODUITS ================= #}
+    {% if produits is empty %}
+        <div class="text-center py-5 text-muted">
+            Aucun produit trouvé
+        </div>
+    {% else %}
+        <div class="row g-4">
+            {% for produit in produits %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+
+                    <div class="card tera-product-card h-100">
+
+                        {# Image produit #}
+                        {% if produit.image %}
+                            <img src="{{ asset('uploads/produits/' ~ produit.image) }}"
+                                 class="tera-product-cover-img"
+                                 alt="{{ produit.nom }}">
+                        {% endif %}
+
+                        <div class="card-body d-flex flex-column">
+                            <h6 class="fw-bold">{{ produit.nom }}</h6>
+                            <small class="text-muted mb-2">{{ produit.categorie }}</small>
+
+                            {# Prix et bouton Voir #}
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <strong class="text-primary">
+                                    {{ produit.prix|number_format(2, ',', ' ') }} DT
+                                </strong>
+
+                                <a href="{{ path('boutique_produit_show', {id: produit.id}) }}"
+                                   class="btn btn-sm btn-primary rounded-pill">
+                                    Voir
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# ================= FLOATING PANIER ================= #}
+    {% if panier|length > 0 %}
+        <div class="tera-floating-checkout">
+            <a href="{{ path('boutique_panier') }}" class="tera-floating-btn">
+                🛒 Voir panier ({{ panier|length }})
+            </a>
+        </div>
+    {% endif %}
+
+</div>
+
+{# ================= STYLE ================= #}
+<style>
+.tera-boutique-filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    justify-content:center;
+}
+
+.tera-filter-pill{
+    padding:8px 18px;
+    border-radius:999px;
+    background:#f1f5f9;
+    text-decoration:none;
+    color:#475569;
+    font-weight:600;
+}
+
+.tera-filter-pill.active{
+    background:#667eea;
+    color:#fff;
+}
+
+.tera-product-card{
+    border-radius:16px;
+    transition:.3s;
+    box-shadow:0 6px 20px rgba(0,0,0,.08);
+}
+
+.tera-product-card:hover{
+    transform:translateY(-5px);
+}
+
+.tera-product-cover-img{
+    height:180px;
+    object-fit:cover;
+    width:100%;
+    border-top-left-radius:16px;
+    border-top-right-radius:16px;
+}
+
+.tera-floating-checkout{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+}
+
+.tera-floating-btn{
+    background:#10b981;
+    color:white;
+    padding:12px 22px;
+    border-radius:40px;
+    font-weight:700;
+    text-decoration:none;
+}
+</style>
+
+{% endblock %}

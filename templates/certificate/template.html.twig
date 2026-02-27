@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Certificat de Réussite</title>
+    <style>
+        @page { margin: 0; }
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background-color: #555;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            padding: 30px;
+            box-sizing: border-box;
+            text-align: center;
+            background-color: #fff;
+        }
+        .border-pattern {
+            border: 2px solid #b4975a; /* Gold */
+            padding: 5px;
+            height: 98%;
+            box-sizing: border-box;
+        }
+        .inner-border {
+            border: 10px solid #1e293b; /* Dark Blue */
+            height: 97%;
+            padding: 40px;
+            position: relative;
+            background: #fff;
+            box-sizing: border-box;
+        }
+        .content-frame {
+             border: 1px solid #b4975a;
+             height: 100%;
+             padding: 20px;
+             position: relative;
+             box-sizing: border-box;
+             /* Background pattern */
+             background-image: radial-gradient(#f0f0f0 10%, transparent 10%);
+             background-position: 0 0;
+             background-size: 20px 20px;
+        }
+
+        /* Corner Decorations */
+        .corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #b4975a;
+        }
+        .top-left { top: 10px; left: 10px; border-right: none; border-bottom: none; }
+        .top-right { top: 10px; right: 10px; border-left: none; border-bottom: none; }
+        .bottom-left { bottom: 10px; left: 10px; border-right: none; border-top: none; }
+        .bottom-right { bottom: 10px; right: 10px; border-left: none; border-top: none; }
+        
+        h1 {
+            font-size: 60px;
+            text-transform: uppercase;
+            color: #1e293b;
+            margin: 20px 0 10px;
+            letter-spacing: 6px;
+            font-weight: normal;
+            border-bottom: 1px solid #b4975a;
+            display: inline-block;
+            padding-bottom: 20px;
+        }
+        .subtitle {
+            font-size: 22px;
+            color: #64748b;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+        }
+        .recipient {
+            font-size: 48px;
+            font-weight: bold;
+            color: #b4975a; /* Gold Text */
+            margin: 20px 0 40px;
+            font-family: 'Times New Roman', serif;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .text {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #475569;
+            font-style: italic;
+        }
+        .course-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #1e293b;
+            margin: 10px 0 30px;
+            text-transform: uppercase;
+        }
+        .score-badge {
+            display: inline-block;
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 4px;
+            font-size: 22px;
+            font-weight: bold;
+            margin: 30px 0;
+            border: 2px solid #b4975a;
+            box-shadow: 3px 3px 0 rgba(180, 151, 90, 0.4);
+        }
+        .footer {
+            margin-top: 60px;
+            display: table;
+            width: 100%;
+        }
+        .signature-block {
+            display: table-cell;
+            width: 40%;
+            text-align: center;
+            vertical-align: bottom;
+        }
+        .signature-line {
+            width: 200px;
+            border-top: 1px solid #333;
+            margin: 0 auto 10px;
+            padding-top: 10px;
+        }
+        .seal-container {
+            display: table-cell;
+            width: 20%;
+            text-align: center;
+            vertical-align: middle;
+            position: relative;
+        }
+        .seal {
+             width: 120px;
+             height: 120px;
+             background: #b4975a;
+             border-radius: 50%;
+             margin: 0 auto;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             color: white;
+             font-weight: bold;
+             border: 5px dotted #fff;
+             box-shadow: 0 0 0 5px #b4975a;
+        }
+        .seal-text {
+            padding-top: 40px; /* Poor man's vertical align for dompdf if flex fails */
+            font-size: 18px;
+            display: block;
+            text-align: center;
+            transform: rotate(-15deg);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #b4975a;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="border-pattern">
+            <div class="inner-border">
+                <div class="content-frame">
+                    <div class="corner top-left"></div>
+                    <div class="corner top-right"></div>
+                    <div class="corner bottom-left"></div>
+                    <div class="corner bottom-right"></div>
+
+                    <div class="logo">Formini Academy</div>
+                    
+                    <h1>Certificat de Réussite</h1>
+                    <div class="subtitle">DÉCERNÉ À</div>
+
+                    <div class="recipient">
+                        {{ resultat.apprenant.prenom }} {{ resultat.apprenant.nom }}
+                    </div>
+
+                    <div class="text">en reconnaissance de l'achèvement réussi du quiz d'évaluation</div>
+                    
+                    <div class="course-title">{{ quiz.titre|default(resultat.quiz.titre) }}</div>
+                    
+                    <div class="text">faisant partie du programme de formation</div>
+                    <div class="text" style="font-weight: bold; color: #1e293b;">{{ formation.titre|default(resultat.quiz.formation.titre) }}</div>
+
+                    <div class="score-badge">
+                        Note Finale : {{ resultat.note }}%
+                    </div>
+
+                    <div class="footer">
+                        <div class="signature-block">
+                            <div class="text" style="margin-bottom: 20px;">Fait à Tunis, le</div>
+                            <div class="text" style="font-weight: bold; font-style: normal;">{{ resultat.dateTentative|date('d/m/Y') }}</div>
+                        </div>
+                        
+                        <div class="seal-container">
+                            <div class="seal">
+                                <div class="seal-text">OFFICIAL<br>VERIFIED</div>
+                            </div>
+                        </div>
+
+                        <div class="signature-block">
+                            <div class="signature-line">
+                               <img src="" alt="" style="height: 40px; display: none;"> <!-- Placeholder for signature image -->
+                               <span style="font-family: 'Courier New', serif; font-size: 20px; font-style: italic;">L'équipe Pédagogique</span>
+                            </div>
+                            <div class="text" style="font-size: 12px; text-transform: uppercase; color: #94a3b8; font-style: normal;">Signature Autorisée</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
