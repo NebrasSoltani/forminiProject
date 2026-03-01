@@ -79,20 +79,11 @@ services:
     App\Twig\LanguageExtension:
         tags:
             - { name: twig.extension }
-            $sendgridApiKey: "%env(string:SENDGRID_API_KEY)%"
-            $sendgridFromEmail: "%env(string:SENDGRID_FROM_EMAIL)%"
-            $sendgridFromName: "%env(string:SENDGRID_FROM_NAME)%"
-            $httpClient: "@http_client"
 
-    # ⭐ Configuration du service ChatbotAnalyseService
-    App\Service\ChatbotAnalyseService:
+
+    App\Service\AIProductSuggestionService:
         arguments:
-            $questionRepository: '@App\Repository\QuestionRepository'
-            $reponseRepository: '@App\Repository\ReponseRepository'
-            $httpClient: "@http_client"
-            $logger: "@logger"
-            $emailSender: '@App\Service\SendGridEmailSender'
-            $geminiApiKey: "%env(string:GEMINI_API_KEY)%"
+            $geminiApiKey: '%env(GEMINI_API_KEY)%'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
@@ -105,8 +96,3 @@ services:
         tags:
             - { name: "scheb_two_factor.provider", alias: "google" }
 
-# ⭐ NOUVEAU — GeminiService
-    App\Service\GeminiService:
-        arguments:
-            $httpClient: "@http_client"
-            $apiKey: "%env(string:GEMINI_API_KEY)%"

@@ -27,7 +27,7 @@ class AdminCommandeController extends AbstractController
     {
         // Récupère le numéro de page dans l'URL, par défaut 1
         $page = max(1, $request->query->getInt('page', 1)); 
-        $limit = 8; // nombre de commandes affichées par page
+        $limit = 3; // nombre de commandes affichées par page
         $offset = ($page - 1) * $limit; // calcul de l'offset pour la requête SQL
 
         // On compte le nombre total de commandes dans la BDD

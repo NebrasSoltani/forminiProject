@@ -8,12 +8,11 @@ use App\Entity\Inscription;
 use App\Entity\Produit;
 use App\Service\CallMeBotWhatsappSender;
 use App\Service\SendGridEmailSender;
+use App\Service\PdfGeneratorService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
-use Stripe\Stripe;
-use Stripe\Checkout\Session;
 use Stripe\Webhook;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -293,6 +292,7 @@ class PaiementController extends AbstractController
         EntityManagerInterface $em,
         SendGridEmailSender $sendGrid,
         CallMeBotWhatsappSender $smsSender,
+        PdfGeneratorService $pdfGenerator,
         LoggerInterface $logger
     ): Response {
         $user = $this->getUser();
@@ -305,9 +305,19 @@ class PaiementController extends AbstractController
         $commande->setStatut('payee');
         $em->flush();
 
+        // Génération de la facture PDF
+        $invoicePath = null;
+        try {
+            $invoicePath = $pdfGenerator->generateInvoicePdf($commande, $user);
+            $logger->info('Invoice PDF generated: ' . $invoicePath);
+        } catch (\Throwable $e) {
+            $logger->error('Failed to generate invoice PDF: ' . $e->getMessage());
+        }
+
         $html = $this->renderView('emails/commande_success.html.twig', [
             'commande' => $commande,
             'user' => $user,
+            'invoicePath' => $invoicePath,
         ]);
 
         $emailSent = false;
@@ -320,6 +330,16 @@ class PaiementController extends AbstractController
                 'Votre commande a ete confirmee',
                 $html
             );
+            
+            // Ajouter la facture PDF en pièce jointe si elle a été générée
+            if ($invoicePath && file_exists($invoicePath)) {
+                $email->attach(
+                    file_get_contents($invoicePath),
+                    'facture_' . $commande->getId() . '.pdf',
+                    'application/pdf'
+                );
+            }
+            
             $sendGrid->send($email);
             $logger->info('Order email sent via SendGrid');
             $emailSent = true;
@@ -333,7 +353,7 @@ class PaiementController extends AbstractController
                 $smsSender->send(
                     (string) $user->getTelephone(),
                     sprintf(
-                        'Paiement confirme. Commande #%d recue pour %.2f TND. Merci.',
+                        'Paiement confirme. Commande #%d recue pour %.2f TND. Facture PDF envoyee par email. Merci.',
                         (int) $commande->getId(),
                         (float) $commande->getTotal()
                     )
@@ -348,9 +368,9 @@ class PaiementController extends AbstractController
         }
 
         if ($emailSent && $smsSent) {
-            $this->addFlash('success', 'Paiement confirme. Email et SMS de confirmation envoyes.');
+            $this->addFlash('success', 'Paiement confirme. Email et SMS de confirmation envoyes. Facture PDF jointe a l\'email.');
         } elseif ($emailSent) {
-            $this->addFlash('warning', 'Paiement confirme. Email envoye, mais SMS non envoye.');
+            $this->addFlash('warning', 'Paiement confirme. Email avec facture PDF envoye, mais SMS non envoye.');
         } elseif ($smsSent) {
             $this->addFlash('warning', 'Paiement confirme. SMS envoye, mais email non envoye.');
         } else {
@@ -360,6 +380,7 @@ class PaiementController extends AbstractController
         return $this->render('payment/success.html.twig', [
             'commande' => $commande,
             'user' => $user,
+            'invoicePath' => $invoicePath ? basename($invoicePath) : null,
         ]);
     }
 
@@ -487,5 +508,40 @@ class PaiementController extends AbstractController
     public function cancel(): Response
     {
         return $this->render('payment/cancel.html.twig');
+    }
+
+    #[Route('/facture/{id}', name: 'download_invoice')]
+    public function downloadInvoice(
+        int $id,
+        EntityManagerInterface $em,
+        PdfGeneratorService $pdfGenerator
+    ): Response {
+        $user = $this->getUser();
+        $commande = $em->getRepository(Commande::class)->find($id);
+
+        if (!$commande || $commande->getUtilisateur() !== $user) {
+            throw $this->createNotFoundException('Commande non trouvee');
+        }
+
+        if ($commande->getStatut() !== 'payee') {
+            throw $this->createAccessDeniedException('La facture n\'est disponible que pour les commandes payées');
+        }
+
+        try {
+            $invoicePath = $pdfGenerator->generateInvoicePdf($commande, $user);
+            
+            if (!file_exists($invoicePath)) {
+                throw $this->createNotFoundException('Fichier de facture non trouvé');
+            }
+
+            return $this->file(
+                $invoicePath,
+                'facture_' . $commande->getId() . '.pdf',
+                'application/pdf'
+            );
+        } catch (\Throwable $e) {
+            $this->addFlash('error', 'Erreur lors de la génération de la facture: ' . $e->getMessage());
+            return $this->redirectToRoute('boutique_mes_commandes');
+        }
     }
 }
