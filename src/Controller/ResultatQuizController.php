@@ -39,62 +39,69 @@ class ResultatQuizController extends AbstractController
     /**
      * Lister tous les résultats
      */
-  #[Route('', name: 'list', methods: ['GET'])]
-public function list(): JsonResponse
-{
-    $resultats = $this->repository->findBy([], ['dateRealisation' => 'DESC']);
+    #[Route('', name: 'list', methods: ['GET'])]
+    public function list(): JsonResponse
+    {
+        $resultats = $this->repository->findBy([], ['dateTentative' => 'DESC']);
 
-    if (!$resultats) {
-        return new JsonResponse(['message' => 'Aucun résultat trouvé.'], JsonResponse::HTTP_NOT_FOUND);
+        if (!$resultats) {
+            return new JsonResponse(['message' => 'Aucun résultat trouvé.'], JsonResponse::HTTP_NOT_FOUND);
+        }
+
+        $data = $this->serializer->serialize($resultats, 'json');
+        return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
     }
-
-    $data = $this->serializer->serialize($resultats, 'json', ['groups' => 'resultat:read']);
-    return new JsonResponse($data, JsonResponse::HTTP_OK, [], true);
-}
 
     /**
      * Créer un nouveau résultat
      */
-#[Route('', name: 'create', methods: ['POST'])]
-public function create(Request $request): JsonResponse
-{
-    $data = json_decode($request->getContent(), true);
+    #[Route('', name: 'create', methods: ['POST'])]
+    public function create(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
 
-    if (!$data) {
-        return new JsonResponse(['message' => 'Données invalides'], JsonResponse::HTTP_BAD_REQUEST);
+        if (!$data) {
+            return new JsonResponse(['message' => 'Données invalides'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Vérifier l'existence du quiz
+        $quiz = $this->quizRepository->find($data['quiz_id'] ?? null);
+        if (!$quiz) {
+            return new JsonResponse(['message' => 'Quiz introuvable'], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        // Créer le résultat
+        $resultat = new ResultatQuiz();
+        $resultat->setQuiz($quiz);
+
+        // Apprenant connecté
+        $user = $this->getUser();
+        if (!$user) {
+            return new JsonResponse(['message' => 'Utilisateur non connecté'], JsonResponse::HTTP_UNAUTHORIZED);
+        }
+        $resultat->setApprenant($user);
+
+        // Champs de l'entité
+        $resultat->setNote((string)($data['scoreObtenu'] ?? 0)); // correspond à note
+        $resultat->setNombreBonnesReponses((int)($data['nbQuestionsRepondues'] ?? 0));
+        $resultat->setNombreTotalQuestions((int)($data['nombreTotalQuestions'] ?? 0));
+        $resultat->setReussi((bool)($data['reussi'] ?? false));
+        $resultat->setDetailsReponses($data['reponsesDetaillees'] ?? null);
+
+        // Validation
+        $errors = $this->validator->validate($resultat);
+        if (count($errors) > 0) {
+            return new JsonResponse(['message' => (string)$errors], JsonResponse::HTTP_BAD_REQUEST);
+        }
+
+        $this->em->persist($resultat);
+        $this->em->flush();
+
+        return new JsonResponse([
+            'message' => 'Résultat ajouté avec succès',
+            'id' => $resultat->getId()
+        ], JsonResponse::HTTP_CREATED);
     }
-
-    // Vérifier l'existence du quiz
-    $quiz = $this->quizRepository->find($data['quiz_id'] ?? null);
-    if (!$quiz) {
-        return new JsonResponse(['message' => 'Quiz introuvable'], JsonResponse::HTTP_BAD_REQUEST);
-    }
-
-    // Créer le résultat
-    $resultat = new ResultatQuiz();
-    $resultat->setQuiz($quiz);
-    $resultat->setScoreObtenu((float)($data['scoreObtenu'] ?? 0));
-    $resultat->setNbQuestionsRepondues((int)($data['nbQuestionsRepondues'] ?? 0));
-    $resultat->setTempsPrisSecondes(isset($data['tempsPrisSecondes']) ? (int)$data['tempsPrisSecondes'] : null);
-    $resultat->setStatut($data['statut'] ?? 'termine');
-    $resultat->setReponsesDetaillees($data['reponsesDetaillees'] ?? null);
-
-    // Validation
-    $errors = $this->validator->validate($resultat);
-    if (count($errors) > 0) {
-        return new JsonResponse(['message' => (string)$errors], JsonResponse::HTTP_BAD_REQUEST);
-    }
-
-    // Sauvegarder en base
-    $this->em->persist($resultat);
-    $this->em->flush();
-
-    // Retourner un message de succès + l'ID du résultat ajouté
-    return new JsonResponse([
-        'message' => 'Résultat ajouté avec succès',
-        'id' => $resultat->getId()
-    ], JsonResponse::HTTP_CREATED);
-}
 #[Route('/{id}', name: 'update', methods: ['PUT', 'PATCH'])]
 public function update(int $id, Request $request): JsonResponse
 {
