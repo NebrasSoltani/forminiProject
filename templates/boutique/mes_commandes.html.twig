@@ -61,6 +61,8 @@
                                                     <span class="badge bg-info">Confirmée</span>
                                                 {% elseif commande.statut == 'en_cours' %}
                                                     <span class="badge bg-primary">En cours</span>
+                                                {% elseif commande.statut == 'payee' %}
+                                                    <span class="badge bg-success">Payée</span>
                                                 {% elseif commande.statut == 'livree' %}
                                                     <span class="badge bg-success">Livrée</span>
                                                 {% elseif commande.statut == 'annulee' %}

@@ -33,8 +33,6 @@ use Scheb\TwoFactorBundle\Model\Google\TwoFactorInterface;
 
 #[UniqueEntity(fields: ['email'], message: 'Il existe déjà un compte avec cet email')]
 
-class User implements UserInterface, PasswordAuthenticatedUserInterface
-
 class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFactorInterface
 {
 
@@ -85,8 +83,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     private ?string $prenom = null;
 
 
-
-    #[ORM\Column(length: 12)]
 
     #[ORM\Column(length: 12)]
     #[Assert\NotBlank(message: 'Le téléphone est obligatoire')]
@@ -269,8 +265,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
 
     public function setEmail(?string $email): static
-
-    public function setEmail(?string $email): static
     {
 
         $this->email = $email;
@@ -358,8 +352,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
 
     public function setNom(?string $nom): static
-
-    public function setNom(?string $nom): static
     {
 
         $this->nom = $nom;
@@ -381,8 +373,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
 
     public function setPrenom(?string $prenom): static
-
-    public function setPrenom(?string $prenom): static
     {
 
         $this->prenom = $prenom;
@@ -402,8 +392,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     }
 
 
-
-    public function setTelephone(?string $telephone): static
 
     public function setTelephone(?string $telephone): static
     {
@@ -977,18 +965,6 @@ public function setGouvernorat(?Gouvernorat $gouvernorat): static
     return $this;
 
 }
-
-}
-
-    {
-        return $this->gouvernorat;
-    }
-
-    public function setGouvernorat(?Gouvernorat $gouvernorat): static
-    {
-        $this->gouvernorat = $gouvernorat;
-        return $this;
-    }
 
     public function getGoogleId(): ?string
     {

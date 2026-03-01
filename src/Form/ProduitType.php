@@ -45,9 +45,9 @@ class ProduitType extends AbstractType
                 'label' => 'Catégorie',
                 'choices' => [
                     'Informatique' => 'Informatique',
-                    'Outils intelligents' => 'Outils intelligents',
                     'Scientifique' => 'Scientifique',
                     'Accessoires' => 'Accessoires',
+                    'Outils Intelligents' => 'Outils Intelligents',
                 ],
                 'placeholder' => 'Choisir une catégorie',
                 'constraints' => [
@@ -93,8 +93,9 @@ class ProduitType extends AbstractType
             ->add('statut', ChoiceType::class, [
                 'label' => 'Statut',
                 'choices' => [
-                    'Actif' => 'actif',
-                    'Inactif' => 'inactif',
+                    'Disponible' => 'disponible',
+                    'En rupture de stock' => 'rupture',
+                    'Indisponible' => 'indisponible',
                 ],
                 'constraints' => [
                     new NotBlank(['message' => 'Le statut est obligatoire'])

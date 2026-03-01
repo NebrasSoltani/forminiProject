@@ -13,18 +13,12 @@ class GeminiService
 
     public function __construct(
         private readonly HttpClientInterface $httpClient,
-        private readonly ?string $apiKey = null  // ← clé nullable
+        private readonly ?string $apiKey = null
     ) {
         if ($this->apiKey === null) {
-            throw new \RuntimeException('La clé GEMINI_API_KEY n’est pas définie.');
+            throw new \RuntimeException('La clé GEMINI_API_KEY n\'est pas définie.');
         }
     }
-
-    public function generateQuestions(string $sujet, int $nombre = 5, array $types = ['qcm'], int $pointsDefaut = 1): array
-    {
-        $typesStr = implode(', ', $types);
-        private readonly string $apiKey
-    ) {}
 
     /**
      * Génère des questions de quiz structurées via Gemini.
@@ -52,15 +46,6 @@ Tu es un expert pédagogique. Génère exactement {$nombre} questions de quiz su
 
 **Types de questions autorisés :** {$typesStr}
 
-... (le reste de ton prompt)
-PROMPT;
-
-        $response = $this->httpClient->request('POST', self::API_URL, [
-            'headers' => ['Content-Type' => 'application/json'],
-            'query'   => ['key' => $this->apiKey],
-            'json'    => [
-                'contents' => [['parts' => [['text' => $prompt]]]],
-                'generationConfig' => ['temperature' => 0.7, 'maxOutputTokens' => 4096],
 **Instructions strictes :**
 - Réponds UNIQUEMENT avec un tableau JSON valide, sans texte avant ni après.
 - Ne mets PAS de balises markdown (pas de ```json ni ```).
@@ -134,34 +119,9 @@ PROMPT;
         $data = $response->toArray();
         $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
 
-        if ($statusCode === 429) {
-            throw new \RuntimeException("Le quota de l'API Gemini est dépassé. Veuillez réessayer plus tard.");
-        }
-
-        if ($statusCode !== 200) {
-            $body = $response->getContent(false);
-            throw new \RuntimeException("Erreur API Gemini (HTTP {$statusCode}) : {$body}");
-        }
-
-        $data = $response->toArray();
-
-        // Extraire le texte généré
-        $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
-
-        if (empty($text)) {
-            throw new \RuntimeException('Gemini n\'a retourné aucun contenu.');
-        }
-
         return $this->parseJsonResponse($text);
     }
 
-    private function parseJsonResponse(string $text): array
-    {
-        $text = trim(preg_replace('/^```(?:json)?\s*|\s*```\s*$/', '', $text));
-        $questions = json_decode($text, true);
-
-        if (json_last_error() !== JSON_ERROR_NONE && preg_match('/\[.*\]/s', $text, $matches)) {
-            $questions = json_decode($matches[0], true);
     /**
      * Parse la réponse JSON de Gemini et la nettoie si nécessaire.
      */
@@ -195,13 +155,6 @@ PROMPT;
         return array_map([$this, 'normalizeQuestion'], $questions);
     }
 
-    private function normalizeQuestion(array $q): array
-    {
-        $typesValides = ['qcm', 'vrai_faux', 'texte'];
-        // Valider et normaliser chaque question
-        return array_map([$this, 'normalizeQuestion'], $questions);
-    }
-
     /**
      * Normalise et valide une question générée.
      */
@@ -214,13 +167,6 @@ PROMPT;
             'type'        => in_array($q['type'] ?? '', $typesValides, true) ? $q['type'] : 'qcm',
             'points'      => max(1, min(100, (int)($q['points'] ?? 1))),
             'explication' => trim($q['explication'] ?? ''),
-            'reponses'    => array_map(fn($r) => [
-                'texte'      => trim($r['texte'] ?? ''),
-                'estCorrecte'=> (bool)($r['estCorrecte'] ?? false),
-            ], $q['reponses'] ?? []),
-        ];
-    }
-}
             'reponses'    => array_map(
                 fn($r) => [
                     'texte'      => trim($r['texte'] ?? ''),
