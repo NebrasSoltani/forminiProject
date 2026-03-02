@@ -22,7 +22,7 @@
                             </a>
 
                             {# Bouton pour générer la facture PDF de la commande #}
-                            <a href="{{ path('download_invoice', {id: commande.id}) }}"
+                            <a href="{{ path('commande_pdf', {id: commande.id}) }}"
                                class="btn btn-success"
                                target="_blank">
                                 <i class="fas fa-file-pdf"></i>
@@ -50,8 +50,6 @@
                                     <span class="badge bg-info fs-6">Confirmée</span>
                                 {% elseif commande.statut == 'en_cours' %}
                                     <span class="badge bg-primary fs-6">En cours</span>
-                                {% elseif commande.statut == 'payee' %}
-                                    <span class="badge bg-success fs-6">Payée</span>
                                 {% elseif commande.statut == 'livree' %}
                                     <span class="badge bg-success fs-6">Livrée</span>
                                 {% elseif commande.statut == 'annulee' %}

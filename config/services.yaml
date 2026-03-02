@@ -80,11 +80,6 @@ services:
         tags:
             - { name: twig.extension }
 
-
-    App\Service\AIProductSuggestionService:
-        arguments:
-            $geminiApiKey: '%env(GEMINI_API_KEY)%'
-
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     
@@ -96,3 +91,9 @@ services:
         tags:
             - { name: "scheb_two_factor.provider", alias: "google" }
 
+    # ⭐ Twilio Verify Service Configuration
+    App\Service\TwilioVerifyService:
+        arguments:
+            $accountSid: "%env(string:TWILIO_ACCOUNT_SID)%"
+            $authToken: "%env(string:TWILIO_AUTH_TOKEN)%"
+            $verifyServiceSid: "%env(string:TWILIO_VERIFY_SERVICE_SID)%"

@@ -1,0 +1,102 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Face Recognition Test{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-search"></i> Test Face Recognition</h4>
+                </div>
+                <div class="card-body">
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> 
+                        Upload a photo to test the face recognition system. The system will detect and analyze faces in the image.
+                    </div>
+
+                    <form id="recognitionForm" enctype="multipart/form-data">
+                        <div class="mb-4">
+                            <label for="face_image" class="form-label">Upload Photo for Recognition</label>
+                            <input type="file" class="form-control" id="face_image" name="face_image" 
+                                   accept="image/jpeg,image/jpg,image/png" required>
+                            <div class="form-text">Choose a photo containing face(s) to recognize</div>
+                        </div>
+
+                        <div class="mb-4" id="imagePreview" style="display: none;">
+                            <label class="form-label">Preview</label>
+                            <div class="text-center">
+                                <img id="previewImg" class="img-fluid rounded" style="max-height: 300px;" alt="Preview">
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary" id="recognizeBtn">
+                                <i class="fas fa-search"></i> Recognize Face
+                            </button>
+                            <a href="{{ path('app_face_recognition_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Face Recognition
+                            </a>
+                        </div>
+                    </form>
+
+                    <div id="result" style="display: none;" class="mt-4">
+                        <h5>Recognition Results</h5>
+                        <div id="resultContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('face_image');
+    const imagePreview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const recognizeBtn = document.getElementById('recognizeBtn');
+    const form = document.getElementById('recognitionForm');
+    const result = document.getElementById('result');
+    const resultContent = document.getElementById('resultContent');
+
+    // File preview
+    fileInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            imagePreview.style.display = 'none';
+        }
+    });
+
+    // Form submission - use regular form submission to avoid Turbo issues
+    form.addEventListener('submit', function(e) {
+        // Let the form submit normally for Turbo compatibility
+        recognizeBtn.disabled = true;
+        recognizeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Recognizing...';
+    });
+});
+</script>
+{% endblock %}

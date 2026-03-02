@@ -1,0 +1,19 @@
+services:
+    # Twilio Verify Service
+    App\Service\TwilioVerifyService:
+        arguments:
+            $accountSid: '%env(TWILIO_ACCOUNT_SID)%'
+            $authToken: '%env(TWILIO_AUTH_TOKEN)%'
+            $verifyServiceSid: '%env(TWILIO_VERIFY_SERVICE_SID)%'
+            $logger: '@logger'
+        tags:
+            - { name: monolog.logger, channel: twilio }
+
+    # Twilio Verify Controller
+    App\Controller\TwilioVerifyController:
+        arguments:
+            $twilioVerify: '@App\Service\TwilioVerifyService'
+            $entityManager: '@doctrine.orm.entity_manager'
+            $logger: '@logger'
+        tags:
+            - controller.service_arguments

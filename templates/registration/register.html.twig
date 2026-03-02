@@ -495,7 +495,7 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
                 </div>
                 
                 <div class="card-body form-section">
-                    {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+                    {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate', 'data-turbo': 'false'}}) }}
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
@@ -541,13 +541,26 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
                             <div class="col-md-6">
                                 <div class="form-group">
                                     {{ form_label(registrationForm.telephone, 'Téléphone', {'label_attr': {'class': 'form-label'}}) }}
-                                    {{ form_widget(registrationForm.telephone, {
-                                        'attr': {
-                                            'class': 'form-control',
-                                            'placeholder': 'Ex: +216 20 123 456'
-                                        }
-                                    }) }}
+                                    <div class="input-group">
+                                        <span class="input-group-text">+216</span>
+                                        {{ form_widget(registrationForm.telephone, {
+                                            'attr': {
+                                                'class': 'form-control',
+                                                'placeholder': 'XX XXX XXX',
+                                                'pattern': '[0-9]{8}',
+                                                'maxlength': '8',
+                                                'id': 'phone-input'
+                                            }
+                                        }) }}
+                                    </div>
                                     {{ form_errors(registrationForm.telephone) }}
+                                    <small class="form-text">Format: XX XXX XXX (8 chiffres)</small>
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary" id="verify-phone-btn">
+                                            📱 Vérifier le numéro
+                                        </button>
+                                        <div id="phone-verification-status" class="mt-2"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -956,6 +969,11 @@ document.addEventListener('DOMContentLoaded', function() {
         if (targetSection) {
             targetSection.style.display = 'block';
             setTimeout(() => targetSection.classList.add('visible'), 10);
+            
+            // Reinitialize phone verification if switching to apprenant role
+            if (selectedRole === 'apprenant') {
+                setTimeout(() => initializePhoneVerification(), 100);
+            }
         }
     }
 
@@ -983,6 +1001,126 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Phone verification functionality (only for apprenant role)
+    let phoneInput, verifyPhoneBtn, phoneVerificationStatus;
+    let phoneVerified = false;
+
+    function initializePhoneVerification() {
+        phoneInput = document.getElementById('phone-input');
+        verifyPhoneBtn = document.getElementById('verify-phone-btn');
+        phoneVerificationStatus = document.getElementById('phone-verification-status');
+
+        // Only initialize if elements exist
+        if (phoneInput && verifyPhoneBtn && phoneVerificationStatus) {
+            // Format phone input
+            phoneInput.addEventListener('input', function() {
+                this.value = this.value.replace(/\D/g, '');
+                
+                // Reset verification status if phone changes
+                if (phoneVerified) {
+                    phoneVerified = false;
+                    verifyPhoneBtn.textContent = '📱 Vérifier le numéro';
+                    verifyPhoneBtn.classList.remove('btn-success');
+                    verifyPhoneBtn.classList.add('btn-outline-primary');
+                    phoneVerificationStatus.innerHTML = '';
+                }
+            });
+
+            // Phone verification
+            verifyPhoneBtn.addEventListener('click', async function() {
+                const phone = phoneInput.value.trim();
+                
+                if (!phone || phone.length !== 8) {
+                    phoneVerificationStatus.innerHTML = '<div class="alert alert-danger">Veuillez entrer un numéro de téléphone valide (8 chiffres)</div>';
+                    return;
+                }
+
+                verifyPhoneBtn.disabled = true;
+                verifyPhoneBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Envoi en cours...';
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ phone: phone })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    phoneVerificationStatus.innerHTML = `
+                        <div class="alert alert-success">
+                            ✅ ${result.message}
+                            <div class="mt-2">
+                                <input type="text" class="form-control form-control-sm" id="verification-code" 
+                                       placeholder="Entrez le code à 6 chiffres" maxlength="6" pattern="[0-9]{6}">
+                                <button type="button" class="btn btn-sm btn-success mt-2" id="confirm-code-btn">
+                                    Confirmer le code
+                                </button>
+                            </div>
+                        </div>`;
+                    
+                    // Add code confirmation functionality
+                    const confirmCodeBtn = document.getElementById('confirm-code-btn');
+                    const verificationCodeInput = document.getElementById('verification-code');
+                    
+                    if (confirmCodeBtn) {
+                        confirmCodeBtn.addEventListener('click', async function() {
+                            if (!verificationCodeInput) {
+                                phoneVerificationStatus.innerHTML += '<div class="alert alert-danger mt-2">Champ de code non trouvé</div>';
+                                return;
+                            }
+                            
+                            const code = verificationCodeInput.value.trim();
+                            
+                            if (!code || code.length !== 6) {
+                                phoneVerificationStatus.innerHTML += '<div class="alert alert-danger mt-2">Veuillez entrer un code à 6 chiffres</div>';
+                                return;
+                            }
+
+                            confirmCodeBtn.disabled = true;
+                            confirmCodeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Vérification...';
+
+                            try {
+                                const verifyResponse = await fetch('/api/phone-verification/verify', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    },
+                                    body: JSON.stringify({ code: code })
+                                });
+
+                                const verifyResult = await verifyResponse.json();
+
+                                if (verifyResult.success) {
+                                    phoneVerified = true;
+                                    verifyPhoneBtn.textContent = '✅ Téléphone vérifié';
+                                    verifyPhoneBtn.classList.remove('btn-outline-primary');
+                                    verifyPhoneBtn.classList.add('btn-success');
+                                    phoneVerificationStatus.innerHTML = '<div class="alert alert-success">✅ Téléphone vérifié avec succès!</div>';
+                                } else {
+                                    phoneVerificationStatus.innerHTML += `<div class="alert alert-danger mt-2">${verifyResult.message}</div>`;
+                                }
+                            } catch (error) {
+                                phoneVerificationStatus.innerHTML += '<div class="alert alert-danger mt-2">Erreur de connexion. Veuillez réessayer.</div>';
+                            } finally {
+                                confirmCodeBtn.disabled = false;
+                                confirmCodeBtn.innerHTML = 'Confirmer le code';
+                            }
+                        });
+                    }
+
+                } else {
+                    phoneVerificationStatus.innerHTML = `<div class="alert alert-danger">${result.message}</div>`;
+                }
+            } catch (error) {
+                phoneVerificationStatus.innerHTML = '<div class="alert alert-danger">Erreur de connexion. Veuillez réessayer.</div>';
+            } finally {
+                verifyPhoneBtn.disabled = false;
+                verifyPhoneBtn.innerHTML = '📱 Vérifier le numéro';
+            }
+        });
+    }
 
     // Add custom interest for apprenant
     const addInterestBtn = document.getElementById('addInterestBtn');
@@ -1042,20 +1180,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Turnstile callbacks
     window.onTurnstileSuccess = function(token) {
-        document.getElementById('cf-turnstile-response').value = token;
-        document.getElementById('turnstile-error').style.display = 'none';
-        document.getElementById('register-submit-btn').disabled = false;
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = token;
+        }
+        const errorElement = document.getElementById('turnstile-error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+        const submitBtn = document.getElementById('register-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+        }
     };
 
     window.onTurnstileExpired = function() {
-        document.getElementById('cf-turnstile-response').value = '';
-        document.getElementById('register-submit-btn').disabled = true;
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = '';
+        }
+        const submitBtn = document.getElementById('register-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
     };
 
     window.onTurnstileError = function() {
-        document.getElementById('cf-turnstile-response').value = '';
-        document.getElementById('turnstile-error').style.display = 'block';
-        document.getElementById('register-submit-btn').disabled = true;
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = '';
+        }
+        const errorElement = document.getElementById('turnstile-error');
+        if (errorElement) {
+            errorElement.style.display = 'block';
+        }
+        const submitBtn = document.getElementById('register-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
     };
 
     // Form validation
@@ -1063,12 +1225,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (registrationForm) {
         registrationForm.addEventListener('submit', function(e) {
-            const turnstileResponse = document.getElementById('cf-turnstile-response').value;
+            const responseElement = document.getElementById('cf-turnstile-response');
+            const turnstileResponse = responseElement ? responseElement.value : '';
             
             if (!turnstileResponse) {
                 e.preventDefault();
-                document.getElementById('turnstile-error').style.display = 'block';
-                document.getElementById('turnstile-error').textContent = 'Veuillez compléter la vérification de sécurité.';
+                const errorElement = document.getElementById('turnstile-error');
+                if (errorElement) {
+                    errorElement.style.display = 'block';
+                    errorElement.textContent = 'Veuillez compléter la vérification de sécurité.';
+                }
                 return false;
             }
         });

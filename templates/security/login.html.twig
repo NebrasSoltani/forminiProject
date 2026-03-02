@@ -411,6 +411,13 @@
     background: #f6f8fa;
 }
 
+/* Face Button */
+.btn-face:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    color: #667eea;
+}
+
 
 /* Animations */
 @keyframes fadeIn {
@@ -465,7 +472,7 @@
                         </div>
                     {% endfor %}
 
-                    <form method="post">
+                    <form method="post" data-turbo="false">
                         {% if error %}
                             <div class="alert alert-danger">
                                 <i>⚠️</i> {{ error.messageKey|trans(error.messageData, 'security') }}
@@ -552,6 +559,20 @@
                         <button class="btn btn-login" type="submit" id="login-submit-btn">
                             <span>➡️ Se connecter</span>
                         </button>
+
+                        <!-- Face Login Button -->
+                        <div class="oauth-divider">
+                            <span>OU</span>
+                        </div>
+                        
+                        <div class="oauth-buttons">
+                            <a href="{{ path('face_login') }}" class="btn btn-oauth btn-face">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                                </svg>
+                                Se connecter avec votre visage
+                            </a>
+                        </div>
 
                         <!-- OAuth Login Buttons -->
                         <div class="oauth-divider">
@@ -644,20 +665,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Turnstile callbacks
     window.onTurnstileSuccess = function(token) {
-        document.getElementById('cf-turnstile-response').value = token;
-        document.getElementById('turnstile-error').style.display = 'none';
-        document.getElementById('login-submit-btn').disabled = false;
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = token;
+        }
+        const errorElement = document.getElementById('turnstile-error');
+        if (errorElement) {
+            errorElement.style.display = 'none';
+        }
+        const submitBtn = document.getElementById('login-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+        }
     };
 
     window.onTurnstileExpired = function() {
-        document.getElementById('cf-turnstile-response').value = '';
-        document.getElementById('login-submit-btn').disabled = true;
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = '';
+        }
+        const submitBtn = document.getElementById('login-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
     };
 
     window.onTurnstileError = function() {
-        document.getElementById('cf-turnstile-response').value = '';
-        document.getElementById('turnstile-error').style.display = 'block';
-        document.getElementById('login-submit-btn').disabled = true;
+        const responseElement = document.getElementById('cf-turnstile-response');
+        if (responseElement) {
+            responseElement.value = '';
+        }
+        const errorElement = document.getElementById('turnstile-error');
+        if (errorElement) {
+            errorElement.style.display = 'block';
+        }
+        const submitBtn = document.getElementById('login-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
     };
 
     // Form validation
@@ -666,12 +711,16 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
-            const turnstileResponse = document.getElementById('cf-turnstile-response').value;
+            const responseElement = document.getElementById('cf-turnstile-response');
+            const turnstileResponse = responseElement ? responseElement.value : '';
             
             if (!turnstileResponse) {
                 e.preventDefault();
-                document.getElementById('turnstile-error').style.display = 'block';
-                document.getElementById('turnstile-error').textContent = 'Veuillez compléter la vérification de sécurité.';
+                const errorElement = document.getElementById('turnstile-error');
+                if (errorElement) {
+                    errorElement.style.display = 'block';
+                    errorElement.textContent = 'Veuillez compléter la vérification de sécurité.';
+                }
                 return false;
             }
         });

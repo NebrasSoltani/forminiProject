@@ -10,67 +10,10 @@
         <p class="text-lg mb-2">Merci pour votre achat, {{ commande.utilisateur.prenom }}.</p>
         <p class="mb-2">Commande n° <strong>{{ commande.id }}</strong></p>
         <p class="mb-4">Montant payé : <strong>{{ commande.total|number_format(2, ',', ' ') }} Dt</strong></p>
-        
-        {% if invoicePath %}
-            <div class="mb-4 p-4 bg-blue-50 rounded-lg">
-                <h3 class="text-lg font-semibold text-blue-800 mb-2">📄 Votre facture PDF</h3>
-                <p class="text-sm text-blue-600 mb-3">Votre facture a été générée et envoyée par email.</p>
-                <div class="flex justify-center gap-3">
-                    <a href="{{ path('download_invoice', {id: commande.id}) }}" 
-                       class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                       target="_blank">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                        </svg>
-                        Télécharger la facture
-                    </a>
-                </div>
-            </div>
-        {% endif %}
-        
-        <div class="flex justify-center gap-3 mt-6">
-            <a href="{{ path('boutique_mes_commandes') }}" class="btn btn-outline-primary">Voir mes commandes</a>
-            <a href="{{ path('boutique_index') }}" class="btn btn-primary">Retour à la boutique</a>
-        </div>
+        <a href="{{ path('boutique_index') }}" class="btn btn-primary">Retour à la boutique</a>
     {% else %}
         <p class="text-lg mb-4">Votre paiement a été confirmé, mais nous n'avons pas retrouvé votre commande.</p>
         <a href="{{ path('boutique_index') }}" class="btn btn-primary">Retour à la boutique</a>
     {% endif %}
 </div>
-
-<style>
-.btn {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: all 0.2s;
-    border: 2px solid transparent;
-}
-
-.btn-primary {
-    background-color: #3b82f6;
-    color: white;
-    border-color: #3b82f6;
-}
-
-.btn-primary:hover {
-    background-color: #2563eb;
-    border-color: #2563eb;
-}
-
-.btn-outline-primary {
-    background-color: transparent;
-    color: #3b82f6;
-    border-color: #3b82f6;
-}
-
-.btn-outline-primary:hover {
-    background-color: #3b82f6;
-    color: white;
-}
-</style>
 {% endblock %}

@@ -209,7 +209,7 @@
                 </div>
             {% endif %}
 
-            <form action="{{ checkPathUrl }}" method="post" id="2fa-form">
+            <form action="{{ checkPathUrl }}" method="post" id="2fa-form" data-turbo="false">
                 {% if displayTrustedOption %}
                     <div class="trust-device">
                         <div class="form-check">

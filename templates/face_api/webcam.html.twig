@@ -1,0 +1,511 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Face API Webcam Demo{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .webcam-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .webcam-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .video-container {
+            position: relative;
+            margin: 20px auto;
+            max-width: 640px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #webcam, #overlay {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .results-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .face-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: left;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            color: #212529;
+            font-size: 18px;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .demo-links {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .face-count {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 20px 0;
+        }
+        
+        .expressions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .expression-item {
+            background: white;
+            padding: 8px;
+            border-radius: 3px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .expression-name {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .expression-value {
+            font-weight: bold;
+            color: #333;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Face API from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    
+    <script>
+        class WebcamFaceAPIDemo {
+            constructor() {
+                this.config = {{ config|json_encode|raw }};
+                this.isModelLoaded = false;
+                this.isWebcamActive = false;
+                this.isDetecting = false;
+                this.detectionInterval = null;
+                this.video = null;
+                this.canvas = null;
+                this.init();
+            }
+
+            async init() {
+                await this.loadModels();
+                this.setupElements();
+                this.setupEventListeners();
+            }
+
+            async loadModels() {
+                try {
+                    this.updateStatus('Loading Face API models...', 'info');
+                    
+                    // Load models from CDN
+                    await faceapi.nets.ssdMobilenetv1.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+                    await faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+                    await faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+                    await faceapi.nets.ageGenderNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+                    await faceapi.nets.faceExpressionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+                    
+                    this.isModelLoaded = true;
+                    this.updateStatus('Face API models loaded successfully!', 'success');
+                    this.enableControls();
+                } catch (error) {
+                    console.error('Error loading models:', error);
+                    this.updateStatus('Failed to load Face API models: ' + error.message, 'error');
+                }
+            }
+
+            setupElements() {
+                this.video = document.getElementById('webcam');
+                this.canvas = document.getElementById('overlay');
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.detectBtn = document.getElementById('detectBtn');
+                this.resultsSection = document.getElementById('resultsSection');
+                this.faceCount = document.getElementById('faceCount');
+                this.faceInfo = document.getElementById('faceInfo');
+            }
+
+            setupEventListeners() {
+                this.startBtn.addEventListener('click', () => this.startWebcam());
+                this.stopBtn.addEventListener('click', () => this.stopWebcam());
+                this.detectBtn.addEventListener('click', () => this.toggleDetection());
+            }
+
+            async startWebcam() {
+                try {
+                    this.updateStatus('Starting webcam...', 'info');
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user'
+                        }
+                    });
+                    
+                    this.video.srcObject = stream;
+                    await this.video.play();
+                    
+                    this.isWebcamActive = true;
+                    this.updateStatus('Webcam started successfully!', 'success');
+                    this.updateControls();
+                    
+                } catch (error) {
+                    console.error('Webcam error:', error);
+                    this.updateStatus('Failed to start webcam: ' + error.message, 'error');
+                }
+            }
+
+            stopWebcam() {
+                if (this.video.srcObject) {
+                    this.video.srcObject.getTracks().forEach(track => track.stop());
+                    this.video.srcObject = null;
+                }
+                
+                this.stopDetection();
+                this.isWebcamActive = false;
+                this.updateStatus('Webcam stopped', 'info');
+                this.updateControls();
+                this.clearResults();
+            }
+
+            toggleDetection() {
+                if (this.isDetecting) {
+                    this.stopDetection();
+                } else {
+                    this.startDetection();
+                }
+            }
+
+            async startDetection() {
+                if (!this.isModelLoaded || !this.isWebcamActive) {
+                    this.updateStatus('Models not loaded or webcam not active', 'warning');
+                    return;
+                }
+
+                this.isDetecting = true;
+                this.updateStatus('Face detection started', 'success');
+                this.updateControls();
+
+                // Start continuous detection
+                this.detectionInterval = setInterval(async () => {
+                    await this.detectFaces();
+                }, 500); // Detect every 500ms
+            }
+
+            stopDetection() {
+                if (this.detectionInterval) {
+                    clearInterval(this.detectionInterval);
+                    this.detectionInterval = null;
+                }
+                
+                this.isDetecting = false;
+                this.updateStatus('Face detection stopped', 'info');
+                this.updateControls();
+                
+                // Clear canvas
+                const context = this.canvas.getContext('2d');
+                context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            async detectFaces() {
+                if (!this.isDetecting || !this.video || this.video.paused || this.video.ended) {
+                    return;
+                }
+
+                try {
+                    // Detect faces with all available data
+                    const detections = await faceapi
+                        .detectAllFaces(this.video, new faceapi.SsdMobilenetv1Options())
+                        .withFaceLandmarks()
+                        .withFaceDescriptors()
+                        .withAgeAndGender()
+                        .withFaceExpressions();
+
+                    // Update display
+                    await this.updateDisplay(detections);
+                    
+                } catch (error) {
+                    console.error('Detection error:', error);
+                    // Don't show error for every detection failure, only log it
+                }
+            }
+
+            async updateDisplay(detections) {
+                // Update face count
+                this.faceCount.textContent = `${detections.length} face(s) detected`;
+                
+                // Clear and redraw canvas
+                const displaySize = { 
+                    width: this.video.videoWidth, 
+                    height: this.video.videoHeight 
+                };
+                
+                faceapi.matchDimensions(this.canvas, displaySize);
+                
+                const resizedDetections = faceapi.resizeResults(detections, displaySize);
+                
+                const context = this.canvas.getContext('2d');
+                context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Draw detections
+                faceapi.draw.drawDetections(this.canvas, resizedDetections);
+                faceapi.draw.drawFaceLandmarks(this.canvas, resizedDetections);
+                
+                // Update face information
+                this.updateFaceInfo(detections);
+            }
+
+            updateFaceInfo(detections) {
+                if (detections.length === 0) {
+                    this.resultsSection.style.display = 'none';
+                    return;
+                }
+
+                this.resultsSection.style.display = 'block';
+                this.faceInfo.innerHTML = '';
+
+                detections.forEach((detection, index) => {
+                    const faceData = this.extractFaceData(detection, index);
+                    const faceElement = this.createFaceElement(faceData);
+                    this.faceInfo.appendChild(faceElement);
+                });
+            }
+
+            extractFaceData(detection, index) {
+                const expressions = detection.expressions;
+                let dominantExpression = '';
+                let maxExpressionValue = 0;
+                
+                for (const [expression, value] of Object.entries(expressions)) {
+                    if (value > maxExpressionValue) {
+                        maxExpressionValue = value;
+                        dominantExpression = expression;
+                    }
+                }
+
+                return {
+                    faceId: index + 1,
+                    confidence: Math.round(detection.detection.score * 100),
+                    age: Math.round(detection.age),
+                    gender: detection.gender,
+                    genderProbability: Math.round(detection.genderProbability * 100),
+                    dominantExpression: dominantExpression,
+                    expressionProbability: Math.round(maxExpressionValue * 100),
+                    allExpressions: expressions
+                };
+            }
+
+            createFaceElement(faceData) {
+                const div = document.createElement('div');
+                div.className = 'info-item';
+                
+                const expressionsHtml = Object.entries(faceData.allExpressions)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([expression, value]) => `
+                        <div class="expression-item">
+                            <div class="expression-name">${expression}</div>
+                            <div class="expression-value">${Math.round(value * 100)}%</div>
+                        </div>
+                    `).join('');
+
+                div.innerHTML = `
+                    <div class="info-label">Face #${faceData.faceId}</div>
+                    <div class="info-value">Confidence: ${faceData.confidence}%</div>
+                    <div class="info-value">Age: ${faceData.age} years</div>
+                    <div class="info-value">Gender: ${faceData.gender} (${faceData.genderProbability}%)</div>
+                    <div class="info-value">Expression: ${faceData.dominantExpression} (${faceData.expressionProbability}%)</div>
+                    <div class="info-label">All Expressions:</div>
+                    <div class="expressions-grid">
+                        ${expressionsHtml}
+                    </div>
+                `;
+                
+                return div;
+            }
+
+            updateControls() {
+                this.startBtn.disabled = this.isWebcamActive;
+                this.stopBtn.disabled = !this.isWebcamActive;
+                this.detectBtn.disabled = !this.isWebcamActive || !this.isModelLoaded;
+                
+                if (this.isDetecting) {
+                    this.detectBtn.textContent = 'Stop Detection';
+                    this.detectBtn.className = 'btn btn-danger';
+                } else {
+                    this.detectBtn.textContent = 'Start Detection';
+                    this.detectBtn.className = 'btn btn-success';
+                }
+            }
+
+            enableControls() {
+                this.detectBtn.disabled = false;
+            }
+
+            updateStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+            }
+
+            clearResults() {
+                this.resultsSection.style.display = 'none';
+                this.faceCount.textContent = '0 faces detected';
+                this.faceInfo.innerHTML = '';
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new WebcamFaceAPIDemo();
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+<div class="webcam-container">
+    <h1>Face API Webcam Demo</h1>
+    <p>Real-time face detection, expression analysis, age, and gender estimation using your webcam.</p>
+    
+    <div class="demo-links">
+        <a href="{{ path('face_api_index') }}" class="btn">📷 Image Upload Demo</a>
+        <a href="{{ path('face_api_config') }}" class="btn">⚙️ View Configuration</a>
+    </div>
+
+    <!-- Status -->
+    <div id="status" class="status info">Initializing...</div>
+
+    <!-- Webcam Section -->
+    <div class="webcam-section">
+        <h2>Live Face Detection</h2>
+        <p>Allow camera access to enable real-time face detection</p>
+        
+        <div class="video-container">
+            <video id="webcam" autoplay muted playsinline></video>
+            <canvas id="overlay"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn">📹 Start Webcam</button>
+            <button id="stopBtn" class="btn btn-danger" disabled>⏹️ Stop Webcam</button>
+            <button id="detectBtn" class="btn btn-success" disabled>🔍 Start Detection</button>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section">
+        <h2>Face Detection Results</h2>
+        <div id="faceCount" class="face-count">0 faces detected</div>
+        <div id="faceInfo" class="face-info"></div>
+    </div>
+</div>
+{% endblock %}

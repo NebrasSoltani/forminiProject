@@ -25,7 +25,7 @@ class Produit
 
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'La catégorie est obligatoire')]
-    #[Assert\Choice(choices: ['Informatique', 'Scientifique', 'Accessoires', 'Outils Intelligents'])]
+    #[Assert\Choice(choices: ['Informatique', 'Scientifique', 'Accessoires', 'Supports'])]
     private ?string $categorie = null;
 
     #[ORM\Column(type: Types::TEXT)]

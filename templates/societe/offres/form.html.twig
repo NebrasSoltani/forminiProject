@@ -20,7 +20,7 @@
                     <div class="card-body">
                         <h4 class="card-title mb-4">{{ offre.id ? 'Modifier l\'offre' : 'Nouvelle offre de stage' }}</h4>
                         
-                        {{ form_start(form) }}
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'data-turbo': 'false'}}) }}
                         
                         {# Afficher les erreurs globales du formulaire #}
                         {{ form_errors(form) }}

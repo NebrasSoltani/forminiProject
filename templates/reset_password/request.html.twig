@@ -131,7 +131,7 @@
                             <div class="alert alert-success" role="alert">{{ flash_success }}</div>
                         {% endfor %}
 
-                        {{ form_start(requestForm) }}
+                        {{ form_start(requestForm, {'attr': {'data-turbo': 'false'}}) }}
                             <div class="mb-4">
                                 {{ form_label(requestForm.email, 'Email', {'label_attr': {'class': 'form-label'}}) }}
                                 <div class="input-group">
