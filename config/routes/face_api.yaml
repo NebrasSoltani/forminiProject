@@ -1,0 +1,3 @@
+face_api:
+    resource: "App\\Controller\\FaceApiController"
+    type: annotation

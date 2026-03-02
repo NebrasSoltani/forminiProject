@@ -411,6 +411,13 @@
     background: #f6f8fa;
 }
 
+/* Face Button */
+.btn-face:hover {
+    border-color: #667eea;
+    background: #f8f9ff;
+    color: #667eea;
+}
+
 
 /* Animations */
 @keyframes fadeIn {
@@ -552,6 +559,20 @@
                         <button class="btn btn-login" type="submit" id="login-submit-btn">
                             <span>➡️ Se connecter</span>
                         </button>
+
+                        <!-- Face Login Button -->
+                        <div class="oauth-divider">
+                            <span>OU</span>
+                        </div>
+                        
+                        <div class="oauth-buttons">
+                            <a href="{{ path('face_login') }}" class="btn btn-oauth btn-face">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                                </svg>
+                                Se connecter avec votre visage
+                            </a>
+                        </div>
 
                         <!-- OAuth Login Buttons -->
                         <div class="oauth-divider">

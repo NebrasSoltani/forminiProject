@@ -356,6 +356,52 @@
     </div>
 </div>
 
+<!-- Face Registration Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-camera"></i> Face Recognition
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="text-muted">
+                            Register your face for biometric login. This allows you to securely access your account using face recognition instead of a password.
+                        </p>
+                        
+                        <div class="d-flex gap-2">
+                            <a href="{{ path('face_register') }}" class="btn btn-primary">
+                                <i class="fas fa-camera"></i> 
+                                {% if app.user.faceData|length > 0 %}Update Face Data{% else %}Register Face{% endif %}
+                            </a>
+                            
+                            {% if app.user.faceData|length > 0 %}
+                                <button class="btn btn-outline-success" disabled>
+                                    <i class="fas fa-check-circle"></i> Face Registered
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="face-status-icon">
+                            {% if app.user.faceData|length > 0 %}
+                                <i class="fas fa-check-circle text-success fa-3x"></i>
+                                <p class="text-success mt-2">Face Recognition Enabled</p>
+                            {% else %}
+                                <i class="fas fa-exclamation-triangle text-warning fa-3x"></i>
+                                <p class="text-warning mt-2">Face Not Registered</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Disable 2FA Modal -->
 <div class="modal fade" id="disable2FAModal" tabindex="-1" aria-labelledby="disable2FAModalLabel" aria-hidden="true">
     <div class="modal-dialog">

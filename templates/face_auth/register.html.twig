@@ -1,0 +1,602 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Face Registration{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .face-registration-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .registration-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .video-container {
+            position: relative;
+            margin: 20px auto;
+            max-width: 640px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        #webcam, #overlay {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+        
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+        
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .face-status {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .face-registered {
+            border-left: 4px solid #28a745;
+        }
+        
+        .face-not-registered {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .instructions h4 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ul {
+            margin-bottom: 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .quality-indicator {
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .quality-good {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .quality-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .quality-poor {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <!-- Face API from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script>
+    
+    <script>
+        class FaceRegistration {
+            constructor() {
+                this.config = {{ config|json_encode|raw }};
+                this.isModelLoaded = false;
+                this.isWebcamActive = false;
+                this.currentFaceDescriptor = null;
+                this.video = null;
+                this.canvas = null;
+                this.isStartingCamera = false; // Prevent multiple camera starts
+                this.init();
+            }
+
+            async init() {
+                await this.loadModels();
+                if (!this.setupElements()) {
+                    this.updateStatus('Failed to initialize - required elements not found', 'error');
+                    return;
+                }
+                this.setupEventListeners();
+                this.updateFaceStatus();
+            }
+
+            async loadModels() {
+                try {
+                    this.updateStatus('Loading Face API models...', 'info');
+                    
+                    // Load models from CDN
+                    await faceapi.nets.ssdMobilenetv1.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+                    await faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+                    await faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/');
+                    
+                    this.isModelLoaded = true;
+                    this.updateStatus('Face API models loaded successfully!', 'success');
+                    this.enableControls();
+                } catch (error) {
+                    console.error('Error loading models:', error);
+                    this.updateStatus('Failed to load Face API models: ' + error.message, 'error');
+                }
+            }
+
+            setupElements() {
+                this.video = document.getElementById('webcam');
+                this.canvas = document.getElementById('overlay');
+                this.startBtn = document.getElementById('startBtn');
+                this.stopBtn = document.getElementById('stopBtn');
+                this.registerBtn = document.getElementById('registerBtn');
+                this.removeBtn = document.getElementById('removeBtn');
+                this.qualityIndicator = document.getElementById('qualityIndicator');
+                
+                // Check if elements exist
+                if (!this.startBtn || !this.stopBtn || !this.registerBtn) {
+                    console.error('Required buttons not found in DOM');
+                    return false;
+                }
+                return true;
+            }
+
+            setupEventListeners() {
+                if (!this.startBtn || !this.stopBtn || !this.registerBtn) {
+                    console.error('Cannot setup event listeners - buttons not found');
+                    return;
+                }
+                
+                this.startBtn.addEventListener('click', () => this.startWebcam());
+                this.stopBtn.addEventListener('click', () => this.stopWebcam());
+                this.registerBtn.addEventListener('click', () => this.registerFace());
+                
+                if (this.removeBtn) {
+                    this.removeBtn.addEventListener('click', () => this.removeFace());
+                }
+            }
+
+            async startWebcam() {
+                if (this.isStartingCamera) {
+                    return; // Prevent multiple simultaneous starts
+                }
+                
+                this.isStartingCamera = true;
+                
+                try {
+                    // Stop any existing webcam first
+                    if (this.video.srcObject) {
+                        this.video.srcObject.getTracks().forEach(track => track.stop());
+                        this.video.srcObject = null;
+                    }
+                    
+                    this.updateStatus('Starting webcam...', 'info');
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 640 },
+                            height: { ideal: 480 },
+                            facingMode: 'user'
+                        }
+                    });
+                    
+                    this.video.srcObject = stream;
+                    await this.video.play();
+                    
+                    this.isWebcamActive = true;
+                    this.updateStatus('Camera started. Position your face in the frame.', 'success');
+                    this.updateControls();
+                    
+                    // Start face detection
+                    this.startFaceDetection();
+                    
+                } catch (error) {
+                    console.error('Webcam error:', error);
+                    if (error.name === 'AbortError') {
+                        this.updateStatus('Camera start was interrupted. Please try again.', 'warning');
+                    } else if (error.name === 'NotAllowedError') {
+                        this.updateStatus('Camera permission denied. Please allow camera access.', 'error');
+                    } else {
+                        this.updateStatus('Failed to start webcam: ' + error.message, 'error');
+                    }
+                } finally {
+                    this.isStartingCamera = false;
+                }
+            }
+
+            stopWebcam() {
+                if (this.video.srcObject) {
+                    this.video.srcObject.getTracks().forEach(track => track.stop());
+                    this.video.srcObject = null;
+                }
+                
+                this.isWebcamActive = false;
+                this.currentFaceDescriptor = null;
+                this.updateStatus('Webcam stopped', 'info');
+                this.updateControls();
+                this.clearCanvas();
+                this.updateQualityIndicator(null);
+            }
+
+            startFaceDetection() {
+                if (!this.isWebcamActive || !this.isModelLoaded) return;
+                
+                const detect = async () => {
+                    if (!this.isWebcamActive) return;
+                    
+                    try {
+                        const detections = await faceapi
+                            .detectSingleFace(this.video, new faceapi.SsdMobilenetv1Options())
+                            .withFaceLandmarks()
+                            .withFaceDescriptor();
+
+                        this.updateDisplay(detections);
+                        
+                        if (detections) {
+                            this.currentFaceDescriptor = Array.from(detections.descriptor);
+                            this.updateQualityIndicator(detections);
+                        } else {
+                            this.currentFaceDescriptor = null;
+                            this.updateQualityIndicator(null);
+                        }
+                        
+                        requestAnimationFrame(detect);
+                    } catch (error) {
+                        console.error('Detection error:', error);
+                    }
+                };
+                
+                detect();
+            }
+
+            updateDisplay(detection) {
+                if (!this.video || !this.canvas) {
+                    console.error('Video or canvas element not found');
+                    return;
+                }
+                
+                const displaySize = { 
+                    width: this.video.videoWidth || 640, 
+                    height: this.video.videoHeight || 480 
+                };
+                
+                if (displaySize.width === 0 || displaySize.height === 0) {
+                    return; // Skip if video dimensions are not ready
+                }
+                
+                faceapi.matchDimensions(this.canvas, displaySize);
+                
+                const resizedDetection = detection ? 
+                    faceapi.resizeResults(detection, displaySize) : null;
+                
+                const context = this.canvas.getContext('2d');
+                context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                if (resizedDetection) {
+                    faceapi.draw.drawDetections(this.canvas, [resizedDetection]);
+                    faceapi.draw.drawFaceLandmarks(this.canvas, [resizedDetection]);
+                }
+            }
+
+            updateQualityIndicator(detection) {
+                if (!detection) {
+                    this.qualityIndicator.className = 'quality-indicator';
+                    this.qualityIndicator.innerHTML = 'No face detected';
+                    return;
+                }
+
+                const confidence = detection.detection.score;
+                let quality, message, className;
+
+                if (confidence > 0.8) {
+                    quality = 'good';
+                    message = 'Excellent face detection quality';
+                    className = 'quality-good';
+                } else if (confidence > 0.5) {
+                    quality = 'medium';
+                    message = 'Good face detection quality';
+                    className = 'quality-medium';
+                } else {
+                    quality = 'poor';
+                    message = 'Poor face detection quality - adjust position';
+                    className = 'quality-poor';
+                }
+
+                this.qualityIndicator.className = `quality-indicator ${className}`;
+                this.qualityIndicator.innerHTML = `
+                    <div>Quality: ${quality.charAt(0).toUpperCase() + quality.slice(1)}</div>
+                    <div>Confidence: ${Math.round(confidence * 100)}%</div>
+                    <div>${message}</div>
+                `;
+            }
+
+            async registerFace() {
+                if (!this.currentFaceDescriptor) {
+                    this.updateStatus('No face detected. Please position your face in the frame and ensure good lighting.', 'warning');
+                    return;
+                }
+
+                try {
+                    this.updateStatus('Registering face...', 'info');
+                    
+                    const imageName = `face_${Date.now()}.jpg`;
+                    
+                    const response = await fetch('{{ path("face_register_process") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            faceDescriptor: this.currentFaceDescriptor,
+                            imageName: imageName
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.updateStatus('Face registered successfully!', 'success');
+                        this.updateFaceStatus();
+                        setTimeout(() => {
+                            this.stopWebcam();
+                        }, 2000);
+                    } else {
+                        this.updateStatus(result.error || 'Failed to register face', 'error');
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    this.updateStatus('Registration failed: ' + error.message, 'error');
+                }
+            }
+
+            async removeFace() {
+                if (!confirm('Are you sure you want to remove your face data? This will disable face login.')) {
+                    return;
+                }
+
+                try {
+                    this.updateStatus('Removing face data...', 'info');
+                    
+                    const response = await fetch('{{ path("face_register_remove") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        this.updateStatus('Face data removed successfully!', 'success');
+                        this.updateFaceStatus();
+                    } else {
+                        this.updateStatus(result.error || 'Failed to remove face data', 'error');
+                    }
+                } catch (error) {
+                    console.error('Removal error:', error);
+                    this.updateStatus('Failed to remove face data: ' + error.message, 'error');
+                }
+            }
+
+            updateFaceStatus() {
+                const hasFaceData = {{ hasFaceData ? 'true' : 'false' }};
+                const faceStatusDiv = document.getElementById('faceStatus');
+                
+                if (hasFaceData) {
+                    faceStatusDiv.className = 'face-status face-registered';
+                    faceStatusDiv.innerHTML = `
+                        <h4><i class="fas fa-check-circle text-success"></i> Face Registered</h4>
+                        <p>Your face is registered for biometric login. You can use face login for quick access to your account.</p>
+                        <button class="btn btn-warning" id="removeBtn">Remove Face Data</button>
+                    `;
+                } else {
+                    faceStatusDiv.className = 'face-status face-not-registered';
+                    faceStatusDiv.innerHTML = `
+                        <h4><i class="fas fa-exclamation-triangle text-warning"></i> Face Not Registered</h4>
+                        <p>Register your face to enable biometric login for quick and secure access to your account.</p>
+                    `;
+                }
+                
+                // Re-setup event listeners for dynamic content
+                const removeBtn = document.getElementById('removeBtn');
+                if (removeBtn) {
+                    removeBtn.addEventListener('click', () => this.removeFace());
+                }
+            }
+
+            updateControls() {
+                if (this.startBtn) this.startBtn.disabled = this.isWebcamActive;
+                if (this.stopBtn) this.stopBtn.disabled = !this.isWebcamActive;
+                // Register button is always enabled - user can attempt registration anytime
+                if (this.registerBtn) this.registerBtn.disabled = false;
+            }
+
+            enableControls() {
+                if (this.registerBtn) {
+                    this.registerBtn.disabled = false;
+                }
+            }
+
+            updateStatus(message, type) {
+                const status = document.getElementById('status');
+                status.textContent = message;
+                status.className = `status ${type}`;
+            }
+
+            clearCanvas() {
+                if (this.canvas) {
+                    const context = this.canvas.getContext('2d');
+                    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new FaceRegistration();
+        });
+    </script>
+{% endblock %}
+
+{% block body %}
+<div class="face-registration-container">
+    <a href="{{ path('app_profile_edit') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Back to Profile
+    </a>
+
+    <h1>Face Registration</h1>
+    <p>Register your face for biometric login to quickly and securely access your account.</p>
+
+    <!-- Status -->
+    <div id="status" class="status info">Initializing...</div>
+
+    <!-- Instructions -->
+    <div class="instructions">
+        <h4><i class="fas fa-info-circle"></i> How to Register Your Face</h4>
+        <ul>
+            <li>Ensure you are in a well-lit area with your face clearly visible</li>
+            <li>Position your face in the center of the camera frame</li>
+            <li>Maintain a neutral expression and look directly at the camera</li>
+            <li>Keep a distance of about 50-70cm from the camera</li>
+            <li>Wait for the quality indicator to show "Good" before registering</li>
+            <li>Click "Register Face" to save your facial data</li>
+        </ul>
+    </div>
+
+    <!-- Face Status -->
+    <div id="faceStatus" class="face-status">
+        <!-- Content will be dynamically updated -->
+    </div>
+
+    <!-- Webcam Section -->
+    <div class="registration-section">
+        <h2>Face Registration</h2>
+        
+        <div class="video-container">
+            <video id="webcam" autoplay muted playsinline></video>
+            <canvas id="overlay"></canvas>
+        </div>
+        
+        <div id="qualityIndicator" class="quality-indicator">
+            Camera not started
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn" class="btn">📹 Start Camera</button>
+            <button id="stopBtn" class="btn btn-danger" disabled>⏹️ Stop Camera</button>
+            <button id="registerBtn" class="btn btn-success" disabled>🔐 Register Face</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
