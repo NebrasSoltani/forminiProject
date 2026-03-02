@@ -34,173 +34,191 @@
             {% endfor %}
         {% endfor %}
 
-        <div class="row">
-            <div class="col-lg-11 col-xl-10 mx-auto">
-                <div class="row g-4">
-                    <!-- LEFT: IMAGE -->
-                    <div class="col-lg-6">
-                        <div class="tera-product-image-wrapper">
-                            {% if produit.image %}
-                                <img src="{{ asset('uploads/produits/' ~ produit.image) }}" 
-                                     alt="{{ produit.nom }}" 
-                                     class="tera-product-main-image">
+        <div class="container">
+            <div class="row">
+                <!-- LEFT: IMAGE -->
+                <div class="col-lg-6">
+                    <div class="tera-product-image-wrapper">
+                        {% if produit.image %}
+                            <img src="{{ asset('uploads/produits/' ~ produit.image) }}" 
+                                 alt="{{ produit.nom }}" 
+                                 class="tera-product-main-image">
+                        {% else %}
+                            <div class="tera-product-placeholder">
+                                <i class="bi bi-image"></i>
+                                <p class="mt-3 mb-0 text-muted">Aucune image</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- RIGHT: DETAILS -->
+                <div class="col-lg-6">
+                    <div class="tera-product-details">
+                        <!-- Category Badge -->
+                        <div class="mb-3">
+                            <span class="tera-category-pill">
+                                <i class="bi bi-tag me-2"></i>{{ produit.categorie }}
+                            </span>
+                        </div>
+
+                        <!-- Product Title -->
+                        <h1 class="tera-product-name mb-4">{{ produit.nom }}</h1>
+                        
+                        <!-- Price Section -->
+                        <div class="tera-price-section mb-4">
+                            <div class="tera-price-amount">
+                                <span class="tera-price-value">{{ produit.prix|number_format(2, ',', ' ') }}</span>
+                                <span class="tera-price-currency">Dt</span>
+                            </div>
+                            <div class="tera-price-info">
+                                <i class="bi bi-truck me-1"></i>Livraison gratuite
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        {% if produit.description %}
+                            <div class="tera-description-card mb-4">
+                                <h5 class="tera-section-title">Description</h5>
+                                <p class="tera-description-text">{{ produit.description|nl2br }}</p>
+                            </div>
+                        {% endif %}
+
+                        <!-- Stock Status -->
+                        <div class="tera-stock-status mb-4">
+                            {% if produit.stock > 10 %}
+                                <div class="tera-stock-badge tera-stock-available">
+                                    <i class="bi bi-check-circle-fill me-2"></i>
+                                    <span><strong>En stock</strong> ({{ produit.stock }} disponibles)</span>
+                                </div>
+                            {% elseif produit.stock > 0 %}
+                                <div class="tera-stock-badge tera-stock-limited">
+                                    <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                    <span><strong>Stock limité</strong> ({{ produit.stock }} restants)</span>
+                                </div>
                             {% else %}
-                                <div class="tera-product-placeholder">
-                                    <i class="bi bi-image"></i>
-                                    <p class="mt-3 mb-0 text-muted">Aucune image</p>
+                                <div class="tera-stock-badge tera-stock-unavailable">
+                                    <i class="bi bi-x-circle-fill me-2"></i>
+                                    <span><strong>Rupture de stock</strong></span>
                                 </div>
                             {% endif %}
                         </div>
-                    </div>
 
-                    <!-- RIGHT: DETAILS -->
-                    <div class="col-lg-6">
-                        <div class="tera-product-details">
-                            <!-- Category Badge -->
-                            <div class="mb-3">
-                                <span class="tera-category-pill">
-                                    <i class="bi bi-tag me-2"></i>{{ produit.categorie }}
-                                </span>
-                            </div>
-
-                            <!-- Product Title -->
-                            <h1 class="tera-product-name mb-4">{{ produit.nom }}</h1>
-                            
-                            <!-- Price -->
-                                <div class="tera-price-amount">
-                                    <span class="tera-price-value">{{ produit.prix|number_format(2, ',', ' ') }}</span>
-                                    <span class="tera-price-currency">Dt</span>
-                                </div>
-            {% if produit.description %}
-    
-                                <p class="tera-description-text">{{ produit.description|nl2br }}</p>
-                            {% endif %}
-                            <br>
-
-                            <!-- Add to Cart Form -->
-                            <div class="tera-cart-form mb-5">
-                                <form method="post" action="{{ path('boutique_panier_ajouter', {id: produit.id}) }}">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart' ~ produit.id) }}">
-                                    
-                                    <div class="row g-3 align-items-end">
-                                        <div class="col-4">
-                                            <label for="quantite" class="tera-form-label">Quantité</label>
-                                            <input type="number" 
-                                                   class="tera-quantity-input" 
-                                                   id="quantite" 
-                                                   name="quantite" 
-                                                   value="1" 
-                                                   min="1" 
-                                                   max="{{ produit.stock }}"
-                                                   {% if produit.stock == 0 %}disabled{% endif %}>
-                                        </div>
-                                        <div class="col-8">
-                                            {% if produit.stock > 0 %}
-                                                <button type="submit" class="tera-add-to-cart-btn w-100">
-                                                    <i class="bi bi-cart-plus me-2"></i>Ajouter au panier
-                                                </button>
-                                            {% else %}
-                                                <button class="tera-disabled-btn w-100" disabled>
-                                                    <i class="bi bi-x-circle me-2"></i>Produit indisponible
-                                                </button>
-                                            {% endif %}
-                                        </div>
+                        <!-- Add to Cart Form -->
+                        <div class="tera-cart-form mb-4">
+                            <form method="post" action="{{ path('boutique_panier_ajouter', {id: produit.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('add_to_cart' ~ produit.id) }}">
+                                
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-4">
+                                        <label for="quantite" class="tera-form-label">Quantité</label>
+                                        <input type="number" 
+                                               class="tera-quantity-input" 
+                                               id="quantite" 
+                                               name="quantite" 
+                                               value="1" 
+                                               min="1" 
+                                               max="{{ produit.stock }}"
+                                               {% if produit.stock == 0 %}disabled{% endif %}>
                                     </div>
-                                </form>
-                            </div>
-                
-             <div class="tera-stock-status mb-4">
-                                {% if produit.stock > 10 %}
-                                    <div class="tera-stock-badge tera-stock-available">
-                                        <i class="bi bi-check-circle-fill me-2"></i>
-                                        <span><strong>En stock</strong> ({{ produit.stock }} disponibles)</span>
-                                    </div>
-                                {% elseif produit.stock > 0 %}
-                                    <div class="tera-stock-badge tera-stock-limited">
-                                        <i class="bi bi-exclamation-circle-fill me-2"></i>
-                                        <span><strong>Stock limité</strong> ({{ produit.stock }} restants)</span>
-                                    </div>
-                                {% else %}
-                                    <div class="tera-stock-badge tera-stock-unavailable">
-                                        <i class="bi bi-x-circle-fill me-2"></i>
-                                        <span><strong>Rupture de stock</strong></span>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            <!-- Additional Info -->
-                            <div class="tera-info-grid mt-4">
-
-                                <div class="tera-info-item">
-                                    <i class="bi bi-shield-check"></i>
-                                    <div>
-                                        <strong>Garantie</strong>
-                                        <span>Satisfait ou remboursé</span>
+                                    <div class="col-8">
+                                        {% if produit.stock > 0 %}
+                                            <button type="submit" class="tera-add-to-cart-btn w-100">
+                                                <i class="bi bi-cart-plus me-2"></i>Ajouter au panier
+                                            </button>
+                                        {% else %}
+                                            <button class="tera-disabled-btn w-100" disabled>
+                                                <i class="bi bi-x-circle me-2"></i>Produit indisponible
+                                            </button>
+                                        {% endif %}
                                     </div>
                                 </div>
-                            </div>
+                            </form>
+                        </div>
 
-                            {% if suggestions is defined and suggestions is not empty %}
-                                <div class="tera-ai-suggestions mt-5">
-                                    <div class="tera-ai-header mb-4">
-                                        <div class="tera-ai-header-icon">
-                                            <i class="bi bi-stars"></i>
-                                        </div>
-                                        <div>
-                                            <h4 class="mb-0">Suggestions IA pour vous</h4>
-                                            <p class="tera-ai-subtitle mb-0">Produits du même type que celui que vous consultez</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="row g-4">
-                                        {% for suggestion in suggestions %}
-                                            <div class="col-md-6">
-                                                <div class="tera-ai-card">
-                                                    <a href="{{ path('boutique_produit_show', {id: suggestion.id}) }}" class="tera-ai-thumb-wrap">
-                                                        {% if suggestion.image %}
-                                                            <img src="{{ asset('uploads/produits/' ~ suggestion.image) }}" alt="{{ suggestion.nom }}" class="tera-ai-thumb">
-                                                        {% else %}
-                                                            <div class="tera-ai-thumb-placeholder">
-                                                                <i class="bi bi-image"></i>
-                                                            </div>
-                                                        {% endif %}
-                                                        <span class="tera-ai-match-badge">
-                                                            <i class="bi bi-stars me-1"></i>Recommandé
-                                                        </span>
-                                                    </a>
-
-                                                    <div class="tera-ai-content">
-                                                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-                                                            <span class="tera-ai-cat">{{ suggestion.categorie }}</span>
-                                                            <strong class="tera-ai-price">{{ suggestion.prix|number_format(2, ',', ' ') }} Dt</strong>
-                                                        </div>
-                                                        <h6 class="tera-ai-title">{{ suggestion.nom }}</h6>
-                                                        <p class="tera-ai-desc mb-0">
-                                                            {{ suggestion.description ? (suggestion.description|length > 82 ? suggestion.description|slice(0, 82) ~ '...' : suggestion.description) : 'Produit recommandé pour compléter votre achat.' }}
-                                                        </p>
-                                                    </div>
-
-                                                    <div class="tera-ai-actions">
-                                                        <a href="{{ path('boutique_produit_show', {id: suggestion.id}) }}" class="btn btn-sm tera-ai-btn-outline w-100">
-                                                            <i class="bi bi-eye me-1"></i>Voir
-                                                        </a>
-                                                        <form method="post" action="{{ path('boutique_panier_ajouter', {id: suggestion.id}) }}" class="w-100 m-0">
-                                                            <input type="hidden" name="quantite" value="1">
-                                                            <button type="submit" class="btn btn-sm tera-ai-btn w-100">
-                                                                <i class="bi bi-lightning-charge-fill me-1"></i>Acheter maintenant
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        {% endfor %}
-                                    </div>
+                        <!-- Additional Info -->
+                        <div class="tera-info-grid">
+                            <div class="tera-info-item">
+                                <i class="bi bi-shield-check"></i>
+                                <div>
+                                    <strong>Garantie</strong>
+                                    <span>Satisfait ou remboursé</span>
                                 </div>
-                            {% endif %}
+                            </div>
+                            <div class="tera-info-item">
+                                <i class="bi bi-truck"></i>
+                                <div>
+                                    <strong>Livraison</strong>
+                                    <span>24-48h</span>
+                                </div>
+                            </div>
+                            <div class="tera-info-item">
+                                <i class="bi bi-credit-card"></i>
+                                <div>
+                                    <strong>Paiement</strong>
+                                    <span>Sécurisé</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- SUGGESTIONS -->
+        {% if suggestions is defined and suggestions is not empty %}
+            <div class="container mt-5">
+                <div class="tera-suggestions-section">
+                    <div class="tera-suggestions-header">
+                        <div class="tera-suggestions-icon">
+                            <i class="bi bi-tag"></i>
+                        </div>
+                        <div>
+                            <h3 class="tera-suggestions-title">Produits similaires</h3>
+                            <p class="tera-suggestions-subtitle">Autres produits de la catégorie "{{ produit.categorie }}"</p>
+                        </div>
+                    </div>
+
+                    <div class="row g-4">
+                        {% for suggestion in suggestions %}
+                            <div class="col-md-6 col-lg-3">
+                                <div class="tera-suggestion-card">
+                                    <div class="tera-suggestion-image">
+                                        <a href="{{ path('boutique_produit_show', {id: suggestion.id}) }}">
+                                            {% if suggestion.image %}
+                                                <img src="{{ asset('uploads/produits/' ~ suggestion.image) }}" alt="{{ suggestion.nom }}">
+                                            {% else %}
+                                                <div class="tera-suggestion-placeholder">
+                                                    <i class="bi bi-image"></i>
+                                                </div>
+                                            {% endif %}
+                                        </a>
+                                        <span class="tera-suggestion-category">{{ suggestion.categorie }}</span>
+                                    </div>
+                                    
+                                    <div class="tera-suggestion-content">
+                                        <h6 class="tera-suggestion-title">{{ suggestion.nom }}</h6>
+                                        <p class="tera-suggestion-price">{{ suggestion.prix|number_format(2, ',', ' ') }} Dt</p>
+                                        
+                                        <div class="tera-suggestion-actions">
+                                            <a href="{{ path('boutique_produit_show', {id: suggestion.id}) }}" class="btn btn-sm btn-outline-primary w-100 mb-2">
+                                                <i class="bi bi-eye me-1"></i>Voir détails
+                                            </a>
+                                            <form method="post" action="{{ path('boutique_panier_ajouter', {id: suggestion.id}) }}">
+                                                <input type="hidden" name="quantite" value="1">
+                                                <button type="submit" class="btn btn-sm btn-primary w-100">
+                                                    <i class="bi bi-cart-plus me-1"></i>Ajouter
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
     </div>
 </div>
 
@@ -242,23 +260,25 @@
 /* PRODUCT IMAGE */
 .tera-product-image-wrapper {
     background: #fff;
-    border-radius: 24px;
-    box-shadow: 0 15px 40px rgba(15, 23, 42, .1);
-    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, .1);
+    padding: 20px;
     position: sticky;
     top: 20px;
     overflow: hidden;
+    border: 1px solid rgba(102, 126, 234, .1);
 }
 
 .tera-product-main-image {
     width: 100%;
     height: auto;
-    border-radius: 16px;
+    border-radius: 12px;
     transition: transform 0.5s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, .1);
 }
 
 .tera-product-main-image:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .tera-product-placeholder {
@@ -266,23 +286,24 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 500px;
+    height: 300px;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    border-radius: 16px;
+    border-radius: 12px;
     color: #94a3b8;
 }
 
 .tera-product-placeholder i {
-    font-size: 100px;
+    font-size: 60px;
     opacity: .3;
 }
 
 /* PRODUCT DETAILS */
 .tera-product-details {
     background: #fff;
-    border-radius: 20px;
-    box-shadow: 0 12px 35px rgba(15, 23, 42, .08);
-    padding: 32px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(15, 23, 42, .1);
+    padding: 25px;
+    border: 1px solid rgba(102, 126, 234, .1);
 }
 
 .tera-category-pill {
@@ -290,20 +311,79 @@
     align-items: center;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
-    padding: 8px 18px;
-    border-radius: 999px;
+    padding: 6px 12px;
+    border-radius: 50px;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.5px;
     box-shadow: 0 4px 12px rgba(102, 126, 234, .25);
 }
 
 .tera-product-name {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 800;
     color: #0f172a;
-    line-height: 1.3;
+    line-height: 1.2;
+    margin: 0;
+    letter-spacing: -0.5px;
+}
+
+/* PRICE */
+.tera-price-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    padding: 20px;
+    border-radius: 16px;
+    border: 2px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.tera-price-amount {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.tera-price-value {
+    font-size: 32px;
+    font-weight: 900;
+    color: #0f172a;
+    line-height: 1;
+}
+
+.tera-price-currency {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.tera-price-info {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* DESCRIPTION */
+.tera-description-card {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+    margin-bottom: 20px;
+}
+
+.tera-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 12px 0;
+}
+
+.tera-description-text {
+    color: #475569;
+    line-height: 1.6;
+    font-size: 14px;
     margin: 0;
 }
 
@@ -313,8 +393,9 @@
     align-items: center;
     padding: 12px 20px;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
+    margin-bottom: 20px;
 }
 
 .tera-stock-available {
@@ -335,57 +416,23 @@
     border: 2px solid #ef4444;
 }
 
-/* PRICE */
-.tera-price-section {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    padding: 20px 24px;
-    border-radius: 16px;
-    border: 2px solid #e2e8f0;
-}
-
-.tera-price-amount {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 12px;
-}
-
-.tera-price-value {
-    font-size: 32px;
-    font-weight: 800;
-    color: #0f172a;
-    line-height: 1;
-}
-
-.tera-price-currency {
-    font-size: 20px;
-    font-weight: 700;
-    color: #0f172a;
-}
-
-.tera-price-info {
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 600;
-}
-
 /* CART FORM */
 .tera-form-label {
     font-weight: 800;
     color: #0f172a;
-    font-size: 14px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     display: block;
 }
 
 .tera-quantity-input {
     width: 100%;
-    padding: 16px;
-    border: 3px solid #e2e8f0;
-    border-radius: 16px;
-    font-size: 18px;
+    padding: 12px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
     font-weight: 800;
     text-align: center;
     color: #0f172a;
@@ -396,20 +443,20 @@
 .tera-quantity-input:focus {
     outline: none;
     border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, .1);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, .1);
 }
 
 .tera-add-to-cart-btn {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #fff;
     border: 0;
-    border-radius: 16px;
-    padding: 18px 32px;
+    border-radius: 12px;
+    padding: 15px 24px;
     font-weight: 900;
-    font-size: 16px;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    box-shadow: 0 12px 30px rgba(102, 126, 234, .35);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, .3);
     transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -435,64 +482,49 @@
 }
 
 .tera-add-to-cart-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 40px rgba(102, 126, 234, .45);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 25px rgba(102, 126, 234, .4);
 }
 
 .tera-disabled-btn {
     background: #e2e8f0;
     color: #94a3b8;
     border: 0;
-    border-radius: 16px;
-    padding: 18px 32px;
+    border-radius: 12px;
+    padding: 15px 24px;
     font-weight: 900;
-    font-size: 16px;
+    font-size: 14px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     cursor: not-allowed;
 }
 
-/* DESCRIPTION */
-.tera-description-card {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    padding: 20px 24px;
-    border-radius: 14px;
-    border-left: 4px solid #667eea;
-}
-
-.tera-section-title {
-    font-size: 17px;
-    font-weight: 700;
-    color: #0f172a;
-    margin: 0;
-}
-
-.tera-description-text {
-    color: #475569;
-    line-height: 1.7;
-    font-size: 14px;
-    margin: 0;
-}
-
 /* INFO GRID */
 .tera-info-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-top: 20px;
 }
 
 .tera-info-item {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
     background: #f8fafc;
-    padding: 20px;
-    border-radius: 16px;
+    padding: 15px;
+    border-radius: 12px;
     border: 2px solid #e2e8f0;
+    transition: all .3s ease;
+}
+
+.tera-info-item:hover {
+    border-color: #667eea;
+    transform: translateY(-1px);
 }
 
 .tera-info-item i {
-    font-size: 24px;
+    font-size: 20px;
     color: #667eea;
 }
 
@@ -502,7 +534,7 @@
 }
 
 .tera-info-item strong {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     color: #64748b;
     text-transform: uppercase;
@@ -510,113 +542,96 @@
 }
 
 .tera-info-item span {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: #0f172a;
-    margin-top: 4px;
+    margin-top: 3px;
 }
 
-/* BACK LINK */
-.tera-back-link {
-    display: inline-flex;
-    align-items: center;
-    color: #64748b;
-    text-decoration: none;
-    font-weight: 700;
-    font-size: 15px;
-    transition: all .3s ease;
-}
-
-.tera-back-link:hover {
-    color: #667eea;
-    transform: translateX(-4px);
-}
-
-.tera-back-link i {
-    transition: transform .3s ease;
-}
-
-.tera-back-link:hover i {
-    transform: translateX(-2px);
-}
-
-.tera-ai-suggestions {
-    background:
-        radial-gradient(circle at top right, rgba(29, 78, 216, .14), transparent 40%),
-        linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+/* SUGGESTIONS */
+.tera-suggestions-section {
+    background: linear-gradient(135deg, #f8fbff 0%, #ffffff 100%);
     border: 1px solid #dbeafe;
-    border-radius: 22px;
-    padding: 22px;
-    box-shadow: 0 10px 25px rgba(15, 23, 42, .07);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .08);
+    margin-top: 25px;
 }
 
-.tera-ai-header {
+.tera-suggestions-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    color: #0f172a;
+    margin-bottom: 20px;
 }
 
-.tera-ai-header-icon {
-    width: 42px;
-    height: 42px;
+.tera-suggestions-icon {
+    width: 40px;
+    height: 40px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
     color: #fff;
-    box-shadow: 0 8px 20px rgba(29, 78, 216, .35);
+    box-shadow: 0 6px 15px rgba(29, 78, 216, .3);
 }
 
-.tera-ai-header-icon i {
-    font-size: 18px;
+.tera-suggestions-icon i {
+    font-size: 16px;
 }
 
-.tera-ai-subtitle {
-    margin-top: 4px;
+.tera-suggestions-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+}
+
+.tera-suggestions-subtitle {
+    margin-top: 3px;
     color: #64748b;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
+    margin-bottom: 0;
 }
 
-.tera-ai-card {
+.tera-suggestion-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
     height: 100%;
     display: flex;
     flex-direction: column;
-    transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+    transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
 }
 
-.tera-ai-card:hover {
-    transform: translateY(-4px);
+.tera-suggestion-card:hover {
+    transform: translateY(-3px);
     border-color: #bfdbfe;
-    box-shadow: 0 16px 30px rgba(15, 23, 42, .1);
+    box-shadow: 0 12px 25px rgba(15, 23, 42, .1);
 }
 
-.tera-ai-thumb-wrap {
-    display: block;
+.tera-suggestion-image {
     position: relative;
     height: 150px;
     overflow: hidden;
     background: #f1f5f9;
 }
 
-.tera-ai-thumb {
+.tera-suggestion-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform .4s ease;
 }
 
-.tera-ai-card:hover .tera-ai-thumb {
+.tera-suggestion-card:hover .tera-suggestion-image img {
     transform: scale(1.05);
 }
 
-.tera-ai-thumb-placeholder {
+.tera-suggestion-placeholder {
     width: 100%;
     height: 100%;
     display: flex;
@@ -626,136 +641,101 @@
     color: #64748b;
 }
 
-.tera-ai-thumb-placeholder i {
+.tera-suggestion-placeholder i {
     font-size: 30px;
 }
 
-.tera-ai-match-badge {
+.tera-suggestion-category {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(15, 23, 42, .82);
+    top: 8px;
+    left: 8px;
+    background: rgba(15, 23, 42, .9);
     color: #fff;
-    padding: 5px 9px;
-    border-radius: 999px;
-    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 50px;
+    font-size: 9px;
     font-weight: 700;
-    letter-spacing: .3px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
 }
 
-.tera-ai-content {
-    padding: 14px 14px 10px;
+.tera-suggestion-content {
+    padding: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tera-suggestion-title {
+    color: #0f172a;
+    margin: 0 0 8px 0;
+    line-height: 1.3;
+    font-size: 14px;
+    font-weight: 700;
     flex: 1;
 }
 
-.tera-ai-cat {
-    background: #e0ecff;
-    color: #1e40af;
-    border-radius: 999px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: .35px;
-}
-
-.tera-ai-price {
-    color: #0b1324;
-    font-size: 15px;
-}
-
-.tera-ai-title {
-    color: #0f172a;
-    margin: 0;
-    line-height: 1.35;
-    font-size: 15px;
-    min-height: 40px;
-}
-
-.tera-ai-desc {
-    color: #64748b;
-    font-size: 12px;
-    line-height: 1.55;
-}
-
-.tera-ai-actions {
-    display: flex;
-    gap: 8px;
-    padding: 0 14px 14px;
-}
-
-.tera-ai-btn {
-    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
-    color: #fff;
-    border: 0;
-    font-weight: 700;
-}
-
-.tera-ai-btn:hover {
-    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-    color: #fff;
-}
-
-.tera-ai-btn-outline {
-    border: 1px solid #bfdbfe;
+.tera-suggestion-price {
     color: #1d4ed8;
-    background: #eff6ff;
-    font-weight: 700;
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 12px;
 }
 
-.tera-ai-btn-outline:hover {
-    background: #1d4ed8;
-    color: #fff;
-    border-color: #1d4ed8;
+.tera-suggestion-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 /* RESPONSIVE */
 @media (max-width: 991px) {
     .tera-product-image-wrapper {
         position: static;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
+        padding: 20px;
     }
     
     .tera-product-details {
-        padding: 30px 24px;
+        padding: 20px;
     }
     
     .tera-product-name {
-        font-size: 32px;
+        font-size: 22px;
     }
     
     .tera-price-value {
-        font-size: 42px;
+        font-size: 28px;
+    }
+    
+    .tera-suggestions-section {
+        padding: 20px 15px;
     }
 }
 
 @media (max-width: 576px) {
     .tera-product-details {
-        padding: 24px 20px;
+        padding: 20px 15px;
     }
     
     .tera-product-name {
-        font-size: 28px;
+        font-size: 20px;
     }
     
     .tera-price-section {
-        padding: 24px;
+        padding: 15px;
     }
     
     .tera-price-value {
-        font-size: 36px;
+        font-size: 24px;
     }
     
     .tera-info-grid {
         grid-template-columns: 1fr;
     }
 
-    .tera-ai-actions {
-        flex-direction: column;
-    }
-
-    .tera-ai-thumb-wrap {
-        height: 170px;
+    .tera-suggestion-actions {
+        flex-direction: row;
     }
 }
 </style>
