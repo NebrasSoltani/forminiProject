@@ -8,15 +8,23 @@ use App\Entity\Commande;
 use App\Entity\CommandeItem;
 use App\Entity\User;
 use App\Repository\ProduitRepository;
-use App\Repository\CommandeRepository;
-use App\Service\AIProductSuggestionService;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Knp\Component\Pager\Pagination\PaginationInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\SecurityBundle\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Intl\Locale;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Entity\Produit as Product;
+use App\Entity\Commande as OrderItem;
+use App\Repository\ProduitTranslationRepository;
 
 // Préfixe de toutes les routes de ce contrôleur
 #[Route('/boutique')]
@@ -31,7 +39,8 @@ class BoutiqueController extends AbstractController
     public function index(
         Request $request,
         ProduitRepository $produitRepository,
-        SessionInterface $session
+        SessionInterface $session,
+        PaginatorInterface $paginator
     ): Response {
 
         // Récupération des paramètres GET pour recherche et filtre
@@ -63,38 +72,22 @@ class BoutiqueController extends AbstractController
         // Trier par date de création décroissante
         $qb->orderBy('p.dateCreation', 'DESC');
 
-        // Compter le total pour la pagination
-        $countQb = clone $qb;
-        $countQb->resetDQLPart('orderBy'); // on enlève le tri pour compter
-        $total = (int) $countQb
-            ->select('COUNT(p.id)')
-            ->getQuery()
-            ->getSingleScalarResult();
-
-        $pages = max(1, (int) ceil($total / $limit)); // nombre total de pages
-        $page = min($page, $pages); // ajustement si page > pages
-        $offset = ($page - 1) * $limit;
-
-        // Récupération des produits paginés
-        $produits = $qb
-            ->setFirstResult($offset)
-            ->setMaxResults($limit)
-            ->getQuery()
-            ->getResult();
+        // Utilisation de KnpPaginator
+        $pagination = $paginator->paginate(
+            $qb,
+            $request->query->getInt('page', 1),
+            10 // 10 produits par page
+        );
 
         // Récupération du panier depuis la session
         $panier = $session->get('panier', []);
 
         // Affichage de la page boutique
         return $this->render('boutique/index.html.twig', [
-            'produits' => $produits,
+            'pagination' => $pagination,
             'categorieFilter' => $categorieFilter,
             'q' => $search,
             'panier' => $panier,
-            'page' => $page,
-            'pages' => $pages,
-            'limit' => $limit,
-            'total' => $total,
         ]);
     }
 
@@ -103,17 +96,23 @@ class BoutiqueController extends AbstractController
     ====================================================== */
     #[Route('/produit/{id}', name: 'boutique_produit_show', methods: ['GET'])]
     public function show(
-        Produit $produit,
-        AIProductSuggestionService $aiProductSuggestionService
-    ): Response
-    {
-        $connectedUser = $this->getUser();
-        $suggestions = $aiProductSuggestionService->suggestForProduct(
-            $produit,
-            $connectedUser instanceof User ? $connectedUser : null
-        );
+        Product $produit,
+        ProduitRepository $produitRepository
+    ): Response {
 
-        // Symfony récupère automatiquement le produit via l'id
+        // Récupérer uniquement des produits de la même catégorie
+        $suggestions = $produitRepository->createQueryBuilder('p')
+            ->where('p.statut = :statut')
+            ->andWhere('p.id != :id')
+            ->andWhere('p.categorie = :categorie')
+            ->setParameter('statut', 'disponible')
+            ->setParameter('id', $produit->getId())
+            ->setParameter('categorie', $produit->getCategorie())
+            ->orderBy('p.dateCreation', 'DESC')
+            ->setMaxResults(4)
+            ->getQuery()
+            ->getResult();
+
         return $this->render('boutique/show.html.twig', [
             'produit' => $produit,
             'suggestions' => $suggestions,
@@ -125,7 +124,7 @@ class BoutiqueController extends AbstractController
     ====================================================== */
     #[Route('/panier/ajouter/{id}', name: 'boutique_panier_ajouter', methods: ['GET', 'POST'])]
     public function ajouterAuPanier(
-        Produit $produit,
+        Product $produit,
         Request $request,
         SessionInterface $session,
         EntityManagerInterface $em
@@ -271,7 +270,7 @@ class BoutiqueController extends AbstractController
             $produit = $produitRepository->find($id);
 
             if ($produit && $produit->getStock() >= 0) { // stock déjà décrémenté
-                $commandeItem = new CommandeItem();
+                $commandeItem = new OrderItem();
                 $commandeItem->setProduit($produit);
                 $commandeItem->setNomProduit($produit->getNom());
                 $commandeItem->setQuantite($item['quantite']);
