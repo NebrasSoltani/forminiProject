@@ -9,16 +9,19 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 class TwoFactorController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
     private UserPasswordHasherInterface $passwordHasher;
+    private CsrfTokenManagerInterface $csrfTokenManager;
 
-    public function __construct(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
+    public function __construct(EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, CsrfTokenManagerInterface $csrfTokenManager)
     {
         $this->entityManager = $entityManager;
         $this->passwordHasher = $passwordHasher;
+        $this->csrfTokenManager = $csrfTokenManager;
     }
     #[Route('/2fa/setup', name: 'app_2fa_setup')]
     #[IsGranted('ROLE_USER')]
@@ -87,6 +90,13 @@ class TwoFactorController extends AbstractController
     {
         $user = $this->getUser();
         $password = $request->request->get('password');
+        $token = $request->request->get('_token');
+
+        // Validate CSRF token
+        if (!$this->isCsrfTokenValid('2fa_disable', $token)) {
+            $this->addFlash('error', 'Invalid CSRF token.');
+            return $this->redirectToRoute('app_profile_edit');
+        }
 
         // Verify password before disabling 2FA
         if (!$this->isPasswordValid($user, $password)) {
@@ -94,14 +104,22 @@ class TwoFactorController extends AbstractController
             return $this->redirectToRoute('app_profile_edit');
         }
 
+        // Log the current state before changes
+        $this->addFlash('info', 'DEBUG: Before disable - 2FA Enabled: ' . ($user->isGoogleAuthEnabled() ? 'Yes' : 'No') . ', Secret: ' . ($user->getGoogleAuthenticatorSecret() ? 'Set' : 'Null'));
+
+        // Disable 2FA - set both fields to ensure complete disable
         $user->setGoogleAuthenticatorSecret(null);
-        $user->setGoogleAuthEnabled(false);
+        $user->setGoogleAuthEnabled(false); // This sets google_auth_enabled = 0 in database
         
         // Save changes to database
         $this->entityManager->persist($user);
         $this->entityManager->flush();
         
-        $this->addFlash('success', 'Two-factor authentication has been disabled.');
+        // Verify the changes were saved
+        $this->entityManager->refresh($user);
+        $this->addFlash('info', 'DEBUG: After disable - 2FA Enabled: ' . ($user->isGoogleAuthEnabled() ? 'Yes' : 'No') . ', Secret: ' . ($user->getGoogleAuthenticatorSecret() ? 'Set' : 'Null'));
+        
+        $this->addFlash('success', 'Two-factor authentication has been disabled. google_auth_enabled is now 0.');
         return $this->redirectToRoute('app_profile_edit');
     }
 
@@ -207,5 +225,10 @@ class TwoFactorController extends AbstractController
     private function isPasswordValid($user, string $password): bool
     {
         return $this->passwordHasher->isPasswordValid($user, $password);
+    }
+
+    protected function isCsrfTokenValid(string $tokenId, ?string $token): bool
+    {
+        return $this->csrfTokenManager->isTokenValid(new \Symfony\Component\Security\Csrf\CsrfToken($tokenId, $token));
     }
 }

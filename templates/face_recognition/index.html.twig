@@ -1,0 +1,82 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Face Recognition{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-user-circle"></i> Face Recognition</h4>
+                    <span class="badge bg-primary">{{ app.user.email }}</span>
+                </div>
+                <div class="card-body">
+                    {% if hasFaceData %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> Your face data is registered in the system.
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Face Data Information</h5>
+                                <ul class="list-group">
+                                    <li class="list-group-item">
+                                        <strong>Registered:</strong> {{ faceData.createdAt|date('Y-m-d H:i:s') }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Last Updated:</strong> {{ faceData.updatedAt|date('Y-m-d H:i:s') }}
+                                    </li>
+                                    <li class="list-group-item">
+                                        <strong>Status:</strong> 
+                                        <span class="badge bg-success">Active</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Actions</h5>
+                                <div class="d-grid gap-2">
+                                    <a href="{{ path('app_face_recognition_register') }}" class="btn btn-primary">
+                                        <i class="fas fa-sync"></i> Update Face Data
+                                    </a>
+                                    <form method="post" action="{{ path('app_face_recognition_delete', {'id': faceData.id}) }}" 
+                                          onsubmit="return confirm('Are you sure you want to delete your face data?');" data-turbo="false">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ faceData.id) }}">
+                                        <button type="submit" class="btn btn-danger w-100">
+                                            <i class="fas fa-trash"></i> Delete Face Data
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> You haven't registered your face data yet.
+                        </div>
+                        
+                        <div class="text-center">
+                            <h5>Get Started with Face Recognition</h5>
+                            <p class="text-muted">Register your face data to enable face recognition features.</p>
+                            <a href="{{ path('app_face_recognition_register') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-camera"></i> Register Your Face
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-camera"></i> Test Face Recognition</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Upload a photo to test the face recognition system.</p>
+                    <a href="{{ path('app_face_recognition_recognize') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-search"></i> Test Recognition
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

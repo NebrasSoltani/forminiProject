@@ -110,14 +110,22 @@ PROMPT;
 
         $statusCode = $response->getStatusCode();
         if ($statusCode === 429) {
-            throw new \RuntimeException("Le quota de l'API Gemini est dépassé.");
+            throw new \RuntimeException("Le quota de l'API Gemini est dépassé. Veuillez réessayer plus tard.");
         }
+
         if ($statusCode !== 200) {
-            throw new \RuntimeException("Erreur API Gemini (HTTP {$statusCode}) : " . $response->getContent(false));
+            $body = $response->getContent(false);
+            throw new \RuntimeException("Erreur API Gemini (HTTP {$statusCode}) : {$body}");
         }
 
         $data = $response->toArray();
+
+        // Extraire le texte généré
         $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+
+        if (empty($text)) {
+            throw new \RuntimeException('Gemini n\'a retourné aucun contenu.');
+        }
 
         return $this->parseJsonResponse($text);
     }

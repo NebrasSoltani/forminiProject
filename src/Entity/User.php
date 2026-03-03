@@ -86,7 +86,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     #[ORM\Column(length: 12)]
     #[Assert\NotBlank(message: 'Le téléphone est obligatoire')]
-
     private ?string $telephone = null;
 
 
@@ -186,6 +185,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $googleAuthEnabled = false;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $phoneVerified = false;
+
+    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    private ?\DateTimeInterface $phoneVerifiedAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'user', targetEntity: FaceData::class)]
+    private Collection $faceData;
+
     #[ORM\OneToMany(mappedBy: 'formateur', targetEntity: Formation::class)]
 
     private Collection $formations;
@@ -229,17 +237,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
 
     public function __construct()
-
     {
-
+        $this->faceData = new ArrayCollection();
         $this->formations = new ArrayCollection();
-
         $this->inscriptions = new ArrayCollection();
-
         $this->favoris = new ArrayCollection();
-
         $this->participationEvenements = new ArrayCollection();
-
     }
 
 
@@ -266,11 +269,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function setEmail(?string $email): static
     {
-
         $this->email = $email;
-
         return $this;
-
     }
 
 
@@ -353,11 +353,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function setNom(?string $nom): static
     {
-
         $this->nom = $nom;
-
         return $this;
-
     }
 
 
@@ -374,11 +371,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function setPrenom(?string $prenom): static
     {
-
         $this->prenom = $prenom;
-
         return $this;
-
     }
 
 
@@ -395,11 +389,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
     public function setTelephone(?string $telephone): static
     {
-
         $this->telephone = $telephone;
-
         return $this;
-
     }
 
 
@@ -947,24 +938,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, TwoFact
 
 
     public function getGouvernorat(): ?Gouvernorat
+    {
+        return $this->gouvernorat;
+    }
 
-{
-
-    return $this->gouvernorat;
-
-}
-
-
-
-public function setGouvernorat(?Gouvernorat $gouvernorat): static
-
-{
-
-    $this->gouvernorat = $gouvernorat;
-
-    return $this;
-
-}
+    public function setGouvernorat(?Gouvernorat $gouvernorat): static
+    {
+        $this->gouvernorat = $gouvernorat;
+        return $this;
+    }
 
     public function getGoogleId(): ?string
     {
@@ -1083,5 +1065,56 @@ public function setGouvernorat(?Gouvernorat $gouvernorat): static
         }
         
         return false;
+    }
+    public function isPhoneVerified(): bool
+    {
+        return $this->phoneVerified;
+    }
+
+    public function setPhoneVerified(bool $phoneVerified): static
+    {
+        $this->phoneVerified = $phoneVerified;
+        return $this;
+    }
+
+    public function getPhoneVerifiedAt(): ?\DateTimeInterface
+    {
+        return $this->phoneVerifiedAt;
+    }
+
+    public function setPhoneVerifiedAt(?\DateTimeInterface $phoneVerifiedAt): static
+    {
+        $this->phoneVerifiedAt = $phoneVerifiedAt;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, FaceData>
+     */
+    public function getFaceData(): Collection
+    {
+        return $this->faceData;
+    }
+
+    public function addFaceData(FaceData $faceData): static
+    {
+        if (!$this->faceData->contains($faceData)) {
+            $this->faceData->add($faceData);
+            $faceData->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFaceData(FaceData $faceData): static
+    {
+        if ($this->faceData->removeElement($faceData)) {
+            // set the owning side to null (unless already changed)
+            if ($faceData->getUser() === $this) {
+                $faceData->setUser(null);
+            }
+        }
+
+        return $this;
     }
 }

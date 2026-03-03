@@ -120,7 +120,7 @@
                             <div class="alert alert-danger" role="alert">{{ flash_error }}</div>
                         {% endfor %}
 
-                        {{ form_start(resetForm) }}
+                        {{ form_start(resetForm, {'attr': {'data-turbo': 'false'}}) }}
                             <div class="mb-4">
                                 {{ form_label(resetForm.plainPassword.first, 'Nouveau mot de passe', {'label_attr': {'class': 'form-label'}}) }}
                                 <div class="input-group">

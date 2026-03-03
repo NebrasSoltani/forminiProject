@@ -34,12 +34,9 @@ class AIProductSuggestionService
         if ($candidates === []) {
             $candidates = $this->loadOtherTypeCandidateProducts($currentProduct);
             if ($candidates === []) {
-                $this->logger->info('Aucun produit candidat trouvé pour les suggestions');
                 return [];
             }
         }
-
-        $this->logger->info(count($candidates) . ' produits candidats trouvés pour les suggestions');
 
         $categoryPreferences = $user ? $this->loadUserCategoryPreferences($user) : [];
 
@@ -63,7 +60,6 @@ class AIProductSuggestionService
             }
         }
 
-        $this->logger->info(count($result) . ' produits suggérés retournés');
         return $result;
     }
 
@@ -77,7 +73,7 @@ class AIProductSuggestionService
             ->andWhere('p.stock > 0')
             ->andWhere('p.id != :currentId')
             ->andWhere('p.categorie = :categorie')
-            ->setParameter('statut', 'disponible')
+            ->setParameter('statut', 'actif')
             ->setParameter('currentId', $currentProduct->getId())
             ->setParameter('categorie', $currentProduct->getCategorie())
             ->orderBy('p.dateCreation', 'DESC')
@@ -96,7 +92,7 @@ class AIProductSuggestionService
             ->andWhere('p.stock > 0')
             ->andWhere('p.id != :currentId')
             ->andWhere('p.categorie != :categorie')
-            ->setParameter('statut', 'disponible')
+            ->setParameter('statut', 'actif')
             ->setParameter('currentId', $currentProduct->getId())
             ->setParameter('categorie', $currentProduct->getCategorie())
             ->orderBy('p.dateCreation', 'DESC')

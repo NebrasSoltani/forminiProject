@@ -47,10 +47,15 @@ class BoutiqueController extends AbstractController
         $categorieFilter = $request->query->get('categorie'); // filtre par catégorie
         $search = $request->query->get('q'); // recherche texte
 
+        // Pagination
+        $limit = 4; // produits par page
+        $page = max(1, (int) $request->query->get('page', 1));
+        $offset = ($page - 1) * $limit;
+
         // Création d'une requête pour les produits actifs
         $qb = $produitRepository->createQueryBuilder('p')
             ->where('p.statut = :statut')
-            ->setParameter('statut', 'disponible');
+            ->setParameter('statut', 'actif');
 
         // 🔍 Recherche texte sur nom ou catégorie
         if ($search) {

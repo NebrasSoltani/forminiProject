@@ -1,0 +1,3 @@
+face_auth:
+    resource: "App\\Controller\\FaceAuthController"
+    type: annotation
