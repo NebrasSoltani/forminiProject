@@ -41,4 +41,34 @@ class Domaine
         $this->nom = $nom;
         return $this;
     }
+
+    /**
+     * @return Collection<int, Apprenant>
+     */
+    public function getApprenants(): Collection
+    {
+        return $this->apprenants;
+    }
+
+    public function addApprenant(Apprenant $apprenant): static
+    {
+        if (!$this->apprenants->contains($apprenant)) {
+            $this->apprenants->add($apprenant);
+            $apprenant->setDomaine($this);
+        }
+
+        return $this;
+    }
+
+    public function removeApprenant(Apprenant $apprenant): static
+    {
+        if ($this->apprenants->removeElement($apprenant)) {
+            // set the owning side to null (unless already changed)
+            if ($apprenant->getDomaine() === $this) {
+                $apprenant->setDomaine(null);
+            }
+        }
+
+        return $this;
+    }
 }
