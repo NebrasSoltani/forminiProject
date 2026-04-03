@@ -41,7 +41,7 @@ class Apprenant
     )]
     private ?string $objectif = null;
 
-    #[ORM\ManyToOne(targetEntity: Domaine::class)]
+    #[ORM\ManyToOne(targetEntity: Domaine::class, inversedBy: 'apprenants')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Domaine $domaine = null;
 
