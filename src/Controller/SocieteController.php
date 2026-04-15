@@ -33,7 +33,7 @@ class SocieteController extends AbstractController
         $page = max(1, (int) $request->query->get('page', 1));
         $limit = (int) $request->query->get('limit', 10);
         if ($limit <= 0) {
-            $limit = 2;
+            $limit = 10;
         }
 
         $filters = [

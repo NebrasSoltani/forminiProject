@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Repository\OffreStageRepository;
 use App\Repository\CandidatureRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
@@ -15,6 +16,7 @@ class SocieteDashboardController extends AbstractController
 {
     #[Route('/societe/dashboard', name: 'societe_dashboard')]
     public function index(
+        Request $request,
         OffreStageRepository $offreStageRepository,
         CandidatureRepository $candidatureRepository
     ): Response {
@@ -27,6 +29,25 @@ class SocieteDashboardController extends AbstractController
 
         // Récupérer toutes les offres de la société
         $offres = $offreStageRepository->findBySociete($user);
+
+        $pageOffres = max(1, (int) $request->query->get('pageOffres', 1));
+        $limitOffres = (int) $request->query->get('limitOffres', 6);
+        if ($limitOffres <= 0) {
+            $limitOffres = 6;
+        }
+
+        $activeResult = $offreStageRepository->searchBySocietePaginated(
+            $user,
+            ['statut' => 'publiee'],
+            $pageOffres,
+            $limitOffres
+        );
+        $activeOffres = $activeResult['items'];
+        $activeTotal = $activeResult['total'];
+        $activePages = (int) max(1, (int) ceil($activeTotal / $limitOffres));
+        if ($pageOffres > $activePages) {
+            $pageOffres = $activePages;
+        }
         
         // Statistiques générales
         $totalOffres = count($offres);
@@ -96,6 +117,10 @@ class SocieteDashboardController extends AbstractController
             'candidaturesRefusees' => $candidaturesRefusees,
             'dernieresCandidatures' => $dernieresCandidatures,
             'offres' => $offres,
+            'activeOffres' => $activeOffres,
+            'pageOffres' => $pageOffres,
+            'activePages' => $activePages,
+            'limitOffres' => $limitOffres,
         ]);
     }
 }
